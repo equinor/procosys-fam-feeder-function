@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "FamFeederFunction": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "httpPort": 33210,
+      "useSSL": false
+    }
+  }
+}
