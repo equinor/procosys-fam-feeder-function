@@ -19,15 +19,17 @@ public class FamFeederService : IFamFeederService
 {
     private readonly IEventHubProducerService _eventHubProducerService;
     private readonly IFamEventRepository _repo;
+    private readonly IPlantRepository _plantRepository;
     private readonly CommonLibConfig _commonLibConfig;
     private readonly FamFeederOptions _famFeederOptions;
     private readonly Regex _rx = new(@"[\a\e\f\n\r\t\v]", RegexOptions.Compiled);
 
     public FamFeederService(IEventHubProducerService eventHubProducerService, IFamEventRepository repo,
-        IOptions<CommonLibConfig> commonLibConfig, IOptions<FamFeederOptions> famFeederOptions)
+        IOptions<CommonLibConfig> commonLibConfig, IOptions<FamFeederOptions> famFeederOptions, IPlantRepository plantRepository)
     {
         _eventHubProducerService = eventHubProducerService;
         _repo = repo;
+        _plantRepository = plantRepository;
         _commonLibConfig = commonLibConfig.Value;
         _famFeederOptions = famFeederOptions.Value;
     }
@@ -40,7 +42,7 @@ public class FamFeederService : IFamFeederService
         var mapper = CreateCommonLibMapper();
         if (queryParameters.PcsTopic == PcsTopic.WorkOrderCutoff)
         {
-            await WoCutoff(mapper);
+            await WoCutoff(mapper,queryParameters.Plant);
             return;
         }
 
@@ -50,43 +52,43 @@ public class FamFeederService : IFamFeederService
         switch (queryParameters.PcsTopic)
         {
             case PcsTopic.CommPkg:
-                events = await _repo.GetCommPackages();
+                events = await _repo.GetCommPackages(queryParameters.Plant);
                 fields = QueryMapping.CommPkg;
                 break;
             case PcsTopic.Ipo:
                 break;
             case PcsTopic.McPkg:
-                events = await _repo.GetMcPackages();
+                events = await _repo.GetMcPackages(queryParameters.Plant);
                 fields = QueryMapping.McPkg;
                 break;
             case PcsTopic.Project:
-                events = await _repo.GetProjects();
+                events = await _repo.GetProjects(queryParameters.Plant);
                 fields = QueryMapping.Project;
                 break;
             case PcsTopic.Responsible:
                 break;
             case PcsTopic.Tag:
-                events = await _repo.GetTags();
+                events = await _repo.GetTags(queryParameters.Plant);
                 fields = QueryMapping.Tag;
                 break;
             case PcsTopic.TagFunction:
                 break;
             case PcsTopic.PunchListItem:
-                events = await _repo.GetPunchItems();
+                events = await _repo.GetPunchItems(queryParameters.Plant);
                 fields = QueryMapping.PunchListItem;
                 break;
             case PcsTopic.Library:
                 break;
             case PcsTopic.WorkOrder:
-                events = await _repo.GetWorkOrders();
+                events = await _repo.GetWorkOrders(queryParameters.Plant);
                 fields = QueryMapping.WorkOrder;
                 break;
             case PcsTopic.Checklist:
-                events = await _repo.GetCheckLists();
+                events = await _repo.GetCheckLists(queryParameters.Plant);
                 fields = QueryMapping.CheckList;
                 break;
             case PcsTopic.Milestone:
-                events = await _repo.GetMilestones();
+                events = await _repo.GetMilestones(queryParameters.Plant);
                 fields = QueryMapping.Milesstone;
                 break;
             case PcsTopic.WorkOrderCutoff:
@@ -94,11 +96,16 @@ public class FamFeederService : IFamFeederService
             case PcsTopic.Certificate:
                 break;
             case PcsTopic.WoChecklist:
-                events = await _repo.GetWoChecklists();
+                events = await _repo.GetWoChecklists(queryParameters.Plant);
                 fields = QueryMapping.WorkOrderChecklist;
                 break;
             default:
-                throw new ArgumentOutOfRangeException();
+                return;
+        }
+
+        if (events.Count == 0)
+        {
+            return;
         }
 
 
@@ -122,6 +129,8 @@ public class FamFeederService : IFamFeederService
         Console.WriteLine("Done {0}", sw.ElapsedMilliseconds);
     }
 
+    public Task<List<string>> GetAllPlants() => _plantRepository.GetAllPlants();
+
     private SchemaMapper CreateCommonLibMapper()
     {
         ISchemaSource source = new ApiSource(new ApiSourceOptions
@@ -143,13 +152,13 @@ public class FamFeederService : IFamFeederService
         return mapper;
     }
 
-    private async Task WoCutoff(ISchemaMapper mapper)
+    private async Task WoCutoff(ISchemaMapper mapper, string plant)
     {
         var tasks = new[] { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" }.AsParallel().Select(
             async i =>
             {
                 var connectionString = _famFeederOptions.ProCoSysConnectionString;
-                var response = await _repo.GetWoCutoffs(i, connectionString);
+                var response = await _repo.GetWoCutoffs(i,plant, connectionString);
 
                 var messages = response.SelectMany(e => CreateTieMessage(e.Message, "WorkOrderCutoff", "WoNo"));
                 messages = messages.Select(m => mapper.Map(m).Message).ToList();

@@ -4,8 +4,10 @@ namespace Infrastructure.Repositories.Queries;
 internal class WorkOrderQuery
 {
 
-    internal static string Query = @"select
-         '{""Plant"" : ""' || w.projectschema || 
+    internal static string GetQuery(string schema)
+    {
+        return @$"select
+         '{{""Plant"" : ""' || w.projectschema || 
          '"", ""PlantName"" : ""' || regexp_replace(ps.TITLE, '([""\])', '\\\1') ||          
          '"", ""ProjectName"" : ""' || p.NAME || 
          '"", ""WoNo"" : ""' || w.WONO ||
@@ -57,7 +59,7 @@ internal class WorkOrderQuery
          '"", ""CreatedAt"" : ""' || TO_CHAR(e.CREATEDAT, 'YYYY-MM-DD hh:mm:ss') ||
          '"", ""IsVoided"" : ""' || decode(e.isVoided,'Y', 'true', 'N', 'false') ||
          '"", ""LastUpdated"" : ""' || TO_CHAR(w.LAST_UPDATED, 'YYYY-MM-DD hh:mm:ss') ||        
-         '""}' as message
+         '""}}' as message
          from WO w
             join projectschema ps on ps.projectschema = w.projectschema
             join project p on p.project_id = w.project_id
@@ -75,5 +77,6 @@ internal class WorkOrderQuery
             left join library tow on tow.library_id = w.typeofwork_id
             left join library osos on osos.library_id = w.onshoreoffshore_id
             left join library woc on woc.library_id = w.wo_id
-        where w.projectschema = 'PCS$JOHAN_CASTBERG'";
+        where w.projectschema = {schema}";
+    }
 }

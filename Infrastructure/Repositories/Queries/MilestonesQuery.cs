@@ -2,8 +2,10 @@
 
 internal class MilestonesQuery
 {
-    internal static string Query = @"select
-            '{""Plant"" : ""' || e.projectschema || 
+    internal static string GetQuery(string schema)
+    {
+        return @$"select
+            '{{""Plant"" : ""' || e.projectschema || 
             '"", ""PlantName"" : ""' || regexp_replace(ps.TITLE, '([""\])', '\\\1') ||
             '"", ""ProjectName"" : ""' || p.name ||  
             '"", ""CommPkgNo"" : ""' || c.COMMPKGNO ||
@@ -14,7 +16,7 @@ internal class MilestonesQuery
             '"", ""IsSent"" : ""' || decode(cert.issent,'Y', 'true', 'N', 'false') ||  
             '"", ""IsAccepted"" : ""' || decode(cert.isaccepted,'Y', 'true', 'N', 'false') ||
             '"", ""IsRejected"" : ""' || decode(cert.isrejected,'Y', 'true', 'N', 'false') || 
-            '""}' as message
+            '""}}' as message
             from completionmilestonedate e
                 join projectschema ps on ps.projectschema = e.projectschema
                 join library milestone on milestone.library_id = e.milestone_id
@@ -22,5 +24,6 @@ internal class MilestonesQuery
                 left join mcpkg m on m.mcpkg_id = e.element_id
                 left join project p on p.project_id = COALESCE(c.project_id,m.project_id)
                 left join V$Certificate cert on cert.certificate_id = e.certificate_id
-            where e.projectschema = 'PCS$JOHAN_CASTBERG'";
+            where e.projectschema = {schema}";
+    }
 }

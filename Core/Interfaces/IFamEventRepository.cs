@@ -4,32 +4,32 @@ namespace Core.Interfaces
 {
     public interface IFamEventRepository
     {
-        Task<List<FamEvent>> GetProjects();
+        Task<List<FamEvent>> GetProjects(string plant);
 
-        Task<List<FamEvent>> GetMcPackages();
+        Task<List<FamEvent>> GetMcPackages(string plant);
 
-        Task<List<FamEvent>> GetCommPackages();
+        Task<List<FamEvent>> GetCommPackages(string plant);
 
-        Task<List<FamEvent>> GetPunchItems();
+        Task<List<FamEvent>> GetPunchItems(string plant);
 
-        Task<List<FamEvent>> GetWorkOrders();
+        Task<List<FamEvent>> GetWorkOrders(string plant);
 
-        Task<List<FamEvent>> GetCheckLists();
+        Task<List<FamEvent>> GetCheckLists(string plant);
 
-        Task<List<FamEvent>> GetTags();
+        Task<List<FamEvent>> GetTags(string plant);
 
-        Task<List<FamEvent>> GetMilestones();
+        Task<List<FamEvent>> GetMilestones(string plant);
 
-        Task<List<FamEvent>> GetWoCutoffs(string month, string connectionString);
+        Task<List<FamEvent>> GetWoCutoffs(string month, string plant, string connectionString);
 
-        Task<List<FamEvent>> GetWoChecklists();
+        Task<List<FamEvent>> GetWoChecklists(string plant);
 
-        Task<List<FamEvent>> GetSwcr();
+        Task<List<FamEvent>> GetSwcr(string plant);
 
-        Task<List<FamEvent>> GetSwcrSignature();
+        Task<List<FamEvent>> GetSwcrSignature(string plant);
 
-        Task<List<FamEvent>> GetQuery();
+        Task<List<FamEvent>> GetQuery(string plant);
 
-        Task<List<FamEvent>> GetQuerySignature();
+        Task<List<FamEvent>> GetQuerySignature(string plant);
     }
 }

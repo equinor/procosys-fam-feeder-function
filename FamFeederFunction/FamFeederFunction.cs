@@ -1,5 +1,4 @@
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Core.Interfaces;
 using Core.Models;
@@ -10,9 +9,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Extensions.Logging;
-using MoreLinq;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using static System.Enum;
 
 namespace FamFeederFunction
@@ -20,7 +17,6 @@ namespace FamFeederFunction
     public class FamFeederFunction
     {
         private readonly IFamFeederService _famFeederService;
-        private const string Value = "value";
         private ILogger _logger;
 
         public FamFeederFunction(IFamFeederService famFeederService)
@@ -29,7 +25,7 @@ namespace FamFeederFunction
         }
 
         [FunctionName("FamFeederFunction")]
-        public async Task<string> RunOrchestrator(
+        public static async Task<string> RunOrchestrator(
             [OrchestrationTrigger] IDurableOrchestrationContext context)
         {
             var param = context.GetInput<QueryParameters>();
@@ -43,11 +39,7 @@ namespace FamFeederFunction
         public  async Task RunFeeder([ActivityTrigger] IDurableActivityContext context)
         {
              await _famFeederService.RunFeeder(context.GetInput<QueryParameters>());
-             
         }
-
-
-
 
         [FunctionName("FamFeederFunction_HttpStart")]
         public async Task<IActionResult> HttpStart(
@@ -56,29 +48,41 @@ namespace FamFeederFunction
         {
             _logger = log;
 
-            string topicString = req.Query["PcsTopic"];
-            string facility = req.Query["Facility"];
+            var (topicString, plant) = await Deserialize(req);
 
-            var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            topicString ??= data?.PcsTopic;
-            facility ??= data?.Facility;
-            if (topicString == null || facility == null)
+            if (topicString == null || plant == null)
             {
-                return new BadRequestObjectResult("responseMessage");
+                return new BadRequestObjectResult("Please provide both plant and topic");
             }
-
             var parsed = TryParse(topicString, out PcsTopic topic);
             if (!parsed)
             {
-                return new BadRequestObjectResult("responseMessage");
+                return new BadRequestObjectResult("Please provide valid topic");
+            }
+            var plants = await _famFeederService.GetAllPlants();
+            if (!plants.Contains(plant))
+            {
+                return new BadRequestObjectResult("Please provide valid plant");
             }
 
-            var param = new QueryParameters(facility, topic);
+
+            var param = new QueryParameters(plant, topic);
 
             //Explain
             var instanceId = await orchestrationClient.StartNewAsync("FamFeederFunction", param);
             return new OkObjectResult(instanceId);
+        }
+
+        private static async Task<(string topicString, string plant)> Deserialize(HttpRequest req)
+        {
+            string topicString = req.Query["PcsTopic"];
+            string plant = req.Query["Facility"];
+
+            var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            dynamic data = JsonConvert.DeserializeObject(requestBody);
+            topicString ??= data?.PcsTopic;
+            plant ??= data?.Facility;
+            return (topicString, plant);
         }
 
         [FunctionName("GetStatus")]
@@ -99,27 +103,9 @@ namespace FamFeederFunction
         [FunctionName("TerminateInstance")]
         public static Task Terminate(
             [DurableClient] IDurableOrchestrationClient client,
-            [HttpTrigger(AuthorizationLevel.Function,"get", Route = null)] string instanceId)
+            [HttpTrigger(AuthorizationLevel.Function,"get","instanceId", Route = null)] string instanceId)
         {
-            string reason = "Found a bug";
-            return client.TerminateAsync(instanceId, reason);
+            return client.TerminateAsync(instanceId, "reason");
         }
-
-        
-        [FunctionName("TerminateAll")]
-        public static async Task TerminateAll(
-            [DurableClient] IDurableOrchestrationClient client,
-            [HttpTrigger(AuthorizationLevel.Function,"get", Route = null)] string instanceId)
-        {
-            string reason = "Stop everything";
-            var statuses = await client.GetStatusAsync();
-
-            statuses.ForEach( s =>
-            {
-                client.TerminateAsync(s.InstanceId, reason);
-            });
-           
-        }
-
     }
 }

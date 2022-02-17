@@ -19,34 +19,34 @@ public class FamEventRepository : IFamEventRepository
         _workOrderCutoffRepository = new WorkOrderCutoffRepository();
     }
 
-    public async Task<List<FamEvent>> GetMcPackages() => await ExecuteQuery(McPkgQuery.Query);
+    public async Task<List<FamEvent>> GetMcPackages(string plant) => await ExecuteQuery(McPkgQuery.GetQuery(plant));
 
-    public async Task<List<FamEvent>> GetCommPackages() => await ExecuteQuery(CommPkgQuery.Query);
+    public async Task<List<FamEvent>> GetCommPackages(string plant) => await ExecuteQuery(CommPkgQuery.GetQuery(plant));
 
-    public async Task<List<FamEvent>> GetPunchItems() => await ExecuteQuery(PunchListItemQuery.Query);
+    public async Task<List<FamEvent>> GetPunchItems(string plant) => await ExecuteQuery(PunchListItemQuery.GetQuery(plant));
 
-    public async Task<List<FamEvent>> GetWorkOrders() => await ExecuteQuery(WorkOrderQuery.Query);
+    public async Task<List<FamEvent>> GetWorkOrders(string plant) => await ExecuteQuery(WorkOrderQuery.GetQuery(plant));
 
-    public async Task<List<FamEvent>> GetCheckLists() => await ExecuteQuery(ChecklistQuery.Query);
+    public async Task<List<FamEvent>> GetCheckLists(string plant) => await ExecuteQuery(ChecklistQuery.GetQuery(plant));
 
-    public async Task<List<FamEvent>> GetTags() => await ExecuteQuery(TagQuery.Query);
+    public async Task<List<FamEvent>> GetTags(string plant) => await ExecuteQuery(TagQuery.GetQuery(plant));
 
-    public async Task<List<FamEvent>> GetMilestones() => await ExecuteQuery(MilestonesQuery.Query);
+    public async Task<List<FamEvent>> GetMilestones(string plant) => await ExecuteQuery(MilestonesQuery.GetQuery(plant));
 
-    public async Task<List<FamEvent>> GetProjects() => await ExecuteQuery(ProjectQuery.Query);
+    public async Task<List<FamEvent>> GetProjects(string plant) => await ExecuteQuery(ProjectQuery.GetQuery());
 
-    public async Task<List<FamEvent>> GetSwcr() => await ExecuteQuery(SwcrQuery.Query);
+    public async Task<List<FamEvent>> GetSwcr(string plant) => await ExecuteQuery(SwcrQuery.GetQuery(plant));
 
-    public async Task<List<FamEvent>> GetSwcrSignature() => await ExecuteQuery(SwcrSignatureQuery.Query);
+    public async Task<List<FamEvent>> GetSwcrSignature(string plant) => await ExecuteQuery(SwcrSignatureQuery.GetQuery(plant));
 
-    public async Task<List<FamEvent>> GetWoChecklists() => await ExecuteQuery(WorkOrderChecklistsQuery.Query);
+    public async Task<List<FamEvent>> GetWoChecklists(string plant) => await ExecuteQuery(WorkOrderChecklistsQuery.GetQuery(plant));
 
-    public async Task<List<FamEvent>> GetQuery() => await ExecuteQuery(Query.SqlQuery);
+    public async Task<List<FamEvent>> GetQuery(string plant) => await ExecuteQuery(Query.GetQuery(plant));
 
-    public async Task<List<FamEvent>> GetQuerySignature() => await ExecuteQuery(QuerySignature.SqlQuery);
+    public async Task<List<FamEvent>> GetQuerySignature(string plant) => await ExecuteQuery(QuerySignature.GetQuery(plant));
 
-    public async Task<List<FamEvent>> GetWoCutoffs(string month, string connectionString)
-        => await _workOrderCutoffRepository.GetWoCutoffs(month, connectionString);
+    public async Task<List<FamEvent>> GetWoCutoffs(string month, string plant, string connectionString)
+        => await _workOrderCutoffRepository.GetWoCutoffs(month,plant, connectionString);
 
     internal async Task<List<FamEvent>> ExecuteQuery(string query)
     {

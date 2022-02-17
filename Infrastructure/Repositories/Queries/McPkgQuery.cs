@@ -3,8 +3,10 @@ namespace Infrastructure.Repositories.Queries;
 
 public static class McPkgQuery
 {
-    internal static string Query = @"select
-    '{""Plant"" : ""' || m.projectschema ||
+    internal static string GetQuery(string schema)
+    {
+        return @$"select
+    '{{""Plant"" : ""' || e.projectschema || 
     '"", ""PlantName"" : ""' || regexp_replace(ps.TITLE, '([""\])', '\\\1') ||
     '"", ""ProjectName"" : ""' || p.name || 
     '"", ""McPkgNo"" : ""' || m.MCPKGNO ||
@@ -21,7 +23,7 @@ public static class McPkgQuery
     '"", ""IsVoided"" : ""' || decode(e.isVoided,'Y', 'true', 'N', 'false') ||
     '"", ""CreatedAt"" : ""' || TO_CHAR(e.CREATEDAT, 'YYYY-MM-DD hh:mm:ss') ||
     '"", ""LastUpdated"" : ""' || TO_CHAR(m.LAST_UPDATED, 'YYYY-MM-DD hh:mm:ss') ||
-    '""}'  as message
+    '""}}'  as message
     from mcpkg m
         join projectschema ps on ps.projectschema = m.projectschema
         join project p on p.project_id = m.project_id
@@ -31,6 +33,7 @@ public static class McPkgQuery
         left join library area on area.library_id = m.area_id
         left join library mcstatus on mcstatus.library_id = m.mcstatus_id
         left join responsible resp on resp.responsible_id = m.responsible_id
-    where m.projectschema = 'PCS$JOHAN_CASTBERG'";
+    where m.projectschema = {schema}";
+    }
 
 }

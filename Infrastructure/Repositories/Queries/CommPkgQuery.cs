@@ -2,8 +2,10 @@
 
 internal class CommPkgQuery
 {
-    internal static string Query =  @"select      
-         '{""Plant"" : ""' || c.projectschema || 
+    internal static string GetQuery(string schema)
+    {
+        return @$"select
+        '{{""Plant"" : ""' || c.projectschema || 
          '"", ""PlantName"" : ""' || regexp_replace(ps.TITLE, '([""\])', '\\\1') ||
          '"", ""ProjectName"" : ""' || p.name || 
          '"", ""CommPkgNo"" : ""' || c.COMMPKGNO ||
@@ -24,7 +26,7 @@ internal class CommPkgQuery
          '"", ""Priority2"" : ""' || pri2.code  ||
          '"", ""Priority3"" : ""' || pri3.code  ||
          '"", ""LastUpdated"" : ""' || TO_CHAR(c.LAST_UPDATED, 'YYYY-MM-DD hh:mm:ss') ||                                    
-         '""}' as message
+         '""}}' as message
         from commpkg c
             join project p on p.project_id = c.project_id
             join projectschema ps on ps.projectschema = c.projectschema
@@ -36,6 +38,7 @@ internal class CommPkgQuery
             left join library pri3 on pri3.library_id = c.COMMPRIORITY3_ID
             left join library phase on phase.library_id = c.COMMPHASE_ID
             left join library identifier on identifier.library_id = c.IDENTIFIER_ID
-        where c.projectschema = 'PCS$JOHAN_CASTBERG'";
+        where c.projectschema = {schema}";
+    }
 
 }

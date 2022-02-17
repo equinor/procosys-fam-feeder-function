@@ -1,8 +1,10 @@
-﻿namespace Infrastructure.Repositories.Queries
+﻿namespace Infrastructure.Repositories.Queries;
+
+internal class ProjectQuery
 {
-    internal class ProjectQuery
+    internal static string GetQuery()
     {
-        internal static string Query = @"select
+        return @"select
             '{""Plant"" : ""' || p.projectschema || 
             '"", ""ProjectName"" : ""' || p.NAME || 
             '"", ""IsClosed"" : ' || (case when p.ISVOIDED = 'Y' then 'true' else 'false' end) || 

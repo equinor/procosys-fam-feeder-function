@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Reflection;
 using Core;
 using Core.Interfaces;
@@ -11,7 +9,6 @@ using Infrastructure.Repositories;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MoreLinq.Extensions;
 
 [assembly: FunctionsStartup(typeof(FamFeederFunction.Startup))]
 
@@ -30,10 +27,6 @@ public class Startup : FunctionsStartup
             .AddEnvironmentVariables()
             .Build();
 
-
-      
-        
-  
         services.AddOptions<CommonLibConfig>().Configure<IConfiguration>((settings, configuration) =>
         {
             configuration.GetSection("CommonLibConfig");
@@ -48,6 +41,7 @@ public class Startup : FunctionsStartup
         services.AddDbContext(config.GetSection("FamFeederOptions")["ProCoSysConnectionString"]);
         services.AddScoped<IFamEventRepository, FamEventRepository>();
         services.AddScoped<IFamFeederService, FamFeederService>();
+        services.AddScoped<IPlantRepository, PlantRepository>();
     }
 
    

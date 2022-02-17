@@ -6,7 +6,7 @@ namespace Infrastructure.Repositories;
 
 public class WorkOrderCutoffRepository
 {
-    public async Task<List<FamEvent>> GetWoCutoffs(string month, string connectionstring)
+    public async Task<List<FamEvent>> GetWoCutoffs(string month,string plant, string connectionstring)
     {
 
         var query = @$"SELECT
@@ -48,7 +48,7 @@ public class WorkOrderCutoffRepository
     LEFT JOIN library r ON r.library_id = wc.WORESPONSIBLE_id
     LEFT JOIN library jsc ON jsc.library_id = wc.jobstatus_id
     LEFT JOIN library area ON area.library_id = wc.area_id
-  WHERE wc.projectschema = 'PCS$JOHAN_CASTBERG' and cutoffdate like '%.{month}.%'";
+  WHERE wc.projectschema = {plant} and cutoffdate like '%.{month}.%'";
 
 
         var options = new DbContextOptionsBuilder<AppDbContext>();

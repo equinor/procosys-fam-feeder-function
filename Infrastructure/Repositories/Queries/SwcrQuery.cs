@@ -2,8 +2,10 @@
 
 internal class SwcrQuery
 {
-    internal static string Query = @"SELECT
-    '{""Plant"" : ""' || sw.projectschema ||
+    internal static string GetQuery(string schema)
+    {
+        return @$"select
+    '{{""Plant"" : ""' || sw.projectschema ||
     '"", ""PlantName"" : ""' || regexp_replace(ps.TITLE, '([""\])', '\\\1') ||
     '"", ""ProjectName"" : ""' || p.NAME ||
     '"", ""SWCRNO"" : ""' || sw.SWCRNO ||
@@ -22,7 +24,7 @@ internal class SwcrQuery
     '"", ""LastUpdated"" : ""' || TO_CHAR(sw.LAST_UPDATED, 'YYYY-MM-DD hh:mm:ss')  ||
     '"", ""DueDate"" : ""' || TO_CHAR(sw.plannedfinishdate, 'YYYY-MM-DD hh:mm:ss')  ||
     '"", ""EstimatedManhours"" : ""' || sw.estimatedmhrs  ||
-    '""}' as message
+    '""}}' as message
     from swcr sw
         JOIN element e on  E.ELEMENT_ID = sw.swcr_ID
         JOIN projectschema ps ON ps.projectschema = sw.projectschema
@@ -34,5 +36,6 @@ internal class SwcrQuery
         LEFT JOIN library cs ON cs.library_id = sw.controlsystem_id
         LEFT JOIN library sup ON sup.library_id = sw.supplier_id
         LEFT JOIN node n ON n.node_id = sw.node_id
-    WHERE sw.projectschema = 'PCS$JOHAN_CASTBERG'";
+    WHERE sw.projectschema = {schema}";
+    }
 }
