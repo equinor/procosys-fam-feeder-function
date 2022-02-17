@@ -1,9 +1,8 @@
-﻿
-namespace Core.Interfaces
-{
-    public interface IFamFeederService
-    {
+﻿using Core.Models;
 
-        void RunFeeder();
-    }
+namespace Core.Interfaces;
+
+public interface IFamFeederService
+{
+    Task RunFeeder(QueryParameters queryParams);
 }

@@ -31,7 +31,7 @@ internal class WorkOrderQuery
          '"", ""WoTypeCode"" : ""' || regexp_replace(woc.CODE, '([""\])', '\\\1') ||   
          '"", ""ProjectProgress"" : ""' || regexp_replace(w.PROJECTPROGRESS, '([""\])', '\\\1') ||
          '"", ""ExpendedManHours"" : ""' || regexp_replace(NVL(w.TOTALEXPENDEDMANHOURS, w.expended_mhrs), '([""\])', '\\\1') ||
-         '"", ""EstimatedManHours"" : ""' || 
+         '"", ""EstimatedHours"" : ""' || 
                   ( Select ROUND (
                         SUM (quantity
                         * multiplicator
@@ -40,7 +40,7 @@ internal class WorkOrderQuery
                     FROM wo_estimate we
                     WHERE we.wo_id = w.wo_id  )
                   ||
-         '"", ""RemainingManHours"" : ""' || 
+         '"", ""RemainingHours"" : ""' || 
                  ( SELECT  ROUND (
                      SUM (quantity
                         * multiplicator
@@ -75,5 +75,5 @@ internal class WorkOrderQuery
             left join library tow on tow.library_id = w.typeofwork_id
             left join library osos on osos.library_id = w.onshoreoffshore_id
             left join library woc on woc.library_id = w.wo_id
-        where w.projectschema = 'PCS$JOHAN_CASTBERG' and w.wo_id = 115228364";
+        where w.projectschema = 'PCS$JOHAN_CASTBERG'";
 }
