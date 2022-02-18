@@ -24,6 +24,6 @@ internal class MilestonesQuery
                 left join mcpkg m on m.mcpkg_id = e.element_id
                 left join project p on p.project_id = COALESCE(c.project_id,m.project_id)
                 left join V$Certificate cert on cert.certificate_id = e.certificate_id
-            where e.projectschema = {schema}";
+            where e.projectschema = '{schema}'";
     }
 }

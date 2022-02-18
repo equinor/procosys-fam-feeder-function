@@ -36,6 +36,6 @@ internal class SwcrQuery
         LEFT JOIN library cs ON cs.library_id = sw.controlsystem_id
         LEFT JOIN library sup ON sup.library_id = sw.supplier_id
         LEFT JOIN node n ON n.node_id = sw.node_id
-    WHERE sw.projectschema = {schema}";
+    WHERE sw.projectschema = '{schema}'";
     }
 }

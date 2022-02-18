@@ -28,6 +28,6 @@ internal class QuerySignature
         join library sr ON sr.library_id = q.signaturerole_id
         left join person p ON p.person_id = q.signedby_id
         left join library fr On fr.library_id = q.functionalrole_id
-     where q.projectschema = {schema}";
+     where q.projectschema = '{schema}'";
     }
 }

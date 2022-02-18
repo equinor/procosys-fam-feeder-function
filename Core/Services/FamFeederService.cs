@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using Core.Interfaces;
+﻿using Core.Interfaces;
 using Core.Mappers;
 using Equinor.TI.Common.Messaging;
 using Equinor.TI.CommonLibrary.Mapper;
@@ -11,6 +10,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Core.Models;
 using Equinor.ProCoSys.PcsServiceBus;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Core.Services;
@@ -20,25 +20,26 @@ public class FamFeederService : IFamFeederService
     private readonly IEventHubProducerService _eventHubProducerService;
     private readonly IFamEventRepository _repo;
     private readonly IPlantRepository _plantRepository;
+    private readonly ILogger<FamFeederService> _logger;
     private readonly CommonLibConfig _commonLibConfig;
     private readonly FamFeederOptions _famFeederOptions;
     private readonly Regex _rx = new(@"[\a\e\f\n\r\t\v]", RegexOptions.Compiled);
 
     public FamFeederService(IEventHubProducerService eventHubProducerService, IFamEventRepository repo,
-        IOptions<CommonLibConfig> commonLibConfig, IOptions<FamFeederOptions> famFeederOptions, IPlantRepository plantRepository)
+        IOptions<CommonLibConfig> commonLibConfig, IOptions<FamFeederOptions> famFeederOptions, 
+        IPlantRepository plantRepository, ILogger<FamFeederService> logger)
     {
         _eventHubProducerService = eventHubProducerService;
         _repo = repo;
         _plantRepository = plantRepository;
+        _logger = logger;
         _commonLibConfig = commonLibConfig.Value;
         _famFeederOptions = famFeederOptions.Value;
     }
 
     public async Task RunFeeder(QueryParameters queryParameters)
     {
-        var sw = new Stopwatch();
-        sw.Start();
-
+        
         var mapper = CreateCommonLibMapper();
         if (queryParameters.PcsTopic == PcsTopic.WorkOrderCutoff)
         {
@@ -46,7 +47,6 @@ public class FamFeederService : IFamFeederService
             return;
         }
 
-        //  await WoCutoff(mapper);
         var events = new List<FamEvent>();
         var fields = new string[2];
         switch (queryParameters.PcsTopic)
@@ -108,11 +108,7 @@ public class FamFeederService : IFamFeederService
             return;
         }
 
-
-        Console.WriteLine("Found {0} events", events.Count);
-
-        // set the correct messages for each
-        //var fields = QueryMapping.Query;
+        _logger.LogInformation($"Found {events.Count} events for topic {queryParameters.PcsTopic} and plant {queryParameters.Plant}");
 
         var messageType = fields[0];
         var nameField = fields[1];
@@ -125,8 +121,7 @@ public class FamFeederService : IFamFeederService
             await SendFamMessages(batch);
         }
 
-        sw.Stop();
-        Console.WriteLine("Done {0}", sw.ElapsedMilliseconds);
+        _logger.LogInformation($"Finished sending {queryParameters.PcsTopic} to fam" );
     }
 
     public Task<List<string>> GetAllPlants() => _plantRepository.GetAllPlants();
@@ -169,13 +164,13 @@ public class FamFeederService : IFamFeederService
                 }
             });
         await Task.WhenAll(tasks);
+        _logger.LogInformation($"Sent WoCutoff to FAM");
     }
 
     private async Task SendFamMessages(IEnumerable<Message> messages)
     {
         try
         {
-            //Console.WriteLine("Did smt");
             await _eventHubProducerService.SendDataAsync(messages);
         }
         catch (FamConfigException e)

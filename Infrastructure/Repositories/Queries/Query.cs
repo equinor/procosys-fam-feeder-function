@@ -39,6 +39,6 @@ internal class Query
             join library dlib on dlib.library_id = do.discipline_id
             join library qtlib on qtlib.library_id = q.QUERYTYPE_ID
             join library ci ON ci.library_id = q.COSTIMPACT_ID
-         where q.projectschema = {schema}";
+         where q.projectschema = '{schema}'";
     }
 }

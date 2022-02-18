@@ -11,6 +11,6 @@ internal class ProjectQuery
             '"", ""Description"" : ""' || REPLACE(REPLACE(p.DESCRIPTION,'\','\\'),'""','\""') || 
             '""}}'  as message
             from project p
-            where p.projectschema = {schema}";
+            where p.projectschema = '{schema}'";
     }
 }

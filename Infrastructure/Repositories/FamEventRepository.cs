@@ -33,7 +33,7 @@ public class FamEventRepository : IFamEventRepository
 
     public async Task<List<FamEvent>> GetMilestones(string plant) => await ExecuteQuery(MilestonesQuery.GetQuery(plant));
 
-    public async Task<List<FamEvent>> GetProjects(string plant) => await ExecuteQuery(ProjectQuery.GetQuery());
+    public async Task<List<FamEvent>> GetProjects(string plant) => await ExecuteQuery(ProjectQuery.GetQuery(plant));
 
     public async Task<List<FamEvent>> GetSwcr(string plant) => await ExecuteQuery(SwcrQuery.GetQuery(plant));
 

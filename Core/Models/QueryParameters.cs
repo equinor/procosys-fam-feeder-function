@@ -7,12 +7,12 @@ namespace Core.Models;
 public class QueryParameters
 {
 
-    public QueryParameters(string facility, PcsTopic pcsTopic)
+    public QueryParameters(string plant, PcsTopic pcsTopic)
     {
-        Facility = facility;
+        Plant = plant;
         PcsTopic = pcsTopic;
     }
-    public string Facility { get;  }
+    public string Plant { get;  }
 
     public PcsTopic PcsTopic  { get;  }
 }

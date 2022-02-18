@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Core.Interfaces;
 using Core.Models;
@@ -76,7 +77,7 @@ namespace FamFeederFunction
         private static async Task<(string topicString, string plant)> Deserialize(HttpRequest req)
         {
             string topicString = req.Query["PcsTopic"];
-            string plant = req.Query["Facility"];
+            string plant = req.Query["Plant"];
 
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
@@ -85,27 +86,39 @@ namespace FamFeederFunction
             return (topicString, plant);
         }
 
+        [FunctionName("GetStatuses")]
+        public static async Task<IActionResult> Statuses(
+            [DurableClient] IDurableOrchestrationClient client,
+            [HttpTrigger(AuthorizationLevel.Function,"get", Route = null)] HttpRequest request)
+        {
+            var statuses = await client.ListInstancesAsync(new OrchestrationStatusQueryCondition(), CancellationToken.None);
+            return new OkObjectResult(statuses);
+        }
+
         [FunctionName("GetStatus")]
         public static async Task<IActionResult> Status(
             [DurableClient] IDurableOrchestrationClient client,
-            [HttpTrigger(AuthorizationLevel.Function,"get", Route = null)] string instanceId)
+            [HttpTrigger(AuthorizationLevel.Function,"get", Route = "status/{instanceId}")] HttpRequest request, string instanceId)
         {
-
-            var statuses = await client.GetStatusAsync();
-            var status = await client.GetStatusAsync(instanceId);
-            if (status == null)
-            {
-                return new NotFoundResult();
-            }
-            return new OkObjectResult(status.LastUpdatedTime);
+            var statuses = await client.GetStatusAsync(instanceId);
+            return new OkObjectResult(statuses);
         }
 
         [FunctionName("TerminateInstance")]
         public static Task Terminate(
             [DurableClient] IDurableOrchestrationClient client,
-            [HttpTrigger(AuthorizationLevel.Function,"get","instanceId", Route = null)] string instanceId)
+            [HttpTrigger(AuthorizationLevel.Function,"get", Route = "TerminateInstance/{instanceId}")] HttpRequest request, string instanceId)
         {
             return client.TerminateAsync(instanceId, "reason");
         }
+
+        [FunctionName("PurgeInstance")]
+        public static Task PurgeInstance(
+            [DurableClient] IDurableOrchestrationClient client,
+            [HttpTrigger(AuthorizationLevel.Function,"get", Route = "PurgeInstance/{instanceId}")] HttpRequest request, string instanceId)
+        {
+            return client.PurgeInstanceHistoryAsync(instanceId);
+        }
+
     }
 }

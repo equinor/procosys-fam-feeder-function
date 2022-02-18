@@ -26,6 +26,6 @@ internal class SwcrSignatureQuery
         join library sr ON sr.library_id = sign.signaturerole_id
         left join person p ON p.person_id = sign.signedby_id
         left join library fr On fr.library_id = sign.functionalrole_id
-    where sign.projectschema = {schema}";
+    where sign.projectschema = '{schema}'";
     }
 }

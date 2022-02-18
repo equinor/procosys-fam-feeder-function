@@ -4,8 +4,8 @@ internal class ChecklistQuery
 {
     internal static string GetQuery(string schema)
     {
-        return @$"SELECT
-    '{"{"}""Plant"" : ""' || tc.projectschema || 
+        return @$"select
+        '{{""Plant"" : ""' || tc.projectschema || 
         '"", ""PlantName"" : ""' || regexp_replace(ps.TITLE, '([""\])', '\\\1') ||
         '"", ""ProjectName"" : ""' || p.name ||
         '"", ""TagNo"" : ""' ||  regexp_replace(t.tagno, '([""\])', '\\\1') ||
@@ -21,7 +21,7 @@ internal class ChecklistQuery
         '"", ""CreatedAt"" : ""' || TO_CHAR(tc.createdat, 'YYYY-MM-DD hh:mm:ss') ||
         '"", ""SignedAt"" : ""' || TO_CHAR(tc.signedat, 'YYYY-MM-DD hh:mm:ss') ||
         '"", ""VerifiedAt"" : ""' || TO_CHAR(tc.verifiedat, 'YYYY-MM-DD hh:mm:ss') ||
-        '""{"}"}' as message
+        '""}}' as message
         from tagcheck tc
             join projectschema ps on ps.projectschema = tc.projectschema
             join tagformulartype tft on tft.tagformulartype_id = tc.tagformulartype_id
@@ -33,6 +33,6 @@ internal class ChecklistQuery
             left join library reg on reg.library_id = t.register_id
             left join responsible r on r.responsible_id = tc.responsible_id
             left join library status on status.library_id = tc.status_id
-        where tc.projectschema = {schema}";
-    } 
+        where tc.projectschema = '{schema}'";
+    }
 }

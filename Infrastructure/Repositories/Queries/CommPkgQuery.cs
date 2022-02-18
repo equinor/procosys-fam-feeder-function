@@ -38,7 +38,7 @@ internal class CommPkgQuery
             left join library pri3 on pri3.library_id = c.COMMPRIORITY3_ID
             left join library phase on phase.library_id = c.COMMPHASE_ID
             left join library identifier on identifier.library_id = c.IDENTIFIER_ID
-        where c.projectschema = {schema}";
+        where c.projectschema ='{schema}'";
     }
 
 }

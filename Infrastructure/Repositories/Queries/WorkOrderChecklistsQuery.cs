@@ -4,7 +4,7 @@ internal class WorkOrderChecklistsQuery
 {
     internal static string GetQuery(string schema)
     {
-        return @$"select
+    return @$"select
     '{{""Plant"" : ""' || wotc.projectschema ||
     '"", ""ProjectName"" : ""' || p.NAME ||
     '"", ""WoNo"" : ""' || wo.WONO ||
@@ -23,6 +23,6 @@ internal class WorkOrderChecklistsQuery
         join tag t ON t.tag_id = tft.tag_id
         join formulartype ft ON ft.formulartype_id = tft.formulartype_id
         join responsible r on r.responsible_id = tc.Responsible_id
-    WHERE wotc.projectschema = {schema}";
+    WHERE wotc.projectschema = '{schema}'";
     }
 }

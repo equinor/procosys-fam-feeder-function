@@ -77,6 +77,6 @@ internal class WorkOrderQuery
             left join library tow on tow.library_id = w.typeofwork_id
             left join library osos on osos.library_id = w.onshoreoffshore_id
             left join library woc on woc.library_id = w.wo_id
-        where w.projectschema = {schema}";
+         where w.projectschema = '{schema}'";
     }
 }

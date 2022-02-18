@@ -26,6 +26,6 @@ internal class PunchListItemQuery
            LEFT JOIN Tag t on tft.Tag_Id = t.Tag_Id
            LEFT JOIN Project p on p.Project_Id=t.Project_Id
            LEFT JOIN Library l on l.Library_Id = pl.Status_Id
-       where tc.projectschema = {schema}";
+       where tc.projectschema = '{schema}'";
     }
 }

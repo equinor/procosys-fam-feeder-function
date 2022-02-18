@@ -68,6 +68,6 @@ internal class TagQuery
                     left join calloff  on calloff.calloff_id=t.calloff_id
                     left join purchaseorder on purchaseorder.package_id=calloff.package_id
                     left join tagfunction on tagfunction.tagfunction_id = t.tagfunction_id
-                where t.projectschema = {schema}";
+                where t.projectschema = '{schema}'";
     }
 }
