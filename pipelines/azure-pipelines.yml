@@ -37,7 +37,7 @@ stages:
 
      - task: NuGetCommand@2
        inputs:
-         command: '${{ parameters.command }}'
+         command: 'restore'
          feedsToUse: 'config'
          nugetConfigPath: 'nuget.config'
 
