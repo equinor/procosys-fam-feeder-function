@@ -17,12 +17,12 @@ resources:
 variables:
   - template: src/variables/global-variables.yml@templates
   - template: src/resources/fam/fam-variables.yml@templates
- - name: 'repositoryName'
-   value: 'fam/feeder-function'
- - name: 'buildConfiguration'
-   value: 'Release' 
- - name: 'vmImageName'
-   value: 'ubuntu-latest'
+  - name: 'repositoryName'
+    value: 'fam/feeder-function'
+  - name: 'buildConfiguration'
+    value: 'Release' 
+  - name: 'vmImageName'
+    value: 'ubuntu-latest'
 
 stages:
  - stage: "CI"
