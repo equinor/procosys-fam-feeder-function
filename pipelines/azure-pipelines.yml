@@ -1,0 +1,152 @@
+trigger:
+  branches:
+    include:
+      - master
+      - dev
+
+resources:
+   repositories:
+   - repository: self
+   - repository: templates
+     type: github
+     name: equinor/procosys-infra
+     endpoint: 'equinor'
+     ref: infra/85749_fam_webjob
+
+# Global variables for the pipeline
+variables:
+  - template: src/variables/global-variables.yml@templates
+  - template: src/resources/fam/fam-variables.yml@templates
+ - name: 'repositoryName'
+   value: 'fam/feeder-function'
+ - name: 'buildConfiguration'
+   value: 'Release' 
+ - name: 'vmImageName'
+   value: 'ubuntu-latest'
+
+stages:
+ - stage: "CI"
+   displayName: 'Build and Test'
+   jobs:
+   - job:
+     pool:
+       vmImage: $(vmImageName)
+
+     steps:
+     - script: dotnet build --configuration $(buildConfiguration)
+       displayName: 'dotnet build $(buildConfiguration)'
+    
+     - task: DotNetCoreCLI@2
+       displayName: 'dotnet test $(buildConfiguration)'
+       inputs:
+         command: test
+         projects: '**/*[Tt]ests/*.csproj'
+         arguments: '--configuration $(buildConfiguration)'
+
+ # common stage. Docker build, tag and push
+ - stage: common
+   displayName: 'Common'
+   dependsOn: 'CI'
+   condition:  |
+     and
+     (
+       succeeded(),
+       or
+       ( 
+         eq(variables['Build.SourceBranch'], 'refs/heads/master'),
+         eq(variables['Build.SourceBranch'], 'refs/heads/dev')
+       )
+     )
+   variables:
+     envName: 'common'
+     envRg: '${{ variables.envRgName }}'
+     containerRegistry: '${{ variables.containerRegistryName }}'
+     envGroupName: '$(globalPrefix)-$(fullAppName)-${{ variables.envName }}'
+     dockerRegistryServiceConnection: '$(dockerRegistryServiceConnectionName)'
+     dockerfilePath: '$(Build.SourcesDirectory)/src/AccessFunctions/Dockerfile'
+
+   jobs:
+   - template: /templates/pipelines/dockerbuild.yml@templates
+     parameters:
+       deploymentName: 'docker_build_push'
+       env: 'pcs-${{ variables.envName }}'
+       envGroup: '${{ variables.envGroupName }}'
+       dockerfilePath: ${{ variables.dockerfilePath }}
+       buildContext: '$(Build.SourcesDirectory)'
+       repository: ${{ variables.repositoryName }}
+       dockerRegistryServiceConnection: $(dockerRegistryServiceConnectionName)
+
+ - stage: dev
+   displayName: 'dev'
+   dependsOn: 'common'
+   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/dev'))
+   variables:
+    envName: 'dev'
+    serviceConnection: '${{ variables.nonProdServiceConnection }}'
+    envGroupName: '$(globalPrefix)-$(fullAppName)-${{ variables.envName }}'
+    envRg: 'pcs-fam-non-prod-rg'
+
+   jobs:
+   - template: /src/resources/fam/jobs/deploy-function.yml@templates
+     parameters:
+      dependsOn: ''
+      deploymentName: 'publish'
+      serviceConnection: ${{ variables.serviceConnection }}
+      functionApp: '$(globalPrefix)-$(fullAppName)-dev-func'
+      envGroup: '${{ variables.envGroupName }}'
+      envRg: '${{ variables.envRg }}'
+      env: '${{ variables.envName }}'
+      repository: ${{ variables.repositoryName }}
+      containerRegistry: '${{ variables.containerRegistry }}'
+      keyVaultUrl: 'pcs-famfeeder-non-prod-kv'
+      GroupSubscriberDisabled: true
+
+ - stage: test
+   displayName: 'test'
+   dependsOn: 'common'
+   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/dev'))
+   variables:
+    envName: 'test'
+    serviceConnection: '${{ variables.nonProdServiceConnection }}'
+    envGroupName: '$(globalPrefix)-$(fullAppName)-${{ variables.envName }}'
+    envRg: 'pcs-fam-non-prod-rg'
+
+   jobs:
+   - template: /src/resources/fam/jobs/deploy-function.yml@templates
+     parameters:
+      dependsOn: ''
+      deploymentName: 'publish'
+      serviceConnection: ${{ variables.serviceConnection }}
+      functionApp: '$(globalPrefix)-$(fullAppName)-test-func'
+      envGroup: '${{ variables.envGroupName }}'
+      envRg: '${{ variables.envRg }}'
+      env: '${{ variables.envName }}'
+      repository: ${{ variables.repositoryName }}
+      containerRegistry: '${{ variables.containerRegistry }}'
+      keyVaultUrl: 'pcs-famfeeder-non-prod-kv'
+      GroupSubscriberDisabled: true
+
+ - stage: prod
+   displayName: 'prod'
+   dependsOn: 'common'
+   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+   variables:
+    envName: 'prod'
+    serviceConnection: '${{ variables.prodServiceConnection }}'
+    envGroupName: '$(globalPrefix)-$(fullAppName)-${{ variables.envName }}'
+    envRg: 'pcs-fam-prod-rg'
+  
+   jobs:
+   - template: /src/resources/fam/jobs/deploy-function.yml@templates
+     parameters:
+      dependsOn: ''
+      deploymentName: 'publish'
+      serviceConnection: ${{ variables.serviceConnection }}
+      functionApp: '$(globalPrefix)-$(fullAppName)-prod-func'
+      envGroup: '${{ variables.envGroupName }}'
+      envRg: '${{ variables.envRg }}'
+      env: '${{ variables.envName }}'
+      repository: ${{ variables.repositoryName }}
+      containerRegistry: '${{ variables.containerRegistry }}'
+      keyVaultUrl: 'pcs-famfeeder-prod-kv'
+      GroupSubscriberDisabled: false
