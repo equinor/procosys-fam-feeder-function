@@ -70,6 +70,8 @@ stages:
      parameters:
        deploymentName: 'docker_build_push'
        env: 'pcs-${{ variables.envName }}'
+       feedsToUse: 'config'
+       nugetConfigPath: 'nuget.config'
        envGroup: '${{ variables.envGroupName }}'
        dockerfilePath: ${{ variables.dockerfilePath }}
        buildContext: '$(Build.SourcesDirectory)'
