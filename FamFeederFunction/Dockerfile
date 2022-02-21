@@ -5,11 +5,11 @@ WORKDIR /home/site/wwwroot
 EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
-WORKDIR /src
+WORKDIR /
 COPY ["FamFeederFunction/FamFeederFunction.csproj", "FamFeederFunction/"]
 RUN dotnet restore "FamFeederFunction/FamFeederFunction.csproj"
 COPY . .
-WORKDIR "/src/FamFeederFunction"
+WORKDIR "/FamFeederFunction"
 RUN dotnet build "FamFeederFunction.csproj" -c Release -o /app/build
 
 FROM build AS publish
