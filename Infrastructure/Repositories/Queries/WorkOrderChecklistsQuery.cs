@@ -4,7 +4,7 @@ internal class WorkOrderChecklistsQuery
 {
     internal static string GetQuery(string schema)
     {
-    return @$"select
+        return @$"select
     '{{""Plant"" : ""' || wotc.projectschema ||
     '"", ""ProjectName"" : ""' || p.NAME ||
     '"", ""WoNo"" : ""' || wo.WONO ||

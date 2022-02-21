@@ -1,32 +1,29 @@
 ﻿using Core.Interfaces;
-using Core.Mappers;
+using Core.Models;
+using Equinor.ProCoSys.FamWebJob.Core.Mappers;
+using Equinor.ProCoSys.PcsServiceBus;
 using Equinor.TI.Common.Messaging;
 using Equinor.TI.CommonLibrary.Mapper;
 using Equinor.TI.CommonLibrary.Mapper.Core;
 using Fam.Core.EventHubs.Contracts;
 using Fam.Models.Exceptions;
-using MoreLinq;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
-using Core.Models;
-using Equinor.ProCoSys.PcsServiceBus;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MoreLinq;
 
 namespace Core.Services;
 
 public class FamFeederService : IFamFeederService
 {
-    private readonly IEventHubProducerService _eventHubProducerService;
-    private readonly IFamEventRepository _repo;
-    private readonly IPlantRepository _plantRepository;
-    private readonly ILogger<FamFeederService> _logger;
     private readonly CommonLibConfig _commonLibConfig;
+    private readonly IEventHubProducerService _eventHubProducerService;
     private readonly FamFeederOptions _famFeederOptions;
-    private readonly Regex _rx = new(@"[\a\e\f\n\r\t\v]", RegexOptions.Compiled);
+    private readonly ILogger<FamFeederService> _logger;
+    private readonly IPlantRepository _plantRepository;
+    private readonly IFamEventRepository _repo;
 
     public FamFeederService(IEventHubProducerService eventHubProducerService, IFamEventRepository repo,
-        IOptions<CommonLibConfig> commonLibConfig, IOptions<FamFeederOptions> famFeederOptions, 
+        IOptions<CommonLibConfig> commonLibConfig, IOptions<FamFeederOptions> famFeederOptions,
         IPlantRepository plantRepository, ILogger<FamFeederService> logger)
     {
         _eventHubProducerService = eventHubProducerService;
@@ -39,16 +36,15 @@ public class FamFeederService : IFamFeederService
 
     public async Task RunFeeder(QueryParameters queryParameters)
     {
-        
         var mapper = CreateCommonLibMapper();
         if (queryParameters.PcsTopic == PcsTopic.WorkOrderCutoff)
         {
-            await WoCutoff(mapper,queryParameters.Plant);
+            await WoCutoff(mapper, queryParameters.Plant);
             return;
         }
 
         var events = new List<FamEvent>();
-        var fields = new string[2];
+        (PcsTopic, string) fields = new();
         switch (queryParameters.PcsTopic)
         {
             case PcsTopic.CommPkg:
@@ -103,28 +99,26 @@ public class FamFeederService : IFamFeederService
                 return;
         }
 
-        if (events.Count == 0)
-        {
-            return;
-        }
+        if (events.Count == 0 || string.IsNullOrEmpty(fields.Item2)) return;
 
-        _logger.LogInformation($"Found {events.Count} events for topic {queryParameters.PcsTopic} and plant {queryParameters.Plant}");
+        _logger.LogInformation(
+            $"Found {events.Count} events for topic {queryParameters.PcsTopic} and plant {queryParameters.Plant}");
 
-        var messageType = fields[0];
-        var nameField = fields[1];
+        var messageType = fields.Item1;
+        var nameField = fields.Item2;
 
-        var messages = events.SelectMany(e => CreateTieMessage(e.Message, messageType, nameField));
+        var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e.Message, messageType, nameField));
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
 
-        foreach (var batch in mappedMessages.Batch(250))
-        {
-            await SendFamMessages(batch);
-        }
+        foreach (var batch in mappedMessages.Batch(250)) await SendFamMessages(batch);
 
-        _logger.LogInformation($"Finished sending {queryParameters.PcsTopic} to fam" );
+        _logger.LogInformation($"Finished sending {queryParameters.PcsTopic} to fam");
     }
 
-    public Task<List<string>> GetAllPlants() => _plantRepository.GetAllPlants();
+    public Task<List<string>> GetAllPlants()
+    {
+        return _plantRepository.GetAllPlants();
+    }
 
     private SchemaMapper CreateCommonLibMapper()
     {
@@ -133,7 +127,7 @@ public class FamFeederService : IFamFeederService
             TokenProviderConnectionString = "RunAs=App;" +
                                             $"AppId={_commonLibConfig.ClientId};" +
                                             $"TenantId={_commonLibConfig.TenantId};" +
-                                            $"AppKey={_commonLibConfig.ClientSecret}",
+                                            $"AppKey={_commonLibConfig.ClientSecret}"
         });
 
         // Add caching functionality
@@ -149,22 +143,21 @@ public class FamFeederService : IFamFeederService
 
     private async Task WoCutoff(ISchemaMapper mapper, string plant)
     {
-        var tasks = new[] { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" }.AsParallel().Select(
-            async i =>
-            {
-                var connectionString = _famFeederOptions.ProCoSysConnectionString;
-                var response = await _repo.GetWoCutoffs(i,plant, connectionString);
-
-                var messages = response.SelectMany(e => CreateTieMessage(e.Message, "WorkOrderCutoff", "WoNo"));
-                messages = messages.Select(m => mapper.Map(m).Message).ToList();
-
-                foreach (var batch in messages.Batch(250))
+        var tasks = new[] { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" }.AsParallel()
+            .Select(
+                async i =>
                 {
-                    await SendFamMessages(batch);
-                }
-            });
+                    var connectionString = _famFeederOptions.ProCoSysConnectionString;
+                    var response = await _repo.GetWoCutoffs(i, plant, connectionString);
+
+                    var messages = response.SelectMany(e =>
+                        TieMapper.CreateTieMessage(e.Message!, PcsTopic.WorkOrderCutoff, "WoNo"));
+                    messages = messages.Select(m => mapper.Map(m).Message).ToList();
+
+                    foreach (var batch in messages.Batch(250)) await SendFamMessages(batch);
+                });
         await Task.WhenAll(tasks);
-        _logger.LogInformation($"Sent WoCutoff to FAM");
+        _logger.LogInformation("Sent WoCutoff to FAM");
     }
 
     private async Task SendFamMessages(IEnumerable<Message> messages)
@@ -181,66 +174,5 @@ public class FamFeederService : IFamFeederService
         {
             throw new Exception("Error: Could not send message.", e);
         }
-    }
-
-    private IEnumerable<Message> CreateTieMessage(string messageJson, string messageType, string nameField)
-    {
-        var message = CreateEmptyMessage();
-        messageJson = WashString(messageJson);
-
-        var messages = new List<Message>();
-
-        switch (messageType)
-        {
-            case "Milestone":
-
-                message.Objects.Add(MileStoneMapper.CreateMileStoneMessagingObject(messageJson, nameField));
-                messages.Add(message);
-                break;
-
-            case "Tag":
-                {
-                    var tagMessages = TagMapper.CreateMessagingObjects(messageJson, messageType, nameField);
-                    tagMessages.ForEach(mo =>
-                    {
-                        var m = CreateEmptyMessage();
-                        m.Objects.Add(mo);
-                        messages.Add(m);
-                    });
-                    break;
-                }
-
-            default:
-                message.Objects.Add(CommonMapper.CreateMessagingObject(messageJson, messageType, nameField));
-                messages.Add(message);
-                break;
-        }
-
-        return messages;
-    }
-
-    private static Message CreateEmptyMessage()
-    {
-        return new Message
-        {
-            Id = Guid.NewGuid(),
-            Timestamp = DateTime.Now
-        };
-    }
-
-    private string WashString(string busEventMessage)
-    {
-        busEventMessage = busEventMessage.Replace("\r", "");
-        busEventMessage = busEventMessage.Replace("\n", "");
-        busEventMessage = busEventMessage.Replace("\t", "");
-        busEventMessage = busEventMessage.Replace("\f", "");
-        busEventMessage = _rx.Replace(busEventMessage, m => Regex.Escape(m.Value));
-
-        ////Removes non printable characters
-        const string pattern = "[^ -~]+";
-        var regExp = new Regex(pattern);
-        busEventMessage = regExp.Replace(busEventMessage, "");
-
-        return busEventMessage;
     }
 }

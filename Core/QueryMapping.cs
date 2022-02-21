@@ -1,19 +1,23 @@
-﻿namespace Core
+﻿using Equinor.ProCoSys.PcsServiceBus;
+
+namespace Core;
+
+public static class QueryMapping
 {
-    public static class QueryMapping
-    {
-        public static string[] CheckList { get; } = { "Checklist", "ChecklistId" };
-        public static string[] CommPkg { get; } = { "CommPkg", "CommPkgNo" };
-        public static string[] McPkg { get; } = { "McPkg", "McPkgNo" };
-        public static string[] Milesstone { get; } = { "Milestone", "Code" };
-        public static string[] Project { get; } = { "Project", "ProjectName" };
-        public static string[] PunchListItem { get; } = { "PunchListItem", "PunchItemNo" };
-        public static string[] SWCR { get; } = { "SWCR", "SWCRNO" };
-        public static string[] SWCRSignature { get; } = { "SWCRSignature", "SWCRNO" };
-        public static string[] Tag { get; } = { "Tag", "TagNo" };
-        public static string[] WorkOrder { get; } = { "WorkOrder", "WoNo" };
-        public static string[] WorkOrderChecklist { get; } = { "WoChecklist", "WoNo" };
-        public static string[] Query { get; } = { "Query", "QueryId" };
-        public static string[] QuerySignature { get; } = { "QuerySignature", "QueryNo" };
-    }
+    public static (PcsTopic, string) CheckList { get; } = (PcsTopic.Checklist, "CheckListId");
+    public static (PcsTopic, string) CommPkg { get; } = (PcsTopic.CommPkg, "CommPkgNo");
+    public static (PcsTopic, string) McPkg { get; } = (PcsTopic.McPkg, "McPkgNo");
+    public static (PcsTopic, string) Milesstone { get; } = (PcsTopic.Milestone, "Code");
+    public static (PcsTopic, string) Project { get; } = (PcsTopic.Project, "Project");
+
+    public static (PcsTopic, string) PunchListItem { get; } = (PcsTopic.PunchListItem, "PunchItemNo");
+
+    //public static (PcsTopic, string) SWCR { get; } = { PcsTopic.Swcr, "SWCRNO" };
+    //public static (PcsTopic, string) SWCRSignature { get; } = { "SWCRSignature", "SWCRNO" };
+    public static (PcsTopic, string) Tag { get; } = (PcsTopic.Tag, "TagNo");
+    public static (PcsTopic, string) WorkOrder { get; } = (PcsTopic.WorkOrder, "WoNo");
+
+    public static (PcsTopic, string) WorkOrderChecklist { get; } = (PcsTopic.WoChecklist, "WoNo");
+    //public static (PcsTopic, string) Query { get; } =  ( PcsTopic.Query, "QueryId" );
+    //public static (PcsTopic, string) QuerySignature { get; } = { "QuerySignature", "QueryNo" };
 }

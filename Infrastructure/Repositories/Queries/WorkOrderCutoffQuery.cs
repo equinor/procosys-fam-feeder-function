@@ -1,6 +1,6 @@
 ﻿namespace Infrastructure.Repositories.Queries;
 
-internal class WorkOrderCutoffQuery 
+internal class WorkOrderCutoffQuery
 {
     internal static string GetQuery(string schema, string month)
     {
@@ -44,6 +44,5 @@ internal class WorkOrderCutoffQuery
             left join library jsc ON jsc.library_id = wc.jobstatus_id
             left join library area ON area.library_id = wc.area_id
         where wc.projectschema = '{schema}' and cutoffdate like '%.{month}.%'";
-
     }
 }

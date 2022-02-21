@@ -2,7 +2,6 @@
 
 internal class SwcrSignatureQuery
 {
-
     internal static string GetQuery(string schema)
     {
         return @$"select

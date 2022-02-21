@@ -40,5 +40,4 @@ internal class CommPkgQuery
             left join library identifier on identifier.library_id = c.IDENTIFIER_ID
         where c.projectschema ='{schema}'";
     }
-
 }

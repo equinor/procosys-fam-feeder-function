@@ -1,8 +1,5 @@
-﻿
+﻿namespace Infrastructure.Configuration;
 
-namespace Infrastructure.Configuration
+internal class AppConfig
 {
-    internal class AppConfig
-    {
-    }
 }

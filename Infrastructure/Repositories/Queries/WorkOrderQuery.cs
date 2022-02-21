@@ -1,9 +1,7 @@
-﻿
-namespace Infrastructure.Repositories.Queries;
+﻿namespace Infrastructure.Repositories.Queries;
 
 internal class WorkOrderQuery
 {
-
     internal static string GetQuery(string schema)
     {
         return @$"select

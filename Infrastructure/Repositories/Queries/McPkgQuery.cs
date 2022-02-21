@@ -1,5 +1,4 @@
-﻿
-namespace Infrastructure.Repositories.Queries;
+﻿namespace Infrastructure.Repositories.Queries;
 
 public static class McPkgQuery
 {
@@ -35,5 +34,4 @@ public static class McPkgQuery
         left join responsible resp on resp.responsible_id = m.responsible_id
     where m.projectschema = '{schema}'";
     }
-
 }

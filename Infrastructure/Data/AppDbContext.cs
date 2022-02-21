@@ -1,13 +1,16 @@
-﻿using Core.Models;
-using Infrastructure.Configuration;
+﻿using Infrastructure.Configuration;
 using Microsoft.EntityFrameworkCore;
 
-namespace Infrastructure.Data
-{
-    public class AppDbContext : DbContext
-    {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+namespace Infrastructure.Data;
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder) => modelBuilder.ApplyConfiguration(new FamEventConfiguration());
+public class AppDbContext : DbContext
+{
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    {
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfiguration(new FamEventConfiguration());
     }
 }

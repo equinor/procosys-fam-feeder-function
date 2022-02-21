@@ -4,13 +4,14 @@ using Core;
 using Core.Interfaces;
 using Core.Services;
 using Fam.Core.EventHubs.Extensions;
+using FamFeederFunction;
 using Infrastructure;
 using Infrastructure.Repositories;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-[assembly: FunctionsStartup(typeof(FamFeederFunction.Startup))]
+[assembly: FunctionsStartup(typeof(Startup))]
 
 namespace FamFeederFunction;
 
@@ -19,11 +20,11 @@ public class Startup : FunctionsStartup
     public override void Configure(IFunctionsHostBuilder builder)
     {
         var services = builder.Services;
-   
+
         var config = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
-            .AddUserSecrets(Assembly.GetExecutingAssembly(),true)
+            .AddJsonFile("local.settings.json", true, true)
+            .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
             .AddEnvironmentVariables()
             .Build();
 
@@ -31,7 +32,7 @@ public class Startup : FunctionsStartup
         {
             configuration.GetSection("CommonLibConfig");
         });
-      
+
         services.Configure<CommonLibConfig>(config.GetSection("CommonLibConfig"));
         services.Configure<FamFeederOptions>(config.GetSection("FamFeederOptions"));
 
@@ -43,6 +44,4 @@ public class Startup : FunctionsStartup
         services.AddScoped<IFamFeederService, FamFeederService>();
         services.AddScoped<IPlantRepository, PlantRepository>();
     }
-
-   
 }
