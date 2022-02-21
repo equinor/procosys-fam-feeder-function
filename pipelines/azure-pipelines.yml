@@ -99,7 +99,6 @@ stages:
       repository: ${{ variables.repositoryName }}
       containerRegistry: '${{ variables.containerRegistry }}'
       keyVaultUrl: 'pcs-famfeeder-non-prod-kv'
-      GroupSubscriberDisabled: true
 
  - stage: test
    displayName: 'test'
@@ -124,7 +123,6 @@ stages:
       repository: ${{ variables.repositoryName }}
       containerRegistry: '${{ variables.containerRegistry }}'
       keyVaultUrl: 'pcs-famfeeder-non-prod-kv'
-      GroupSubscriberDisabled: true
 
  - stage: prod
    displayName: 'prod'
@@ -149,4 +147,3 @@ stages:
       repository: ${{ variables.repositoryName }}
       containerRegistry: '${{ variables.containerRegistry }}'
       keyVaultUrl: 'pcs-famfeeder-prod-kv'
-      GroupSubscriberDisabled: false
