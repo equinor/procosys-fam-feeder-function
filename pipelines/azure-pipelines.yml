@@ -66,7 +66,7 @@ stages:
      dockerfilePath: '$(Build.SourcesDirectory)/FamFeederFunction/Dockerfile'
 
    jobs:
-   - template: /templates/pipelines/dockerbuild.yml@templates
+   - template: /src/resources/fam/jobs/dockerbuild.yml@templates
      parameters:
        deploymentName: 'docker_build_push'
        env: 'pcs-${{ variables.envName }}'
