@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A1B8F932-015E-40F7-941F-4CF915A84754}"
 	ProjectSection(SolutionItems) = preProject
 		pipelines\azure-pipelines.yml = pipelines\azure-pipelines.yml
+		nuget.config = nuget.config
 	EndProjectSection
 EndProject
 Global
