@@ -52,6 +52,8 @@ public class FamFeederFunction
 
         var (topicString, plant) = await Deserialize(req);
 
+        _logger.LogInformation($"Querying {plant} for {topicString}");
+
         if (topicString == null || plant == null)
             return new BadRequestObjectResult("Please provide both plant and topic");
         var parsed = TryParse(topicString, out PcsTopic topic);
@@ -108,12 +110,4 @@ public class FamFeederFunction
         return client.TerminateAsync(instanceId, "reason");
     }
 
-    [FunctionName("PurgeInstance")]
-    public static Task PurgeInstance(
-        [DurableClient] IDurableOrchestrationClient client,
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "PurgeInstance/{instanceId}")]
-        HttpRequest request, string instanceId)
-    {
-        return client.PurgeInstanceHistoryAsync(instanceId);
-    }
 }
