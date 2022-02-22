@@ -25,8 +25,6 @@ ENV VSS_NUGET_EXTERNAL_FEED_ENDPOINTS="{\"endpointCredentials\": [{\"endpoint\":
 RUN echo $VSS_NUGET_EXTERNAL_FEED_ENDPOINTS
 RUN wget -qO- https://raw.githubusercontent.com/Microsoft/artifacts-credprovider/master/helpers/installcredprovider.sh | bash
 
-#RUN dotnet restore "FamFeederFunction/FamFeederFunction.csproj" --configfile "./nuget.config"
-
 RUN dotnet build "FamFeederFunction.csproj" -c Release
 
 FROM build AS publish
