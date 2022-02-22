@@ -70,7 +70,6 @@ stages:
      envRg: '${{ variables.envRgName }}'
      containerRegistry: '${{ variables.containerRegistryName }}'
      envGroupName: '$(globalPrefix)-$(fullAppName)-${{ variables.envName }}'
-     arguments: '--build-arg FEED_ACCESSTOKEN=$(VSS_NUGET_ACCESSTOKEN)'
      dockerRegistryServiceConnection: '$(dockerRegistryServiceConnectionName)'
      dockerfilePath: '$(Build.SourcesDirectory)/FamFeederFunction/Dockerfile'
 
@@ -79,10 +78,10 @@ stages:
      parameters:
        deploymentName: 'docker_build_push'
        env: 'pcs-${{ variables.envName }}'
-       feedsToUse: 'config'
-       arguments: '--build-arg FEED_ACCESSTOKEN=$(VSS_NUGET_ACCESSTOKEN)'
+       #feedsToUse: 'config'
        nugetConfigPath: 'nuget.config'
        envGroup: '${{ variables.envGroupName }}'
+       arguments: '--build-arg FEED_ACCESSTOKEN=$(VSS_NUGET_ACCESSTOKEN)'
        dockerfilePath: ${{ variables.dockerfilePath }}
        buildContext: '$(Build.SourcesDirectory)'
        repository: ${{ variables.repositoryName }}
