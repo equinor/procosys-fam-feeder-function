@@ -109,7 +109,7 @@ stages:
       env: '${{ variables.envName }}'
       repository: ${{ variables.repositoryName }}
       containerRegistry: '${{ variables.containerRegistry }}'
-      keyVaultUrl: 'pcs-famfeeder-non-prod-kv'
+      keyVaultUrl: 'pcs-fam-non-prod-kv'
 
  - stage: test
    displayName: 'test'
@@ -133,7 +133,7 @@ stages:
       env: '${{ variables.envName }}'
       repository: ${{ variables.repositoryName }}
       containerRegistry: '${{ variables.containerRegistry }}'
-      keyVaultUrl: 'pcs-famfeeder-non-prod-kv'
+      keyVaultUrl: 'pcs-fam-non-prod-kv'
 
  - stage: prod
    displayName: 'prod'
@@ -157,4 +157,4 @@ stages:
       env: '${{ variables.envName }}'
       repository: ${{ variables.repositoryName }}
       containerRegistry: '${{ variables.containerRegistry }}'
-      keyVaultUrl: 'pcs-famfeeder-prod-kv'
+      keyVaultUrl: 'pcs-fam-prod-kv'
