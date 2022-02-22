@@ -80,6 +80,7 @@ stages:
        deploymentName: 'docker_build_push'
        env: 'pcs-${{ variables.envName }}'
        feedsToUse: 'config'
+       arguments: '--build-arg FEED_ACCESSTOKEN=$(VSS_NUGET_ACCESSTOKEN)'
        nugetConfigPath: 'nuget.config'
        envGroup: '${{ variables.envGroupName }}'
        dockerfilePath: ${{ variables.dockerfilePath }}

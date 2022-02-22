@@ -13,6 +13,7 @@ COPY Infrastructure/*csproj ./Infrastructure/
 COPY nuget.config .
 
 COPY . .
+
 WORKDIR "/src/FamFeederFunction"
 
 # nuget fix try this https://github.com/WolfgangOfner/MicroserviceDemo/blob/master/CustomerApi/CustomerApi/Dockerfile
