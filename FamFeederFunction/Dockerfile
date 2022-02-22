@@ -5,15 +5,35 @@ WORKDIR /home/site/wwwroot
 EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
-WORKDIR /
+WORKDIR /src
 COPY ["FamFeederFunction/FamFeederFunction.csproj", "FamFeederFunction/"]
-RUN dotnet restore "FamFeederFunction/FamFeederFunction.csproj"
+COPY Core/*csproj ./Core/
+COPY Infrastructure/*csproj ./Infrastructure/
+
+COPY nuget.config .
+
+
+
 COPY . .
-WORKDIR "/FamFeederFunction"
-RUN dotnet build "FamFeederFunction.csproj" -c Release -o /app/build
+WORKDIR "/src/FamFeederFunction"
+
+
+
+# nuget fix try this https://github.com/WolfgangOfner/MicroserviceDemo/blob/master/CustomerApi/CustomerApi/Dockerfile
+ENV DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER=0
+ENV NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED true
+ARG FEED_ACCESSTOKEN
+RUN echo $FEED_ACCESSTOKEN
+ENV VSS_NUGET_EXTERNAL_FEED_ENDPOINTS="{\"endpointCredentials\": [{\"endpoint\":\"https://statoildeveloper.pkgs.visualstudio.com/_packaging/ProCoSysOfficial/nuget/v3/index.json\", \"username\":\"docker\", \"password\":\"${FEED_ACCESSTOKEN}\"}]}"
+RUN echo $VSS_NUGET_EXTERNAL_FEED_ENDPOINTS
+RUN wget -qO- https://raw.githubusercontent.com/Microsoft/artifacts-credprovider/master/helpers/installcredprovider.sh | bash
+
+#RUN dotnet restore "FamFeederFunction/FamFeederFunction.csproj" --configfile "./nuget.config"
+
+RUN dotnet build "FamFeederFunction.csproj" -c Release
 
 FROM build AS publish
-RUN dotnet publish "FamFeederFunction.csproj" -c Release -o /app/publish
+RUN dotnet publish "FamFeederFunction.csproj" -c Release  --no-restore -o /app/publish
 
 FROM base AS final
 WORKDIR /home/site/wwwroot
