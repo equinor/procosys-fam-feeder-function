@@ -61,7 +61,6 @@ public class FamFeederFunction
         var plants = await _famFeederService.GetAllPlants();
         if (!plants.Contains(plant)) return new BadRequestObjectResult("Please provide valid plant");
 
-
         var param = new QueryParameters(plant, topic);
 
         //Explain
