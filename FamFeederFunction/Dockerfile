@@ -16,7 +16,7 @@ COPY . .
 
 WORKDIR "/src/FamFeederFunction"
 
-# nuget fix try this https://github.com/WolfgangOfner/MicroserviceDemo/blob/master/CustomerApi/CustomerApi/Dockerfile
+# nuget fix
 ENV DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER=0
 ENV NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED true
 ARG FEED_ACCESSTOKEN
