@@ -16,7 +16,7 @@ public static class ServiceCollectionSetup
     private const int MaxOpenCursors = 200;
 
     public static readonly LoggerFactory LoggerFactory =
-        new LoggerFactory(new[]
+        new(new[]
         {
             new Microsoft.Extensions.Logging.Debug.DebugLoggerProvider()
         });

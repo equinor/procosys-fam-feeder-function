@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using Core;
 using Core.Interfaces;
@@ -37,6 +38,13 @@ public class Startup : FunctionsStartup
 
         services.AddEventHubProducer(configBuilder
             => config.Bind("EventHubProducerConfig", configBuilder));
+
+        var rep = new BlobRepository(config["BlobStorage:ConnectionString"], config["BlobStorage:ContainerName"]);
+
+        var walletPath = config["WalletFileDir"];
+        Directory.CreateDirectory(walletPath);
+
+        rep.Download(config["BlobStorage:WalletFileName"], walletPath + "\\cwallet.sso");
 
         services.AddDbContext(config.GetSection("FamFeederOptions")["ProCoSysConnectionString"]);
         services.AddScoped<IFamEventRepository, FamEventRepository>();
