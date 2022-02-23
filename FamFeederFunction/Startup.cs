@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using Core;
 using Core.Interfaces;
@@ -50,6 +51,7 @@ public class Startup : FunctionsStartup
         var rep = new BlobRepository(config["BlobStorage:ConnectionString"], config["BlobStorage:ContainerName"]);
         var walletPath = config["WalletFileDir"];
         Directory.CreateDirectory(walletPath);
-        rep.Download(config["BlobStorage:WalletFileName"], walletPath + "\\cwallet.sso");
+        Console.WriteLine("Created wallet file at: " + walletPath);
+        rep.Download(config["BlobStorage:WalletFileName"], walletPath + "/cwallet.sso");
     }
 }
