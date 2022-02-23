@@ -106,7 +106,6 @@ public class FamFeederService : IFamFeederService
 
         var messageType = fields.Item1;
         var nameField = fields.Item2;
-
         var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e.Message!, messageType, nameField));
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
 
