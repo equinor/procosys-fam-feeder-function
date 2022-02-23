@@ -39,16 +39,19 @@ public class Startup : FunctionsStartup
         services.AddEventHubProducer(configBuilder
             => config.Bind("EventHubProducerConfig", configBuilder));
 
-        var rep = new BlobRepository(config["BlobStorage:ConnectionString"], config["BlobStorage:ContainerName"]);
-
-        var walletPath = config["WalletFileDir"];
-        Directory.CreateDirectory(walletPath);
-
-        rep.Download(config["BlobStorage:WalletFileName"], walletPath + "\\cwallet.sso");
+        AddWalletToDirectory(config);
 
         services.AddDbContext(config.GetSection("FamFeederOptions")["ProCoSysConnectionString"]);
         services.AddScoped<IFamEventRepository, FamEventRepository>();
         services.AddScoped<IFamFeederService, FamFeederService>();
         services.AddScoped<IPlantRepository, PlantRepository>();
+    }
+
+    private static void AddWalletToDirectory(IConfiguration config)
+    {
+        var rep = new BlobRepository(config["BlobStorage:ConnectionString"], config["BlobStorage:ContainerName"]);
+        var walletPath = config["WalletFileDir"];
+        Directory.CreateDirectory(walletPath);
+        rep.Download(config["BlobStorage:WalletFileName"], walletPath + "\\cwallet.sso");
     }
 }
