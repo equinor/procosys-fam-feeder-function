@@ -36,7 +36,9 @@ public class Startup : FunctionsStartup
         services.Configure<FamFeederOptions>(config.GetSection("FamFeederOptions"));
         services.AddEventHubProducer(configBuilder
             => config.Bind("EventHubProducerConfig", configBuilder));
+
         AddWalletToDirectory(config);
+
         services.AddDbContext(config.GetSection("FamFeederOptions")["ProCoSysConnectionString"]);
         services.AddScoped<IFamEventRepository, FamEventRepository>();
         services.AddScoped<IFamFeederService, FamFeederService>();
