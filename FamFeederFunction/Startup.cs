@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Configuration;
 using System.IO;
 using System.Reflection;
+using Azure.Storage.Blobs;
 using Core;
 using Core.Interfaces;
 using Core.Services;
@@ -28,6 +30,8 @@ public class Startup : FunctionsStartup
             .AddEnvironmentVariables()
             .Build();
 
+        
+
         services.AddOptions<CommonLibConfig>().Configure<IConfiguration>((settings, configuration) =>
         {
             configuration.GetSection("CommonLibConfig");
@@ -38,7 +42,9 @@ public class Startup : FunctionsStartup
         services.AddEventHubProducer(configBuilder
             => config.Bind("EventHubProducerConfig", configBuilder));
 
-        AddWalletToDirectory(config);
+        GetWalletFileFromBlobStorage(builder.GetContext().ApplicationRootPath);
+
+        //AddWalletToDirectory(config);
 
         services.AddDbContext(config.GetSection("FamFeederOptions")["ProCoSysConnectionString"]);
         services.AddScoped<IFamEventRepository, FamEventRepository>();
@@ -53,5 +59,25 @@ public class Startup : FunctionsStartup
         Directory.CreateDirectory(walletPath);
         Console.WriteLine("Created wallet file at: " + walletPath);
         rep.Download(config["BlobStorage:WalletFileName"], walletPath + "/cwallet.sso");
+    }
+
+    private static async void GetWalletFileFromBlobStorage(string rootPath)
+    {
+        var connectionString = ConfigurationManager.AppSettings["BlobStorage:ConnectionString"];
+        var blobContainerName = ConfigurationManager.AppSettings["BlobStorage:ContainerName"];
+        var blobName = ConfigurationManager.AppSettings["BlobStorage:WalletFileName"];
+        if (string.IsNullOrWhiteSpace(connectionString) 
+            || string.IsNullOrWhiteSpace(blobContainerName) ||
+            string.IsNullOrWhiteSpace(blobName)) return;
+        //var p1 = Directory.GetParent(rootPath);
+        //if (p1 == null) return;
+        //var p2 = Directory.GetParent(p1.FullName);
+        //if (p2 == null) return;
+
+        var fileName = rootPath + @"/Users/test/wallet/cwallet.sso";
+        var blobClient = new BlobClient(connectionString, blobContainerName, blobName);
+        var response = await blobClient.DownloadAsync();
+        await using var outputFileStream = new FileStream(fileName, FileMode.Create);
+        await response.Value.Content.CopyToAsync(outputFileStream);
     }
 }
