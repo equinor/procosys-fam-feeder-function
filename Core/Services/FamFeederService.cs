@@ -96,10 +96,17 @@ public class FamFeederService : IFamFeederService
                 fields = QueryMapping.WorkOrderChecklist;
                 break;
             default:
+            {
+                _logger.LogInformation("default switch statement, returning");
                 return;
+            }
         }
 
-        if (events.Count == 0 || string.IsNullOrEmpty(fields.Item2)) return;
+        if (events.Count == 0 || string.IsNullOrEmpty(fields.Item2))
+        {
+            _logger.LogInformation("found no events, or field is null");
+            return;
+        }
 
         _logger.LogInformation(
             $"Found {events.Count} events for topic {queryParameters.PcsTopic} and plant {queryParameters.Plant}");
