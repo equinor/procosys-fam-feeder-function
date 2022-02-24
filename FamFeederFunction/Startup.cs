@@ -77,12 +77,8 @@ public class Startup : FunctionsStartup
         if (string.IsNullOrWhiteSpace(connectionString) 
             || string.IsNullOrWhiteSpace(blobContainerName) ||
             string.IsNullOrWhiteSpace(blobName)) return;
-        //var p1 = Directory.GetParent(rootPath);
-        //if (p1 == null) return;
-        //var p2 = Directory.GetParent(p1.FullName);
-        //if (p2 == null) return;
 
-        var fileName = rootPath + @"/Users/test/wallet/cwallet.sso";
+        var fileName = rootPath + @"/wallet/cwallet.sso";
         log.LogInformation("Created wallet file at: " + fileName);
         var blobClient = new BlobClient(connectionString, blobContainerName, blobName);
         var response = await blobClient.DownloadAsync();
