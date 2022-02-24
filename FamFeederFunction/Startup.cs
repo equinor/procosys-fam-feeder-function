@@ -13,12 +13,14 @@ using Infrastructure.Repositories;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 namespace FamFeederFunction;
 
 public class Startup : FunctionsStartup
 {
+
     public override void Configure(IFunctionsHostBuilder builder)
     {
         var services = builder.Services;
@@ -42,7 +44,13 @@ public class Startup : FunctionsStartup
         services.AddEventHubProducer(configBuilder
             => config.Bind("EventHubProducerConfig", configBuilder));
 
-        GetWalletFileFromBlobStorage(builder.GetContext().ApplicationRootPath);
+        var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder.AddConsole();  
+        });
+        ILogger logger = loggerFactory.CreateLogger<Startup>();
+
+        GetWalletFileFromBlobStorage(builder.GetContext().ApplicationRootPath,logger);
 
         //AddWalletToDirectory(config);
 
@@ -61,7 +69,7 @@ public class Startup : FunctionsStartup
         rep.Download(config["BlobStorage:WalletFileName"], walletPath + "/cwallet.sso");
     }
 
-    private static async void GetWalletFileFromBlobStorage(string rootPath)
+    private static async void GetWalletFileFromBlobStorage(string rootPath, ILogger log)
     {
         var connectionString = ConfigurationManager.AppSettings["BlobStorage:ConnectionString"];
         var blobContainerName = ConfigurationManager.AppSettings["BlobStorage:ContainerName"];
@@ -75,6 +83,7 @@ public class Startup : FunctionsStartup
         //if (p2 == null) return;
 
         var fileName = rootPath + @"/Users/test/wallet/cwallet.sso";
+        log.LogInformation("Created wallet file at: " + fileName);
         var blobClient = new BlobClient(connectionString, blobContainerName, blobName);
         var response = await blobClient.DownloadAsync();
         await using var outputFileStream = new FileStream(fileName, FileMode.Create);
