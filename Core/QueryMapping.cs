@@ -4,7 +4,7 @@ namespace Core;
 
 public static class QueryMapping
 {
-    public static (PcsTopic, string) CheckList { get; } = (PcsTopic.Checklist, "CheckListId");
+    public static (PcsTopic, string) CheckList { get; } = (PcsTopic.Checklist, "ChecklistId");
     public static (PcsTopic, string) CommPkg { get; } = (PcsTopic.CommPkg, "CommPkgNo");
     public static (PcsTopic, string) McPkg { get; } = (PcsTopic.McPkg, "McPkgNo");
     public static (PcsTopic, string) Milesstone { get; } = (PcsTopic.Milestone, "Code");
