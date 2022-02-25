@@ -1,9 +1,6 @@
-using System.Configuration;
 using System.IO;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Storage.Blobs;
 using Core.Interfaces;
 using Core.Models;
 using Equinor.ProCoSys.PcsServiceBus;
@@ -91,37 +88,8 @@ public class FamFeederFunction
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]
         HttpRequest request,ILogger log,ExecutionContext context)
     {
-
-        var binpath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        var rootpath = Path.GetFullPath(Path.Combine(binpath, ".."));
-        log.LogInformation("rootpath? "+rootpath);
-        log.LogInformation("appdir "+context.FunctionAppDirectory);
-
-        GetWalletFileFromBlobStorage(rootpath, log);
-       
         var statuses = await client.ListInstancesAsync(new OrchestrationStatusQueryCondition(), CancellationToken.None);
         return new OkObjectResult(statuses);
-    }
-
-    private static async void GetWalletFileFromBlobStorage(string rootPath, ILogger log)
-    {
-        var connectionString = ConfigurationManager.AppSettings["BlobStorage:ConnectionString"];
-        var blobContainerName = ConfigurationManager.AppSettings["BlobStorage:ContainerName"];
-        var blobName = ConfigurationManager.AppSettings["BlobStorage:WalletFileName"];
-        if (string.IsNullOrWhiteSpace(connectionString) 
-            || string.IsNullOrWhiteSpace(blobContainerName) ||
-            string.IsNullOrWhiteSpace(blobName)) return;
-        //var p1 = Directory.GetParent(rootPath);
-        //if (p1 == null) return;
-        //var p2 = Directory.GetParent(p1.FullName);
-        //if (p2 == null) return;
-
-        var fileName = rootPath + @"/Users/test/wallet/cwallet.sso";
-        log.LogInformation("Created wallet file at: " + fileName);
-        var blobClient = new BlobClient(connectionString, blobContainerName, blobName);
-        var response = await blobClient.DownloadAsync();
-        await using var outputFileStream = new FileStream(fileName, FileMode.Create);
-        await response.Value.Content.CopyToAsync(outputFileStream);
     }
 
     [FunctionName("GetStatus")]
@@ -132,6 +100,16 @@ public class FamFeederFunction
     {
         var statuses = await client.GetStatusAsync(instanceId);
         return new OkObjectResult(statuses);
+    }
+
+    [FunctionName(nameof(CleanupOrchestration))]
+    public async Task<IActionResult> CleanupOrchestration(
+        [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
+        [DurableClient] IDurableOrchestrationClient orchestrationClient)
+    {
+        var instanceId = req.Query["id"];
+        var requestPurgeResult = await orchestrationClient.PurgeInstanceHistoryAsync(instanceId);
+        return new OkResult();
     }
 
     [FunctionName("TerminateInstance")]

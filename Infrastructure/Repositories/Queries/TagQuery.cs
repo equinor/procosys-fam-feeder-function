@@ -31,7 +31,7 @@ internal class TagQuery
                 WITHIN group (order by colName) as tagdetails  from (
                 SELECT 
                        f.columnname as colName,
-                        COALESCE(VAL.VALUESTRING,
+                        COALESCE(regexp_replace(val.valuestring, '([""\])', '\\\1'),
                                  TO_CHAR(VAL.VALUEDATE, 'YYYY-MM-DD hh:mm:ss'),
                                  TO_CHAR(VAL.VALUENUMBER),
                                  t2.TAGNO, 
@@ -50,7 +50,7 @@ internal class TagQuery
                 AND (DEF.REGISTER_ID IS NULL OR DEF.REGISTER_ID = t.register_id)
                 AND NOT (DEF.ISVOIDED = 'Y')
                 AND F.COLUMNTYPE in ('NUMBER','DATE','STRING', 'LIBRARY','TAG')
-                AND f.projectschema ='PCS$JOHAN_CASTBERG'))
+                AND f.projectschema ='{schema}'))
                 || '}}' ||
                 '}}' as message
                 from tag t

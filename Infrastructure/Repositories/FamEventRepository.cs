@@ -98,7 +98,12 @@ public class FamEventRepository : IFamEventRepository
         await using var result = await command.ExecuteReaderAsync();
         var entities = new List<FamEvent>();
 
-        while (await result.ReadAsync()) entities.Add(new FamEvent { Message = (string)result[0] });
+        while (await result.ReadAsync())
+        {
+            if(result.HasRows)
+                entities.Add(new FamEvent { Message =  (string)result[0] });
+        }
+
         return entities;
     }
 }

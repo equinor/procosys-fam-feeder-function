@@ -24,15 +24,13 @@ public class Startup : FunctionsStartup
     public override void Configure(IFunctionsHostBuilder builder)
     {
         var services = builder.Services;
-
+   
         var config = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("local.settings.json", true, true)
             .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
             .AddEnvironmentVariables()
             .Build();
-
-        
 
         services.AddOptions<CommonLibConfig>().Configure<IConfiguration>((settings, configuration) =>
         {
@@ -44,15 +42,10 @@ public class Startup : FunctionsStartup
         services.AddEventHubProducer(configBuilder
             => config.Bind("EventHubProducerConfig", configBuilder));
 
-        var loggerFactory = LoggerFactory.Create(builder =>
-        {
-            builder.AddConsole();  
-        });
-        ILogger logger = loggerFactory.CreateLogger<Startup>();
+        services.AddLogging();
 
-        //GetWalletFileFromBlobStorage(builder.GetContext().ApplicationRootPath,logger);
-
-        AddWalletToDirectory(config);
+        if(config["BlobStorage:ConnectionString"] != null)
+             AddWalletToDirectory(config);
 
         services.AddDbContext(config.GetSection("FamFeederOptions")["ProCoSysConnectionString"]);
         services.AddScoped<IFamEventRepository, FamEventRepository>();
@@ -63,26 +56,8 @@ public class Startup : FunctionsStartup
     private static void AddWalletToDirectory(IConfiguration config)
     {
         var rep = new BlobRepository(config["BlobStorage:ConnectionString"], config["BlobStorage:ContainerName"]);
-        var walletPath = "/home/site/wwwroot/wallet";// config["WalletFileDir"];
+        var walletPath = "/home/site/wwwroot/wallet";
         Directory.CreateDirectory(walletPath);
-        Console.WriteLine("Created wallet file at: " + walletPath);
         rep.Download(config["BlobStorage:WalletFileName"], walletPath + "/cwallet.sso");
-    }
-
-    private static async void GetWalletFileFromBlobStorage(string rootPath, ILogger log)
-    {
-        var connectionString = ConfigurationManager.AppSettings["BlobStorage:ConnectionString"];
-        var blobContainerName = ConfigurationManager.AppSettings["BlobStorage:ContainerName"];
-        var blobName = ConfigurationManager.AppSettings["BlobStorage:WalletFileName"];
-        if (string.IsNullOrWhiteSpace(connectionString) 
-            || string.IsNullOrWhiteSpace(blobContainerName) ||
-            string.IsNullOrWhiteSpace(blobName)) throw new Exception("Something was null");
-
-        var fileName = rootPath + @"wallet/cwallet.sso";
-        log.LogInformation("Created wallet file at: " + fileName);
-        var blobClient = new BlobClient(connectionString, blobContainerName, blobName);
-        var response = await blobClient.DownloadAsync();
-        await using var outputFileStream = new FileStream(fileName, FileMode.Create);
-        await response.Value.Content.CopyToAsync(outputFileStream);
     }
 }
