@@ -43,6 +43,6 @@ internal class WorkOrderCutoffQuery
             left join library r ON r.library_id = wc.WORESPONSIBLE_id
             left join library jsc ON jsc.library_id = wc.jobstatus_id
             left join library area ON area.library_id = wc.area_id
-        where wc.projectschema = '{schema}' and (cutoffdate like '%.{month}.%' or cutoffdate like '%/{month}/%' or cutoffdate like '%-{month}-%')";
+        where wc.projectschema = '{schema}' and TO_CHAR(wc.CUTOFFDATE, 'YYYY-MM-DD') like '%-{month}-%'";
     }
 }
