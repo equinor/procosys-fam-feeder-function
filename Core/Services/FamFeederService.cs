@@ -85,7 +85,7 @@ public class FamFeederService : IFamFeederService
                 break;
             case PcsTopic.Milestone:
                 events = await _repo.GetMilestones(queryParameters.Plant);
-                fields = QueryMapping.Milesstone;
+                fields = QueryMapping.Milestone;
                 break;
             case PcsTopic.WorkOrderCutoff:
                 break;
@@ -97,7 +97,7 @@ public class FamFeederService : IFamFeederService
                 break;
             default:
             {
-                _logger.LogInformation("default switch statement, returning");
+                _logger.LogInformation("Default switch statement, returning");
                 return;
             }
         }

@@ -7,7 +7,7 @@ public static class QueryMapping
     public static (PcsTopic, string) CheckList { get; } = (PcsTopic.Checklist, "ChecklistId");
     public static (PcsTopic, string) CommPkg { get; } = (PcsTopic.CommPkg, "CommPkgNo");
     public static (PcsTopic, string) McPkg { get; } = (PcsTopic.McPkg, "McPkgNo");
-    public static (PcsTopic, string) Milesstone { get; } = (PcsTopic.Milestone, "Code");
+    public static (PcsTopic, string) Milestone { get; } = (PcsTopic.Milestone, "Code");
     public static (PcsTopic, string) Project { get; } = (PcsTopic.Project, "Project");
 
     public static (PcsTopic, string) PunchListItem { get; } = (PcsTopic.PunchListItem, "PunchItemNo");

@@ -3,7 +3,6 @@ using Core.Models;
 using Infrastructure.Data;
 using Infrastructure.Repositories.Queries;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Repositories;
 
@@ -13,7 +12,7 @@ public class FamEventRepository : IFamEventRepository
 
     private readonly WorkOrderCutoffRepository _workOrderCutoffRepository;
 
-    public FamEventRepository(AppDbContext context, IConfiguration configuration)
+    public FamEventRepository(AppDbContext context)
     {
         _context = context;
         _workOrderCutoffRepository = new WorkOrderCutoffRepository();
@@ -99,11 +98,8 @@ public class FamEventRepository : IFamEventRepository
         var entities = new List<FamEvent>();
 
         while (await result.ReadAsync())
-        {
-            if(result.HasRows)
-                entities.Add(new FamEvent { Message =  (string)result[0] });
-        }
-
+            if (result.HasRows)
+                entities.Add(new FamEvent { Message = (string)result[0] });
         return entities;
     }
 }

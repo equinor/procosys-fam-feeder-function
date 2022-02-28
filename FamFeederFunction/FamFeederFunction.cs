@@ -19,7 +19,6 @@ namespace FamFeederFunction;
 public class FamFeederFunction
 {
     private readonly IFamFeederService _famFeederService;
-    private ILogger _logger;
 
     public FamFeederFunction(IFamFeederService famFeederService)
     {
@@ -31,17 +30,13 @@ public class FamFeederFunction
         [OrchestrationTrigger] IDurableOrchestrationContext context)
     {
         var param = context.GetInput<QueryParameters>();
-
         await context.CallActivityAsync("RunFeeder", param);
-
         return context.InstanceId;
     }
 
     [FunctionName("RunFeeder")]
-    public async Task RunFeeder([ActivityTrigger] IDurableActivityContext context)
-    {
-        await _famFeederService.RunFeeder(context.GetInput<QueryParameters>());
-    }
+    public async Task RunFeeder([ActivityTrigger] IDurableActivityContext context) 
+        => await _famFeederService.RunFeeder(context.GetInput<QueryParameters>());
 
     [FunctionName("FamFeederFunction_HttpStart")]
     public async Task<IActionResult> HttpStart(
@@ -49,11 +44,9 @@ public class FamFeederFunction
         HttpRequest req,
         [DurableClient] IDurableOrchestrationClient orchestrationClient, ILogger log)
     {
-        _logger = log;
-
         var (topicString, plant) = await Deserialize(req);
 
-        _logger.LogInformation($"Querying {plant} for {topicString}");
+        log.LogInformation($"Querying {plant} for {topicString}");
 
         if (topicString == null || plant == null)
             return new BadRequestObjectResult("Please provide both plant and topic");
@@ -64,8 +57,6 @@ public class FamFeederFunction
 
         var param = new QueryParameters(plant, topic);
 
-
-        //Explain
         var instanceId = await orchestrationClient.StartNewAsync("FamFeederFunction", param);
         return new OkObjectResult(instanceId);
     }
@@ -86,7 +77,7 @@ public class FamFeederFunction
     public static async Task<IActionResult> Statuses(
         [DurableClient] IDurableOrchestrationClient client,
         [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]
-        HttpRequest request,ILogger log,ExecutionContext context)
+        HttpRequest request, ExecutionContext context)
     {
         var statuses = await client.ListInstancesAsync(new OrchestrationStatusQueryCondition(), CancellationToken.None);
         return new OkObjectResult(statuses);
@@ -104,12 +95,13 @@ public class FamFeederFunction
 
     [FunctionName(nameof(CleanupOrchestration))]
     public async Task<IActionResult> CleanupOrchestration(
-        [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
+        [HttpTrigger(AuthorizationLevel.Function, "post")]
+        HttpRequest req,
         [DurableClient] IDurableOrchestrationClient orchestrationClient)
     {
         var instanceId = req.Query["id"];
         var requestPurgeResult = await orchestrationClient.PurgeInstanceHistoryAsync(instanceId);
-        return new OkResult();
+        return new OkObjectResult(requestPurgeResult);
     }
 
     [FunctionName("TerminateInstance")]
@@ -120,5 +112,4 @@ public class FamFeederFunction
     {
         return client.TerminateAsync(instanceId, "reason");
     }
-
 }

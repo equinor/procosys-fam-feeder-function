@@ -1,8 +1,5 @@
-﻿using System;
-using System.Configuration;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
-using Azure.Storage.Blobs;
 using Core;
 using Core.Interfaces;
 using Core.Services;
@@ -13,18 +10,17 @@ using Infrastructure.Repositories;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 [assembly: FunctionsStartup(typeof(Startup))]
+
 namespace FamFeederFunction;
 
 public class Startup : FunctionsStartup
 {
-
     public override void Configure(IFunctionsHostBuilder builder)
     {
         var services = builder.Services;
-   
+
         var config = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("local.settings.json", true, true)
@@ -44,8 +40,8 @@ public class Startup : FunctionsStartup
 
         services.AddLogging();
 
-        if(config["BlobStorage:ConnectionString"] != null)
-             AddWalletToDirectory(config);
+        if (config["BlobStorage:ConnectionString"] != null)
+            AddWalletToDirectory(config);
 
         services.AddDbContext(config.GetSection("FamFeederOptions")["ProCoSysConnectionString"]);
         services.AddScoped<IFamEventRepository, FamEventRepository>();

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Debug;
 
 namespace Infrastructure;
 
@@ -18,7 +19,7 @@ public static class ServiceCollectionSetup
     public static readonly LoggerFactory LoggerFactory =
         new(new[]
         {
-            new Microsoft.Extensions.Logging.Debug.DebugLoggerProvider()
+            new DebugLoggerProvider()
         });
 
     public static IServiceCollection AddDbContext(this IServiceCollection services, string connectionString)

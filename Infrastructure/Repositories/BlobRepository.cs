@@ -14,9 +14,6 @@ public class BlobRepository
     public async void Download(string pathAndFileName, string downloadPath)
     {
         var blobClient = _client.GetBlobClient(pathAndFileName);
-        if (await blobClient.ExistsAsync())
-        {
-            await blobClient.DownloadToAsync(downloadPath);
-        }
+        if (await blobClient.ExistsAsync()) await blobClient.DownloadToAsync(downloadPath);
     }
 }

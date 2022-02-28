@@ -11,6 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A1B8F932-015E-40F7-941F-4CF915A84754}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		pipelines\azure-pipelines.yml = pipelines\azure-pipelines.yml
 		nuget.config = nuget.config
 	EndProjectSection
