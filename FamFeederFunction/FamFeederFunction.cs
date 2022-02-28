@@ -35,8 +35,8 @@ public class FamFeederFunction
     }
 
     [FunctionName("RunFeeder")]
-    public async Task RunFeeder([ActivityTrigger] IDurableActivityContext context) 
-        => await _famFeederService.RunFeeder(context.GetInput<QueryParameters>());
+    public async Task RunFeeder([ActivityTrigger] IDurableActivityContext context, ILogger logger) 
+        => await _famFeederService.RunFeeder(context.GetInput<QueryParameters>(),logger);
 
     [FunctionName("FamFeederFunction_HttpStart")]
     public async Task<IActionResult> HttpStart(

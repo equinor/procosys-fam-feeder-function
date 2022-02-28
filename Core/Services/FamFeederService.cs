@@ -18,29 +18,31 @@ public class FamFeederService : IFamFeederService
     private readonly CommonLibConfig _commonLibConfig;
     private readonly IEventHubProducerService _eventHubProducerService;
     private readonly FamFeederOptions _famFeederOptions;
-    private readonly ILogger<FamFeederService> _logger;
+    private ILogger? _logger;
     private readonly IPlantRepository _plantRepository;
     private readonly IFamEventRepository _repo;
 
     public FamFeederService(IEventHubProducerService eventHubProducerService, IFamEventRepository repo,
         IOptions<CommonLibConfig> commonLibConfig, IOptions<FamFeederOptions> famFeederOptions,
-        IPlantRepository plantRepository, ILogger<FamFeederService> logger)
+        IPlantRepository plantRepository)
     {
         _eventHubProducerService = eventHubProducerService;
         _repo = repo;
         _plantRepository = plantRepository;
-        _logger = logger;
         _commonLibConfig = commonLibConfig.Value;
         _famFeederOptions = famFeederOptions.Value;
     }
 
-    public async Task RunFeeder(QueryParameters queryParameters)
+    public async Task<string> RunFeeder(QueryParameters queryParameters, ILogger logger)
     {
+        _logger = logger;
         var mapper = CreateCommonLibMapper();
         if (queryParameters.PcsTopic == PcsTopic.WorkOrderCutoff)
         {
+            _logger.LogInformation("Starting WoCutoff");
             await WoCutoff(mapper, queryParameters.Plant);
-            return;
+            _logger.LogInformation("Finished WoCutoff");
+            return "finished WoCutoff successfully";
         }
 
         var events = new List<FamEvent>();
@@ -98,14 +100,14 @@ public class FamFeederService : IFamFeederService
             default:
             {
                 _logger.LogInformation("Default switch statement, returning");
-                return;
+                return "default error";
             }
         }
 
         if (events.Count == 0 || string.IsNullOrEmpty(fields.Item2))
         {
             _logger.LogInformation("found no events, or field is null");
-            return;
+            return "error";
         }
 
         _logger.LogInformation(
@@ -116,9 +118,11 @@ public class FamFeederService : IFamFeederService
         var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e.Message!, messageType, nameField));
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
 
-        foreach (var batch in mappedMessages.Batch(250)) await SendFamMessages(batch);
+        //foreach (var batch in mappedMessages.Batch(250)) await SendFamMessages(batch);
 
         _logger.LogInformation($"Finished sending {queryParameters.PcsTopic} to fam");
+
+        return "finished successfully";
     }
 
     public Task<List<string>> GetAllPlants()
@@ -155,6 +159,7 @@ public class FamFeederService : IFamFeederService
                 {
                     var connectionString = _famFeederOptions.ProCoSysConnectionString;
                     var response = await _repo.GetWoCutoffs(i, plant, connectionString);
+                    _logger.LogInformation($"Found {response.Count} cutoffs for month {i} in {plant}");
 
                     var messages = response.SelectMany(e =>
                         TieMapper.CreateTieMessage(e.Message!, PcsTopic.WorkOrderCutoff, "WoNo"));
