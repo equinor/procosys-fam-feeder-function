@@ -30,13 +30,17 @@ public class FamFeederFunction
         [OrchestrationTrigger] IDurableOrchestrationContext context)
     {
         var param = context.GetInput<QueryParameters>();
-        await context.CallActivityAsync("RunFeeder", param);
-        return context.InstanceId;
+        var result = await context.CallActivityAsync<string>("RunFeeder", param);
+        return result;
     }
 
     [FunctionName("RunFeeder")]
-    public async Task RunFeeder([ActivityTrigger] IDurableActivityContext context, ILogger logger) 
-        => await _famFeederService.RunFeeder(context.GetInput<QueryParameters>(),logger);
+    public async Task<string> RunFeeder([ActivityTrigger] IDurableActivityContext context, ILogger logger)
+    {
+        var runFeeder = await _famFeederService.RunFeeder(context.GetInput<QueryParameters>(), logger);
+        logger.LogInformation($"RunFeeder returned {runFeeder}");
+        return runFeeder;
+    }
 
     [FunctionName("FamFeederFunction_HttpStart")]
     public async Task<IActionResult> HttpStart(
@@ -58,7 +62,7 @@ public class FamFeederFunction
         var param = new QueryParameters(plant, topic);
 
         var instanceId = await orchestrationClient.StartNewAsync("FamFeederFunction", param);
-        return new OkObjectResult(instanceId);
+        return orchestrationClient.CreateCheckStatusResponse(req,instanceId);
     }
 
     private static async Task<(string topicString, string plant)> Deserialize(HttpRequest req)
