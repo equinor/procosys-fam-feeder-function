@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Core.Interfaces;
@@ -26,11 +28,33 @@ public class FamFeederFunction
     }
 
     [FunctionName("FamFeederFunction")]
-    public static async Task<string> RunOrchestrator(
+    public static async Task<List<string>> RunOrchestrator(
         [OrchestrationTrigger] IDurableOrchestrationContext context)
     {
         var param = context.GetInput<QueryParameters>();
-        var result = await context.CallActivityAsync<string>("RunFeeder", param);
+        var results = new List<string>();
+        if (param.PcsTopic == PcsTopic.WorkOrderCutoff)
+        {
+            
+            var months = new List<string> { "01", "02", "03","04","05","06","07","08","09","10","11","12" };
+            foreach (var cutoffInput in months.Select(m => new WoCutoffInput(param.Plant, m)))
+            {
+                results.Add(await context.CallActivityAsync<string>("RunWoCutoffFeeder",cutoffInput));
+            }
+
+            return results;
+        }
+
+        results.Add(await context.CallActivityAsync<string>("RunFeeder", param));
+        return results;
+    }
+
+    [FunctionName("RunWoCutoffFeeder")]
+    public async Task<string> RunWoCutoffFeeder([ActivityTrigger] IDurableActivityContext context, ILogger logger)
+    {
+        var woCutoffInput = context.GetInput<WoCutoffInput>();
+        var result = await _famFeederService.WoCutoff(woCutoffInput.Plant,woCutoffInput.Month, logger);
+        logger.LogDebug($"RunFeeder returned {result}");
         return result;
     }
 
@@ -115,5 +139,18 @@ public class FamFeederFunction
         HttpRequest request, string instanceId)
     {
         return client.TerminateAsync(instanceId, "reason");
+    }
+
+    private class WoCutoffInput
+    {
+        public string Plant { get; }
+      
+        public string Month { get; }
+
+        public WoCutoffInput(string plant,  string month)
+        {
+            Plant = plant;
+            Month = month;
+        }
     }
 }
