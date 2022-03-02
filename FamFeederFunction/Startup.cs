@@ -52,7 +52,7 @@ public class Startup : FunctionsStartup
     private static void AddWalletToDirectory(IConfiguration config)
     {
         var rep = new BlobRepository(config["BlobStorage:ConnectionString"], config["BlobStorage:ContainerName"]);
-        var walletPath = "/home/site/wwwroot/wallet";
+        const string walletPath = "/home/site/wwwroot/wallet";
         Directory.CreateDirectory(walletPath);
         rep.Download(config["BlobStorage:WalletFileName"], walletPath + "/cwallet.sso");
     }
