@@ -98,8 +98,12 @@ public class FamEventRepository : IFamEventRepository
         var entities = new List<FamEvent>();
 
         while (await result.ReadAsync())
+        {
             if (result.HasRows)
+            {
                 entities.Add(new FamEvent { Message = (string)result[0] });
+            }
+        }
 
         return entities;
     }
