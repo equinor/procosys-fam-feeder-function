@@ -23,6 +23,7 @@ public class PlantRepository : IPlantRepository
         var plants = new List<string>();
 
         while (await result.ReadAsync()) plants.Add((string)result[0]);
+
         return plants;
     }
 }

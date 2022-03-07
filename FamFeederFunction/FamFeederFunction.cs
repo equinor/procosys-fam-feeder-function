@@ -46,6 +46,21 @@ public class FamFeederFunction
         return results;
     }
 
+    [FunctionName("RunAllExceptCutoff")]
+    public static async Task<List<string>> RunAllExceptCutoffOrchestrator(
+        [OrchestrationTrigger] IDurableOrchestrationContext context)
+    {
+        var plant = context.GetInput<string>();
+        var results = new List<string>();
+  
+            var topics = new List<PcsTopic> { PcsTopic.CommPkg, PcsTopic.McPkg,PcsTopic.Milestone,PcsTopic.Checklist,PcsTopic.WorkOrder,PcsTopic.WoChecklist};
+            foreach (var topic in topics)
+            {
+                results.Add(await context.CallActivityAsync<string>("RunFeeder",new QueryParameters(plant,topic)));
+            }
+            return results;
+    }
+
     [FunctionName("RunWoCutoffFeeder")]
     public async Task<string> RunWoCutoffFeeder([ActivityTrigger] IDurableActivityContext context, ILogger logger)
     {
@@ -83,6 +98,32 @@ public class FamFeederFunction
         var param = new QueryParameters(plant, topic);
 
         var instanceId = await orchestrationClient.StartNewAsync("FamFeederFunction", param);
+        return orchestrationClient.CreateCheckStatusResponse(req,instanceId);
+    }
+
+    [FunctionName("FamFeederFunction_RunAll")]
+    public async Task<IActionResult> RunAllHttpTrigger(
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
+        HttpRequest req,
+        [DurableClient] IDurableOrchestrationClient orchestrationClient, ILogger log)
+    {
+      
+        string plant = req.Query["Plant"];
+        var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+        dynamic data = JsonConvert.DeserializeObject(requestBody);
+        plant ??= data?.Facility;
+
+        log.LogInformation($"Running feeder for all topics for plant {plant} for ");
+
+        if (plant == null)
+        {
+            return new BadRequestObjectResult("Please provide both plant and topic");
+        }
+        var plants = await _famFeederService.GetAllPlants();
+        if (!plants.Contains(plant)) return new BadRequestObjectResult("Please provide valid plant");
+
+
+        var instanceId = await orchestrationClient.StartNewAsync("RunAllExceptCutoff", null,plant);
         return orchestrationClient.CreateCheckStatusResponse(req,instanceId);
     }
 

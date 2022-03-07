@@ -7,6 +7,7 @@ namespace Infrastructure.Repositories;
 
 public class WorkOrderCutoffRepository
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static")]
     public async Task<List<FamEvent>> GetWoCutoffs(string month, string plant, string? connectionString)
     {
         var options = new DbContextOptionsBuilder<AppDbContext>();

@@ -12,7 +12,7 @@ public static class QueryMapping
 
     public static (PcsTopic, string) PunchListItem { get; } = (PcsTopic.PunchListItem, "PunchItemNo");
 
-    //public static (PcsTopic, string) SWCR { get; } = { PcsTopic.Swcr, "SWCRNO" };
+    //public static (PcsTopic, string) SWCR { get; } = { PcsTopic.Sw, "SWCRNO" };
     //public static (PcsTopic, string) SWCRSignature { get; } = { "SWCRSignature", "SWCRNO" };
     public static (PcsTopic, string) Tag { get; } = (PcsTopic.Tag, "TagNo");
     public static (PcsTopic, string) WorkOrder { get; } = (PcsTopic.WorkOrder, "WoNo");

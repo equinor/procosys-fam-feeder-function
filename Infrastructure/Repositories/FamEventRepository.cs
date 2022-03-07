@@ -100,6 +100,7 @@ public class FamEventRepository : IFamEventRepository
         while (await result.ReadAsync())
             if (result.HasRows)
                 entities.Add(new FamEvent { Message = (string)result[0] });
+
         return entities;
     }
 }
