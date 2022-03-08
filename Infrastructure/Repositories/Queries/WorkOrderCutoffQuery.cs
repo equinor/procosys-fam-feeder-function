@@ -22,10 +22,10 @@ internal class WorkOrderCutoffQuery
         '"", ""CutoffWeek"" : ""' || wc.CUTOFFWEEK ||    
         '"", ""CutoffDate"" : ""' || TO_CHAR(wc.CUTOFFDATE, 'YYYY-MM-DD hh:mm:ss') ||   
         '"", ""PlannedStartAtDate"" : ""' || TO_CHAR(wc.WOPLANNEDSTARTUPDATE, 'YYYY-MM-DD hh:mm:ss')  ||
-        '"", ""PlannedFinishAtDate"" : ""' || TO_CHAR(wc.WOPLANNEDCOMPLETIONDATE, 'YYYY-MM-DD hh:mm:ss')  ||
-        '"", ""ManhoursExpended"" : ""' || wc.EXPENDED_MHRS || 
+        '"", ""PlannedFinishedAtDate"" : ""' || TO_CHAR(wc.WOPLANNEDCOMPLETIONDATE, 'YYYY-MM-DD hh:mm:ss')  ||
+        '"", ""ExpendedManHours"" : ""' || wc.EXPENDED_MHRS || 
         '"", ""ManhoursEarned"" : ""' || wc.EARNED_MHRS  ||
-        '"", ""ManhoursEstimated"" : ""' || wc.ESTIMATED_MHRS  ||
+        '"", ""EstimatedHours"" : ""' || wc.ESTIMATED_MHRS  ||
         '"", ""ManhoursExpendedLastWeek"" : ""' ||wc.EXPENDED_LW  ||  
         '"", ""ManhoursEarnedLastWeek"" : ""' || wc.EARNED_LW  ||  
         '""}}' as message
