@@ -115,11 +115,11 @@ public class FamFeederService : IFamFeederService
         var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e.Message!, messageType, nameField));
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
 
-      //  foreach (var batch in mappedMessages.Batch(250)) await SendFamMessages(batch);
+        foreach (var batch in mappedMessages.Batch(250)) await SendFamMessages(batch);
 
         _logger.LogInformation($"Finished sending {queryParameters.PcsTopic} to fam");
 
-        return $"finished successfully sending {mappedMessages.Count} messages to fam";
+        return $"finished successfully sending {mappedMessages.Count} messages to fam for {queryParameters.PcsTopic}";
     }
 
     public Task<List<string>> GetAllPlants()
@@ -159,7 +159,7 @@ public class FamFeederService : IFamFeederService
             TieMapper.CreateTieMessage(e.Message!, PcsTopic.WorkOrderCutoff, "WoNo"));
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
 
-     //   foreach (var batch in mappedMessages.Batch(250)) await SendFamMessages(batch);
+        foreach (var batch in mappedMessages.Batch(250)) await SendFamMessages(batch);
 
         logger.LogDebug("Sent WoCutoff to FAM");
         return $"Sendt {mappedMessages.Count} WoCutoff to FAM  for {month} done";
