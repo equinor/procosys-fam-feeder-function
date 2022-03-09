@@ -61,7 +61,7 @@ internal class WorkOrderQuery
          from WO w
             join projectschema ps on ps.projectschema = w.projectschema
             join project p on p.project_id = w.project_id
-            join element e on E.ELEMENT_ID = w.wo_ID and e.isvoided = 'N'
+            join element e on E.ELEMENT_ID = w.wo_ID
             left join commpkg c on c.commpkg_id = w.commpkg_id
             left join library milestone on milestone.library_id = w.womilestone_id
             left join library submilestone on submilestone.library_id = w.wosubmilestone_id
