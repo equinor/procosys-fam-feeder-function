@@ -94,11 +94,11 @@ public class FamFeederService : IFamFeederService
                 events = await _repo.GetWoChecklists(queryParameters.Plant);
                 fields = QueryMapping.WorkOrderChecklist;
                 break;
-            case PcsTopic.Swcr:
+            case PcsTopic.SWCR:
                 events = await _repo.GetSwcr(queryParameters.Plant);
                 fields = QueryMapping.Swcr;
                 break;
-            case PcsTopic.SwcrSignature:
+            case PcsTopic.SWCRSignature:
                 events = await _repo.GetSwcrSignature(queryParameters.Plant);
                 fields = QueryMapping.SwcrSignature;
                 break;
