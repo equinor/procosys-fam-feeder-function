@@ -1,4 +1,6 @@
-﻿using Equinor.ProCoSys.PcsServiceBus;
+﻿
+
+using Equinor.ProCoSys.PcsServiceBus;
 
 namespace Core;
 
@@ -12,12 +14,15 @@ public static class QueryMapping
 
     public static (PcsTopic, string) PunchListItem { get; } = (PcsTopic.PunchListItem, "PunchItemNo");
 
-    //public static (PcsTopic, string) SWCR { get; } = { PcsTopic.Sw, "SWCRNO" };
-    //public static (PcsTopic, string) SWCRSignature { get; } = { "SWCRSignature", "SWCRNO" };
+    public static (PcsTopic, string) Swcr { get; } = ( PcsTopic.SWCR, "SWCRNO" );
+    public static (PcsTopic, string) SwcrSignature { get; } = ( PcsTopic.SWCRSignature, "SWCRNO" );
     public static (PcsTopic, string) Tag { get; } = (PcsTopic.Tag, "TagNo");
     public static (PcsTopic, string) WorkOrder { get; } = (PcsTopic.WorkOrder, "WoNo");
 
     public static (PcsTopic, string) WorkOrderChecklist { get; } = (PcsTopic.WoChecklist, "WoNo");
+
+    public static (PcsTopic, string) PipingRevision { get; } = (PcsTopic.PipingRevision, "Revision");
+
     //public static (PcsTopic, string) Query { get; } =  ( PcsTopic.Query, "QueryId" );
     //public static (PcsTopic, string) QuerySignature { get; } = { "QuerySignature", "QueryNo" };
 }

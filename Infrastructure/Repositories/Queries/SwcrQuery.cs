@@ -23,7 +23,7 @@ internal class SwcrQuery
     '"", ""IsVoided"" : ""' || decode(e.IsVoided,'Y', 'true', 'N', 'false')  ||
     '"", ""LastUpdated"" : ""' || TO_CHAR(sw.LAST_UPDATED, 'YYYY-MM-DD hh:mm:ss')  ||
     '"", ""DueDate"" : ""' || TO_CHAR(sw.plannedfinishdate, 'YYYY-MM-DD hh:mm:ss')  ||
-    '"", ""EstimatedManhours"" : ""' || sw.estimatedmhrs  ||
+    '"", ""EstimatedHours"" : ""' || sw.estimatedmhrs  ||
     '""}}' as message
     from swcr sw
         JOIN element e on  E.ELEMENT_ID = sw.swcr_ID

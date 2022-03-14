@@ -5,29 +5,30 @@ internal class WorkOrderCutoffQuery
     internal static string GetQuery(string schema, string month)
     {
         return @$"select
-        '{{""Plant"" : ""' || wc.projectschema || 
-        '"", ""PlantName"" : ""' || regexp_replace(ps.TITLE, '([""\])', '\\\1') ||          
-        '"", ""ProjectName"" : ""' || p.NAME || 
+        '{{""Plant"" : ""' || wc.projectschema ||
+        '"", ""PlantName"" : ""' || regexp_replace(ps.TITLE, '([""\])', '\\\1') ||   
+        '"", ""ProjectName"" : ""' || p.NAME ||
         '"", ""WoNo"" : ""' || wo.WONO ||
         '"", ""JobStatusCode"" : ""' || regexp_replace(jsc.CODE, '([""\])', '\\\1') ||
         '"", ""MaterialStatusCode"" : ""' || regexp_replace(msc.CODE, '([""\])', '\\\1') ||
         '"", ""DisciplineCode"" : ""' || regexp_replace(dc.CODE, '([""\])', '\\\1') ||
-        '"", ""CategoryCode"" : ""' || regexp_replace(cat.CODE, '([""\])', '\\\1') ||  
+        '"", ""CategoryCode"" : ""' || regexp_replace(cat.CODE, '([""\])', '\\\1') ||
         '"", ""MilestoneCode"" : ""' || regexp_replace(milestone.CODE, '([""\])', '\\\1') ||
         '"", ""SubMilestoneCode"" : ""' || regexp_replace(submilestone.CODE, '([""\])', '\\\1') ||
         '"", ""HoldByCode"" : ""' ||  regexp_replace(hbc.CODE, '([""\])', '\\\1') ||
         '"", ""PlanActivityCode"" : ""' ||  regexp_replace(pa.CODE, '([""\])', '\\\1') ||
-        '"", ""ResponsibleCode"" : ""' || regexp_replace(r.CODE, '([""\])', '\\\1')  ||                                            
+        '"", ""ResponsibleCode"" : ""' || regexp_replace(r.CODE, '([""\])', '\\\1')  ||                                    
         '"", ""LastUpdated"" : ""' || TO_CHAR(wc.LAST_UPDATED, 'YYYY-MM-DD hh:mm:ss') ||
-        '"", ""CutoffWeek"" : ""' || wc.CUTOFFWEEK ||    
-        '"", ""CutoffDate"" : ""' || TO_CHAR(wc.CUTOFFDATE, 'YYYY-MM-DD hh:mm:ss') ||   
+        '"", ""CutoffWeek"" : ""' || wc.CUTOFFWEEK ||
+        '"", ""CutoffDate"" : ""' || TO_CHAR(wc.CUTOFFDATE, 'YYYY-MM-DD hh:mm:ss') ||
         '"", ""PlannedStartAtDate"" : ""' || TO_CHAR(wc.WOPLANNEDSTARTUPDATE, 'YYYY-MM-DD hh:mm:ss')  ||
         '"", ""PlannedFinishedAtDate"" : ""' || TO_CHAR(wc.WOPLANNEDCOMPLETIONDATE, 'YYYY-MM-DD hh:mm:ss')  ||
-        '"", ""ExpendedManHours"" : ""' || wc.EXPENDED_MHRS || 
+        '"", ""ExpendedManHours"" : ""' || wc.EXPENDED_MHRS ||
         '"", ""ManhoursEarned"" : ""' || wc.EARNED_MHRS  ||
         '"", ""EstimatedHours"" : ""' || wc.ESTIMATED_MHRS  ||
-        '"", ""ManhoursExpendedLastWeek"" : ""' ||wc.EXPENDED_LW  ||  
-        '"", ""ManhoursEarnedLastWeek"" : ""' || wc.EARNED_LW  ||  
+        '"", ""ManhoursExpendedLastWeek"" : ""' ||wc.EXPENDED_LW ||
+        '"", ""ManhoursEarnedLastWeek"" : ""' || wc.EARNED_LW  ||
+        '"", ""ProjectProgress"" : ""' || wc.PROJECTPROGRESS ||
         '""}}' as message
         from wo_cutoff wc
             join wo wo on wo.wo_id = wc.wo_id

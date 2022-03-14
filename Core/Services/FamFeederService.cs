@@ -94,6 +94,18 @@ public class FamFeederService : IFamFeederService
                 events = await _repo.GetWoChecklists(queryParameters.Plant);
                 fields = QueryMapping.WorkOrderChecklist;
                 break;
+            case PcsTopic.Swcr:
+                events = await _repo.GetSwcr(queryParameters.Plant);
+                fields = QueryMapping.Swcr;
+                break;
+            case PcsTopic.SwcrSignature:
+                events = await _repo.GetSwcrSignature(queryParameters.Plant);
+                fields = QueryMapping.SwcrSignature;
+                break;
+            case PcsTopic.PipingRevision:
+                events = await _repo.GetPipingRevision(queryParameters.Plant);
+                fields = QueryMapping.PipingRevision;
+                break;
             default:
             {
                 _logger.LogInformation("Default switch statement, returning");

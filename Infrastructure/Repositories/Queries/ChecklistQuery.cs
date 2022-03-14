@@ -15,6 +15,7 @@ internal class ChecklistQuery
         '"", ""FormularGroup"" : ""' || ft.formulargroup ||
         '"", ""FormularDiscipline"" : ""' || mccr_disc.code ||
         '"", ""Revision"" : ""' || pir.testrevisionno ||
+        '"", ""PipingRevisionMcPkNo"" : ""' || prm.mcpkgno ||
         '"", ""Responsible"" : ""' || r.code ||
         '"", ""Status"" : ""' || status.code ||
         '"", ""UpdatedAt"" : ""' || TO_CHAR(tc.updatedat, 'YYYY-MM-DD hh:mm:ss') ||
@@ -29,6 +30,7 @@ internal class ChecklistQuery
             join formulartype ft on ft.formulartype_id = tft.formulartype_id
             join library mccr_disc on mccr_disc.library_id = ft.discipline_id
             left join pipingrevision pir on pir.pipingrevision_id = tft.pipingrevision_id
+            left join mcpkg prm on prm.mcpk_id = pir.mcpkg_id 
             join project p on p.project_id = t.project_id
             left join library reg on reg.library_id = t.register_id
             left join responsible r on r.responsible_id = tc.responsible_id

@@ -31,4 +31,5 @@ public interface IFamEventRepository
     Task<List<FamEvent>> GetQuery(string plant);
 
     Task<List<FamEvent>> GetQuerySignature(string plant);
+    Task<List<FamEvent>> GetPipingRevision(string plant);
 }

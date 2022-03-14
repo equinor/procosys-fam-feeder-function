@@ -83,6 +83,11 @@ public class FamEventRepository : IFamEventRepository
         return await ExecuteQuery(QuerySignature.GetQuery(plant));
     }
 
+    public async Task<List<FamEvent>> GetPipingRevision(string plant)
+    {
+        return await ExecuteQuery(PipingRevisionQuery.GetQuery(plant));
+    }
+
     public async Task<List<FamEvent>> GetWoCutoffs(string month, string plant, string? connectionString)
     {
         return await _workOrderCutoffRepository.GetWoCutoffs(month, plant, connectionString);
