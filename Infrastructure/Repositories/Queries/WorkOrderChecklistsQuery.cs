@@ -15,7 +15,7 @@ internal class WorkOrderChecklistsQuery
     '""}}'
     FROM wo_tagcheck wotc
         join element e on E.ELEMENT_ID = wotc.wo_ID
-        join wo ON wo.wo_id = wotc.wo_id
+        join wo on wo.wo_id = wotc.wo_id
         join Tagcheck tc on tc.tagcheck_id = wotc.tagcheck_id
         join projectschema ps ON ps.projectschema = wotc.projectschema
         join project p ON p.project_id = wo.project_id
