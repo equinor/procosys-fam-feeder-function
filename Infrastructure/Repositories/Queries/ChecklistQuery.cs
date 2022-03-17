@@ -9,6 +9,8 @@ internal class ChecklistQuery
         '"", ""PlantName"" : ""' || regexp_replace(ps.TITLE, '([""\])', '\\\1') ||
         '"", ""ProjectName"" : ""' || p.name ||
         '"", ""TagNo"" : ""' ||  regexp_replace(t.tagno, '([""\])', '\\\1') ||
+        '"", ""TagId"" : ""' ||  t.tag_id ||
+        '"", ""TagRegisterId"" : ""' ||  t.register_id |
         '"", ""ChecklistId"" : ""' || tc.tagcheck_id ||
         '"", ""TagCategory"" : ""' || reg.code ||
         '"", ""FormularType"" : ""' || ft.formulartype ||

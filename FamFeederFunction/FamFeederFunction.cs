@@ -53,7 +53,9 @@ public class FamFeederFunction
         var plant = context.GetInput<string>();
         var results = new List<string>();
   
-            var topics = new List<PcsTopic> { PcsTopic.CommPkg, PcsTopic.McPkg,PcsTopic.Tag,PcsTopic.Milestone,PcsTopic.Checklist,PcsTopic.WorkOrder,PcsTopic.WoChecklist};
+            var topics = new List<PcsTopic> { PcsTopic.CommPkg, PcsTopic.McPkg,PcsTopic.Tag,PcsTopic.Milestone,
+                PcsTopic.Checklist,PcsTopic.WorkOrder,PcsTopic.WoChecklist, PcsTopic.PipingRevision, PcsTopic.SWCR, 
+                PcsTopic.SWCRSignature};
             foreach (var topic in topics)
             {
                 results.Add(await context.CallActivityAsync<string>("RunFeeder",new QueryParameters(plant,topic)));

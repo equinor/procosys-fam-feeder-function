@@ -11,7 +11,9 @@ internal class PunchListItemQuery
        '"", ""LastUpdated"" : ""' || TO_CHAR(pl.LAST_UPDATED, 'YYYY-MM-DD hh:mm:ss') ||                                                 
        '"", ""PunchItemNo"" : ""' || pl.PunchListItem_Id || 
        '"", ""Description"" : ""' || regexp_replace(pl.Description, '([""\])', '\\\1') || 
-       '"", ""TagNo"" : ""' || regexp_replace(t.TagNo, '([""\])', '\\\1') || 
+       '"", ""TagNo"" : ""' || regexp_replace(t.TagNo, '([""\])', '\\\1') ||
+       '"", ""TagId"" : ""' || t.tag_id ||
+       '"", ""TagRegisterId"" : ""' || t.register_id ||
        '"", ""ResponsibleCode"" : ""' || regexp_replace(r.Code, '([""\])', '\\\1')  ||                    
        '"", ""ResponsibleDescription"" : ""' || regexp_replace(r.Description, '([""\])', '\\\1')  ||                                 
        '"", ""FormType"" : ""' || regexp_replace(ft.FormularType, '([""\])', '\\\1') ||  

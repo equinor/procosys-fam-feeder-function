@@ -7,10 +7,13 @@ internal class WorkOrderChecklistsQuery
         return @$"select
     '{{""Plant"" : ""' || wotc.projectschema ||
     '"", ""ProjectName"" : ""' || p.NAME ||
-    '"", ""WoNo"" : ""' || wo.WONO ||
-    '"", ""TagNo"" : ""' || t.TAGNO ||
+    '"", ""WoNo"" : ""' || wo.wono ||
+    '"", ""TagNo"" : ""' || regexp_replace(t.tagno, '([""\])', '\\\1') ||
+    '"", ""TagId"" : ""' || t.TAG_ID ||
+    '"", ""TagRegisterId"" : ""' || t.register_id ||
     '"", ""FormularType"" : ""' || ft.formulartype ||
     '"", ""FormularGroup"" : ""' || ft.formulargroup ||
+    '"", ""Revision"" : ""' || pir.testrevisionno ||
     '"", ""Responsible"" : ""' || r.CODE ||
     '""}}'
     FROM wo_tagcheck wotc
@@ -23,6 +26,7 @@ internal class WorkOrderChecklistsQuery
         join tag t ON t.tag_id = tft.tag_id
         join formulartype ft ON ft.formulartype_id = tft.formulartype_id
         join responsible r on r.responsible_id = tc.Responsible_id
+        left join pipingrevision pir on pir.pipingrevision_id = tft.pipingrevision_id
     WHERE wotc.projectschema = '{schema}'";
     }
 }
