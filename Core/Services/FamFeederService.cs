@@ -106,6 +106,18 @@ public class FamFeederService : IFamFeederService
                 events = await _repo.GetPipingRevision(queryParameters.Plant);
                 fields = QueryMapping.PipingRevision;
                 break;
+            case PcsTopic.WoMaterial:
+                events = await _repo.GetWoMaterials(queryParameters.Plant);
+                fields = QueryMapping.WoMaterial;
+                break;
+            case PcsTopic.Stock:
+                events = await _repo.GetStock(queryParameters.Plant);
+                fields = QueryMapping.WoMaterial;
+                break;
+            case PcsTopic.WoMilestone:
+                events = await _repo.GetWoMilestones(queryParameters.Plant);
+                fields = QueryMapping.WoMaterial;
+                break;
             default:
             {
                 _logger.LogInformation("Default switch statement, returning");

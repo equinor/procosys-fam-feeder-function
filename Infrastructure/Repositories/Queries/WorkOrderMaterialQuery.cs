@@ -17,7 +17,9 @@ public class WorkOrderMaterialQuery
          '"", ""TagRegisterId"" : ""' || t.register_id ||
          '"", ""StockId"" : ""' || wm.stock_id ||
          '"", ""Quantity"" : ""' || wm.quantity ||
-         '"", ""AdditionalInformation"" : ""' ||regexp_replace(wm.description, '([""\])', '\\\1') ||
+         '"", ""UnitName"" : ""' || regexp_replace(u.name, '([""\])', '\\\1') ||
+         '"", ""UnitDescription"" : ""' || regexp_replace(u.description, '([""\])', '\\\1') ||
+         '"", ""AdditionalInformation"" : ""' || regexp_replace(wm.description, '([""\])', '\\\1') ||
          '"", ""RequiredDate"" : ""' || TO_CHAR(wm.requireddate, 'YYYY-MM-DD hh:mm:ss') ||
          '"", ""EstimatedAvailableDate"" : ""' || TO_CHAR(wm.ESTIMATEDAVAILABLEDATE, 'YYYY-MM-DD hh:mm:ss') ||
          '"", ""Available"" : ""' || decode(wm,.AVAILABLE,'Y', 'true', 'N', 'false') ||
@@ -31,6 +33,7 @@ public class WorkOrderMaterialQuery
             left join tag t on t.tag_id = wm.tag_id
             left join library ms  on ms.library_id = wm.materialstatus_id
             left join library sl on sl.library_id = wm.stocklocation_id
+            left join unit u on u.unit_id = wm.unit_id 
          where wm.projectschema = '{schema}'";
     }
 }

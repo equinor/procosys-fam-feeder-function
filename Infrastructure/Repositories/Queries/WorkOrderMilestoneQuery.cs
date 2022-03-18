@@ -9,7 +9,7 @@ public class WorkOrderMilestoneQuery
          '"", ""ProjectName"" : ""' || p.NAME || 
          '"", ""WoNo"" : ""' || wo.wono ||
          '"", ""Code"" : ""' || milestone.code || 
-         '"", ""MileStoneDate"" : ""' || TO_CHAR(emd.milestonedate, 'YYYY-MM-DD hh:mm:ss') ||
+         '"", ""MilestoneDate"" : ""' || TO_CHAR(emd.milestonedate, 'YYYY-MM-DD hh:mm:ss') ||
          '"", ""SignedByAzureOid"" : ""' || p.azure_oid ||
          '"", ""LastUpdated"" : ""' || TO_CHAR(emd.last_updated, 'YYYY-MM-DD hh:mm:ss') ||        
          '""}}' as message

@@ -22,6 +22,9 @@ public static class QueryMapping
     public static (PcsTopic, string) WorkOrderChecklist { get; } = (PcsTopic.WoChecklist, "WoNo");
 
     public static (PcsTopic, string) PipingRevision { get; } = (PcsTopic.PipingRevision, "Revision");
+    public static (PcsTopic, string) WoMilestone { get; } = (PcsTopic.WoMilestone, "Code");
+    public static (PcsTopic, string) WoMaterial { get; } = (PcsTopic.WoMaterial, "WoNo");
+    public static (PcsTopic, string) Stock { get; } = (PcsTopic.Stock, "StockId");
 
     //public static (PcsTopic, string) Query { get; } =  ( PcsTopic.Query, "QueryId" );
     //public static (PcsTopic, string) QuerySignature { get; } = { "QuerySignature", "QueryNo" };
