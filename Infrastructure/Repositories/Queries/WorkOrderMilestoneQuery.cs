@@ -18,7 +18,7 @@ public class WorkOrderMilestoneQuery
             join project p on p.project_id = wo.project_id
             join library milestone on milestone.library_id = emd.milestone_id         
             left join person p on p.person_id = emd.signedby_id 
-         where w.projectschema = '{schema}'";
+         where emd.projectschema = '{schema}'";
     }
 
 }
