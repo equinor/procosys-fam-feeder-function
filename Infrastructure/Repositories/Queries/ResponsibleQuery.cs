@@ -7,7 +7,7 @@ public class ResponsibleQuery
     internal static string GetQuery(string schema)
     {
         return @$"select
-            '{{""Plant"" : ""' || p.projectschema || 
+            '{{""Plant"" : ""' || r.projectschema || 
             '"", ""ResponsibleId"" : ""' || r.responsible_id || 
             '"", ""Code"" : ""' || regexp_replace(r.code, '([""\])', '\\\1') ||
             '"", ""ResponsibleGroup"" : ""' || regexp_replace(r.responsiblegroup, '([""\])', '\\\1') ||
