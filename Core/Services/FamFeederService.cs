@@ -128,7 +128,7 @@ public class FamFeederService : IFamFeederService
         if (events.Count == 0 || string.IsNullOrEmpty(fields.Item2))
         {
             _logger.LogInformation("found no events, or field is null");
-            return "error";
+            return "found no events, or field is null";
         }
 
         _logger.LogInformation(
