@@ -26,6 +26,8 @@ internal class WorkOrderQuery
          '"", ""AreaCode"" : ""' || regexp_replace(area.CODE, '([""\])', '\\\1') ||
          '"", ""AreaDescription"" : ""' || regexp_replace(area.description, '([""\])', '\\\1') ||  
          '"", ""JobStatusCode"" : ""' || regexp_replace(jsc.CODE, '([""\])', '\\\1') ||
+         '"", ""MaterialComments"" : ""' || regexp_replace(w.MATERIALDESCRIPTION, '([""\])', '\\\1') ||
+         '"", ""ConstructionComments"" : ""' || regexp_replace(w.ASSISTANCEDESCRIPTION, '([""\])', '\\\1') ||
          '"", ""TypeOfWorkCode"" : ""' || regexp_replace(tow.CODE, '([""\])', '\\\1') || 
          '"", ""OnShoreOffShoreCode"" : ""' || regexp_replace(osos.CODE, '([""\])', '\\\1') || 
          '"", ""WoTypeCode"" : ""' || regexp_replace(woc.CODE, '([""\])', '\\\1') ||   

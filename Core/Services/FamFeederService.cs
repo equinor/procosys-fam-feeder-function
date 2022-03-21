@@ -112,11 +112,11 @@ public class FamFeederService : IFamFeederService
                 break;
             case PcsTopic.Stock:
                 events = await _repo.GetStock(queryParameters.Plant);
-                fields = QueryMapping.WoMaterial;
+                fields = QueryMapping.Stock;
                 break;
             case PcsTopic.WoMilestone:
                 events = await _repo.GetWoMilestones(queryParameters.Plant);
-                fields = QueryMapping.WoMaterial;
+                fields = QueryMapping.WoMilestone;
                 break;
             default:
             {
