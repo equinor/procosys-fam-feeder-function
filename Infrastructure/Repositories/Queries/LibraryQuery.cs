@@ -7,7 +7,7 @@ internal class LibraryQuery
         return @$"select
             '{{""Plant"" : ""' || l.projectschema ||
             '"", ""LibraryId"" : ""' || l.library_id ||
-            '"", ""ParentId"" : ""' || l.parent_id ||
+            '"", ""ParentId"" : ""' || regexp_replace(l.parent_id, '([""\])', '\\\1') ||
             '"", ""Code"" : ""' || regexp_replace(l.code, '([""\])', '\\\1') ||
             '"", ""Description"" : ""' || regexp_replace(l.description, '([""\])', '\\\1') ||
             '"", ""IsVoided"" : ""'  || decode(l.isVoided,'Y', 'true', 'N', 'false') ||
