@@ -118,6 +118,11 @@ public class FamEventRepository : IFamEventRepository
         return await _workOrderCutoffRepository.GetWoCutoffs(month, plant, connectionString);
     }
 
+    public async Task<List<FamEvent>> GetDocument(string plant)
+    {
+        return await ExecuteQuery(DocumentQuery.GetQuery(plant));
+    }
+
     internal async Task<List<FamEvent>> ExecuteQuery(string query)
     {
         await using var context = _context;
