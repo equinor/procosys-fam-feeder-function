@@ -25,14 +25,14 @@ internal class TagQuery
               '""IsVoided"" : ' || decode(e.IsVoided,'Y', 'true', 'N', 'false') || ',' ||
               '""Plant"" : ""' || t.projectschema || '"",' ||
               '""PlantName"" : ""' || regexp_replace(ps.TITLE, '([""\])', '\\\1') || '"",' ||    
-              '""LastUpdated"" : ""' || TO_CHAR(t.LAST_UPDATED, 'YYYY-MM-DD hh:mm:ss') || '"",' ||
+              '""LastUpdated"" : ""' || TO_CHAR(t.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:sss') || '"",' ||
               '""TagDetails"" : {{' || 
               (SELECT listagg('""'|| colName ||'"":""'|| regexp_replace(val, '([""\])', '\\\1') ||'""', ',')
                 WITHIN group (order by colName) as tagdetails  from (
                 SELECT 
                        f.columnname as colName,
                         COALESCE(regexp_replace(val.valuestring, '([""\])', '\\\1'),
-                                 TO_CHAR(VAL.VALUEDATE, 'YYYY-MM-DD hh:mm:ss'),
+                                 TO_CHAR(VAL.VALUEDATE, 'yyyy-mm-dd hh24:mi:sss'),
                                  TO_CHAR(VAL.VALUENUMBER),
                                  t2.TAGNO, 
                                  LIBVAL.CODE

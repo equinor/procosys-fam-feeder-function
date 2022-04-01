@@ -20,10 +20,10 @@ internal class ChecklistQuery
         '"", ""PipingRevisionMcPkNo"" : ""' || prm.mcpkgno ||
         '"", ""Responsible"" : ""' || r.code ||
         '"", ""Status"" : ""' || status.code ||
-        '"", ""UpdatedAt"" : ""' || TO_CHAR(tc.updatedat, 'YYYY-MM-DD hh:mm:ss') ||
-        '"", ""CreatedAt"" : ""' || TO_CHAR(tc.createdat, 'YYYY-MM-DD hh:mm:ss') ||
-        '"", ""SignedAt"" : ""' || TO_CHAR(tc.signedat, 'YYYY-MM-DD hh:mm:ss') ||
-        '"", ""VerifiedAt"" : ""' || TO_CHAR(tc.verifiedat, 'YYYY-MM-DD hh:mm:ss') ||
+        '"", ""UpdatedAt"" : ""' || TO_CHAR(tc.updatedat, 'yyyy-mm-dd hh24:mi:sss') ||
+        '"", ""CreatedAt"" : ""' || TO_CHAR(tc.createdat, 'yyyy-mm-dd hh24:mi:sss') ||
+        '"", ""SignedAt"" : ""' || TO_CHAR(tc.signedat, 'yyyy-mm-dd hh24:mi:sss') ||
+        '"", ""VerifiedAt"" : ""' || TO_CHAR(tc.verifiedat, 'yyyy-mm-dd hh24:mi:sss') ||
         '""}}' as message
         from tagcheck tc
             join projectschema ps on ps.projectschema = tc.projectschema

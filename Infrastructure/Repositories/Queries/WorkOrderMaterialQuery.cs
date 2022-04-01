@@ -20,12 +20,12 @@ public class WorkOrderMaterialQuery
          '"", ""UnitName"" : ""' || regexp_replace(u.name, '([""\])', '\\\1') ||
          '"", ""UnitDescription"" : ""' || regexp_replace(u.description, '([""\])', '\\\1') ||
          '"", ""AdditionalInformation"" : ""' || regexp_replace(wm.description, '([""\])', '\\\1') ||
-         '"", ""RequiredDate"" : ""' || TO_CHAR(wm.requireddate, 'YYYY-MM-DD hh:mm:ss') ||
-         '"", ""EstimatedAvailableDate"" : ""' || TO_CHAR(wm.ESTIMATEDAVAILABLEDATE, 'YYYY-MM-DD hh:mm:ss') ||
+         '"", ""RequiredDate"" : ""' || TO_CHAR(wm.requireddate, 'yyyy-mm-dd hh24:mi:sss') ||
+         '"", ""EstimatedAvailableDate"" : ""' || TO_CHAR(wm.ESTIMATEDAVAILABLEDATE, 'yyyy-mm-dd hh24:mi:sss') ||
          '"", ""Available"" : ""' || decode(wm.AVAILABLE,'Y', 'true', 'N', 'false') ||
          '"", ""MaterialStatus"" : ""' ||regexp_replace(ms.code, '([""\])', '\\\1') ||       
          '"", ""StockLocation"" : ""' || regexp_replace(sl.code, '([""\])', '\\\1') ||
-         '"", ""LastUpdated"" : ""' || TO_CHAR(wm.last_updated, 'YYYY-MM-DD hh:mm:ss') ||        
+         '"", ""LastUpdated"" : ""' || TO_CHAR(wm.last_updated, 'yyyy-mm-dd hh24:mi:sss') ||        
          '""}}' as message
          from wo_material wm
             join wo on wo.wo_id = wm.wo_id

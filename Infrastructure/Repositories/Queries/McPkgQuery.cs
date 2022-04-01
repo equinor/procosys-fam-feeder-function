@@ -19,9 +19,9 @@ public static class McPkgQuery
     '"", ""AreaDescription"" : ""' || regexp_replace(area.DESCRIPTION, '([""\])', '\\\1') ||
     '"", ""Discipline"" : ""' || regexp_replace(disipline.DESCRIPTION, '([""\])', '\\\1') ||
     '"", ""McStatus"" : ""' || mcstatus.CODE ||
-    '"", ""IsVoided"" : ""' || decode(e.isVoided,'Y', 'true', 'N', 'false') ||
-    '"", ""CreatedAt"" : ""' || TO_CHAR(e.CREATEDAT, 'YYYY-MM-DD hh:mm:ss') ||
-    '"", ""LastUpdated"" : ""' || TO_CHAR(m.LAST_UPDATED, 'YYYY-MM-DD hh:mm:ss') ||
+    '"", ""IsVoided"" :' || decode(e.isVoided,'Y', 'true', 'N', 'false') ||
+    ', ""CreatedAt"" : ""' || TO_CHAR(e.CREATEDAT, 'yyyy-mm-dd hh24:mi:sss') ||
+    '"", ""LastUpdated"" : ""' || TO_CHAR(m.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:sss') ||
     '""}}'  as message
     from mcpkg m
         join projectschema ps on ps.projectschema = m.projectschema

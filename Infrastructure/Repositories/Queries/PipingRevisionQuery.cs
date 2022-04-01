@@ -18,7 +18,7 @@ public static class PipingRevisionQuery
               '"", ""TestISORevision"" : ""' || pr.TEST_ISO_REVISIONNO ||
               '"", ""PurchaseOrderNo"" : ""' || po.packageno || 
               '"", ""CallOffNo"" : ""' || co.calloffno ||
-              '"", ""LastUpdated"" : ""' || TO_CHAR(pr.LAST_UPDATED, 'YYYY-MM-DD hh:mm:ss') || 
+              '"", ""LastUpdated"" : ""' || TO_CHAR(pr.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:sss') || 
               '""}}' as message
                 from pipingrevision pr              
                     join mcpkg m on m.mcpkg_id = pr.mcpkg_id

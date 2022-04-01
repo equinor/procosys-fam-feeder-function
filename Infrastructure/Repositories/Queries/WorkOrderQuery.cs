@@ -52,13 +52,13 @@ internal class WorkOrderQuery
                 FROM wo_estimate we
                 WHERE we.wo_id = w.wo_id)
                  ||
-         '"", ""PlannedStartAtDate"" : ""' || TO_CHAR(w.WOPLANNEDSTARTUPDATE, 'YYYY-MM-DD hh:mm:ss') ||
-         '"", ""ActualStartAtDate"" : ""' || TO_CHAR(w.WOACTUALSTARTUPDATE, 'YYYY-MM-DD hh:mm:ss') ||
-         '"", ""PlannedFinishedAtDate"" : ""' || TO_CHAR(w.WOPLANNEDCOMPLETIONDATE, 'YYYY-MM-DD hh:mm:ss') ||
-         '"", ""ActualFinishedAtDate"" : ""' ||  TO_CHAR(w.WOACTUALCOMPLETIONDATE, 'YYYY-MM-DD hh:mm:ss') ||
-         '"", ""CreatedAt"" : ""' || TO_CHAR(e.CREATEDAT, 'YYYY-MM-DD hh:mm:ss') ||
+         '"", ""PlannedStartAtDate"" : ""' || TO_CHAR(w.WOPLANNEDSTARTUPDATE, 'yyyy-mm-dd hh24:mi:sss') ||
+         '"", ""ActualStartAtDate"" : ""' || TO_CHAR(w.WOACTUALSTARTUPDATE, 'yyyy-mm-dd hh24:mi:sss') ||
+         '"", ""PlannedFinishedAtDate"" : ""' || TO_CHAR(w.WOPLANNEDCOMPLETIONDATE, 'yyyy-mm-dd hh24:mi:sss') ||
+         '"", ""ActualFinishedAtDate"" : ""' ||  TO_CHAR(w.WOACTUALCOMPLETIONDATE, 'yyyy-mm-dd hh24:mi:sss') ||
+         '"", ""CreatedAt"" : ""' || TO_CHAR(e.CREATEDAT, 'yyyy-mm-dd hh24:mi:sss') ||
          '"", ""IsVoided"" : ""' || decode(e.isVoided,'Y', 'true', 'N', 'false') ||
-         '"", ""LastUpdated"" : ""' || TO_CHAR(w.LAST_UPDATED, 'YYYY-MM-DD hh:mm:ss') ||        
+         '"", ""LastUpdated"" : ""' || TO_CHAR(w.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:sss') ||        
          '""}}' as message
          from WO w
             join projectschema ps on ps.projectschema = w.projectschema

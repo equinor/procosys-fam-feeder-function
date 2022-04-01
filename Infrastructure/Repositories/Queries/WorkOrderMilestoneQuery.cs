@@ -9,9 +9,9 @@ public class WorkOrderMilestoneQuery
          '"", ""ProjectName"" : ""' || p.NAME || 
          '"", ""WoNo"" : ""' || wo.wono ||
          '"", ""Code"" : ""' || milestone.code || 
-         '"", ""MilestoneDate"" : ""' || TO_CHAR(emd.milestonedate, 'YYYY-MM-DD hh:mm:ss') ||
+         '"", ""MilestoneDate"" : ""' || TO_CHAR(emd.milestonedate, 'yyyy-mm-dd hh24:mi:sss') ||
          '"", ""SignedByAzureOid"" : ""' || p.azure_oid ||
-         '"", ""LastUpdated"" : ""' || TO_CHAR(emd.last_updated, 'YYYY-MM-DD hh:mm:ss') ||        
+         '"", ""LastUpdated"" : ""' || TO_CHAR(emd.last_updated, 'yyyy-mm-dd hh24:mi:sss') ||        
          '""}}' as message
          from elementmilestonedate emd
             join wo on wo.wo_id = emd.element_id
