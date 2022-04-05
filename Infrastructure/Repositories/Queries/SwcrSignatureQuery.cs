@@ -15,8 +15,8 @@ internal class SwcrSignatureQuery
     '"", ""SignedByAzureOid"" : ""' || p.azure_oid ||
     '"", ""FunctionalRoleCode"" : ""' || regexp_replace(fr.code, '([""\])', '\\\1') ||
     '"", ""FunctionalRoleDescription"" : ""' ||regexp_replace(fr.description, '([""\])', '\\\1') ||
-    '"", ""SignedDate"" : ""' || TO_CHAR(sign.signedat, 'yyyy-mm-dd hh24:mi:sss') ||
-    '"", ""LastUpdated"" : ""' || TO_CHAR(sign.last_updated, 'yyyy-mm-dd hh24:mi:sss') ||
+    '"", ""SignedDate"" : ""' || TO_CHAR(sign.signedat, 'yyyy-mm-dd hh24:mi:ss') ||
+    '"", ""LastUpdated"" : ""' || TO_CHAR(sign.last_updated, 'yyyy-mm-dd hh24:mi:ss') ||
     '""}}' as message
     from swcrsignature  sign
         join  swcr s on  s.swcr_id = sign.swcr_id

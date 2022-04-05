@@ -21,11 +21,11 @@ internal class CommPkgQuery
          '"", ""CommissioningIdentifier"" : ""' || identifier.code ||
          '"", ""IsVoided"" : ' || decode(e.isVoided,'Y', 'true', 'N', 'false') || 
          ', ""Demolition"" : ' || decode(c.DEMOLITION,'Y', 'true', 'N', 'false') ||
-         ', ""CreatedAt"" : ""' || TO_CHAR(e.CREATEDAT, 'yyyy-mm-dd hh24:mi:sss') ||
+         ', ""CreatedAt"" : ""' || TO_CHAR(e.CREATEDAT, 'yyyy-mm-dd hh24:mi:ss') ||
          '"", ""Priority1"" : ""' || pri1.code  ||
          '"", ""Priority2"" : ""' || pri2.code  ||
          '"", ""Priority3"" : ""' || pri3.code  ||
-         '"", ""LastUpdated"" : ""' || TO_CHAR(c.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:sss') ||                                    
+         '"", ""LastUpdated"" : ""' || TO_CHAR(c.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:ss') ||                                    
          '""}}' as message
         from commpkg c
             join project p on p.project_id = c.project_id

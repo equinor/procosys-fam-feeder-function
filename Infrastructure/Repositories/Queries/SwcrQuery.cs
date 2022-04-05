@@ -19,10 +19,10 @@ internal class SwcrQuery
     '"", ""Contract"" : ""' || con.code ||
     '"", ""Supplier"" : ""' || sup.code ||
     '"", ""Node"" : ""' ||  regexp_replace(n.NODENO, '([""\])', '\\\1') ||
-    '"", ""CreatedAt"" : ""' || TO_CHAR(e.createdat, 'yyyy-mm-dd hh24:mi:sss')  ||
+    '"", ""CreatedAt"" : ""' || TO_CHAR(e.createdat, 'yyyy-mm-dd hh24:mi:ss')  ||
     '"", ""IsVoided"" : ""' || decode(e.IsVoided,'Y', 'true', 'N', 'false')  ||
-    '"", ""LastUpdated"" : ""' || TO_CHAR(sw.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:sss')  ||
-    '"", ""DueDate"" : ""' || TO_CHAR(sw.plannedfinishdate, 'yyyy-mm-dd hh24:mi:sss')  ||
+    '"", ""LastUpdated"" : ""' || TO_CHAR(sw.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:ss')  ||
+    '"", ""DueDate"" : ""' || TO_CHAR(sw.plannedfinishdate, 'yyyy-mm-dd hh24:mi:ss')  ||
     '"", ""EstimatedHours"" : ""' || sw.estimatedmhrs  ||
     '""}}' as message
     from swcr sw

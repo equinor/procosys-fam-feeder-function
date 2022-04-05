@@ -8,7 +8,7 @@ internal class PunchListItemQuery
        '{{""Plant"" : ""' || pl.projectschema || 
        '"", ""PlantName"" : ""' || regexp_replace(ps.title, '([""\])', '\\\1') ||                          
        '"", ""ProjectName"" : ""' || regexp_replace(p.Title, '([""\])', '\\\1') || 
-       '"", ""LastUpdated"" : ""' || TO_CHAR(pl.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:sss') ||                                                 
+       '"", ""LastUpdated"" : ""' || TO_CHAR(pl.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:ss') ||                                                 
        '"", ""PunchItemNo"" : ""' || pl.PunchListItem_Id || 
        '"", ""Description"" : ""' || regexp_replace(pl.Description, '([""\])', '\\\1') || 
        '"", ""TagNo"" : ""' || regexp_replace(t.TagNo, '([""\])', '\\\1') ||

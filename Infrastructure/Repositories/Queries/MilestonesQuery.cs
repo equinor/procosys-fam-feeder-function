@@ -11,8 +11,8 @@ internal class MilestonesQuery
             '"", ""CommPkgNo"" : ""' || c.COMMPKGNO ||
             '"", ""McPkgNo"" : ""' || m.MCPKGNO ||
             '"", ""Code"" : ""' || milestone.code || 
-            '"", ""ActualDate"" : ""' || TO_CHAR(e.actualdate, 'yyyy-mm-dd hh24:mi:sss') ||
-            '"", ""PlannedDate"" : ""' || TO_CHAR(e.planneddate, 'yyyy-mm-dd hh24:mi:sss') ||   
+            '"", ""ActualDate"" : ""' || TO_CHAR(e.actualdate, 'yyyy-mm-dd hh24:mi:ss') ||
+            '"", ""PlannedDate"" : ""' || TO_CHAR(e.planneddate, 'yyyy-mm-dd hh24:mi:ss') ||   
             '"", ""IsSent"" : ""' || decode(cert.issent,'Y', 'true', 'N', 'false') ||  
             '"", ""IsAccepted"" : ""' || decode(cert.isaccepted,'Y', 'true', 'N', 'false') ||
             '"", ""IsRejected"" : ""' || decode(cert.isrejected,'Y', 'true', 'N', 'false') || 
