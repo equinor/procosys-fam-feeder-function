@@ -202,7 +202,7 @@ public class FamFeederService : IFamFeederService
     {
         try
         {
-            //await _eventHubProducerService.SendDataAsync(messages);
+            await _eventHubProducerService.SendDataAsync(messages);
         }
         catch (FamConfigException e)
         {
