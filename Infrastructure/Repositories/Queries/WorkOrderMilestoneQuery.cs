@@ -7,7 +7,7 @@ public class WorkOrderMilestoneQuery
         return @$"select
          '{{""Plant"" : ""' || emd.projectschema || 
          '"", ""ProjectName"" : ""' || p.NAME || 
-         '"", ""WoNo"" : ""' || wo.wono ||
+         '"", ""WoNo"" : ""' || regexp_replace(w.wono, '([""\])', '\\\1') ||
          '"", ""Code"" : ""' || milestone.code || 
          '"", ""MilestoneDate"" : ""' || TO_CHAR(emd.milestonedate, 'yyyy-mm-dd hh24:mi:ss') ||
          '"", ""SignedByAzureOid"" : ""' || p.azure_oid ||
