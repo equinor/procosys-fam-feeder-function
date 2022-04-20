@@ -8,7 +8,7 @@ internal class WorkOrderQuery
          '{{""Plant"" : ""' || w.projectschema || 
          '"", ""PlantName"" : ""' || regexp_replace(ps.TITLE, '([""\])', '\\\1') ||          
          '"", ""ProjectName"" : ""' || p.NAME || 
-         '"", ""WoNo"" : ""' || w.WONO ||
+         '"", ""WoNo"" : ""' || regexp_replace(w.WONO, '([""\])', '\\\1') ||
          '"", ""WoId"" : ""' || w.WO_ID ||
          '"", ""CommPkgNo"" : ""' || c.COMMPKGNO || 
          '"", ""Title"" : ""' || regexp_replace(w.DESCRIPTIONSHORT, '([""\])', '\\\1') || 
