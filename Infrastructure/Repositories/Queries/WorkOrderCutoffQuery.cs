@@ -18,11 +18,11 @@ internal class WorkOrderCutoffQuery
         '"", ""HoldByCode"" : ""' ||  regexp_replace(hbc.CODE, '([""\])', '\\\1') ||
         '"", ""PlanActivityCode"" : ""' ||  regexp_replace(pa.CODE, '([""\])', '\\\1') ||
         '"", ""ResponsibleCode"" : ""' || regexp_replace(r.CODE, '([""\])', '\\\1')  ||                                    
-        '"", ""LastUpdated"" : ""' || TO_CHAR(wc.LAST_UPDATED, 'YYYY-MM-DD hh:mm:ss') ||
+        '"", ""LastUpdated"" : ""' || TO_CHAR(wc.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:ss') ||
         '"", ""CutoffWeek"" : ""' || wc.CUTOFFWEEK ||
-        '"", ""CutoffDate"" : ""' || TO_CHAR(wc.CUTOFFDATE, 'YYYY-MM-DD hh:mm:ss') ||
-        '"", ""PlannedStartAtDate"" : ""' || TO_CHAR(wc.WOPLANNEDSTARTUPDATE, 'YYYY-MM-DD hh:mm:ss')  ||
-        '"", ""PlannedFinishedAtDate"" : ""' || TO_CHAR(wc.WOPLANNEDCOMPLETIONDATE, 'YYYY-MM-DD hh:mm:ss')  ||
+        '"", ""CutoffDate"" : ""' || TO_CHAR(wc.CUTOFFDATE, 'yyyy-mm-dd hh24:mi:ss') ||
+        '"", ""PlannedStartAtDate"" : ""' || TO_CHAR(wc.WOPLANNEDSTARTUPDATE, 'yyyy-mm-dd hh24:mi:ss')  ||
+        '"", ""PlannedFinishedAtDate"" : ""' || TO_CHAR(wc.WOPLANNEDCOMPLETIONDATE, 'yyyy-mm-dd hh24:mi:ss')  ||
         '"", ""ExpendedManHours"" : ""' || wc.EXPENDED_MHRS ||
         '"", ""ManhoursEarned"" : ""' || wc.EARNED_MHRS  ||
         '"", ""EstimatedHours"" : ""' || wc.ESTIMATED_MHRS  ||

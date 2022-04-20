@@ -16,8 +16,8 @@ internal class QuerySignature
         ||'"", ""Sequence"": ""' || q.ranking
         ||'"", ""SignedByAzureOid"": ""' || p.azure_oid
         ||'"", ""FunctionalRoleDescription"": ""' ||regexp_replace(fr.description, '([""\])', '\\\1')
-        ||'"", ""SignedDate"": ""' || TO_CHAR(q.signedat, 'YYYY-MM-DD hh:mm:ss')
-        ||'"", ""LastUpdated"": ""' || TO_CHAR(q.last_updated, 'YYYY-MM-DD hh:mm:ss')
+        ||'"", ""SignedDate"": ""' || TO_CHAR(q.signedat, 'yyyy-mm-dd hh24:mi:ss')
+        ||'"", ""LastUpdated"": ""' || TO_CHAR(q.last_updated, 'yyyy-mm-dd hh24:mi:ss')
         ||'""}}'
     from querysignature q
         join document DO ON do.document_id = q.DOCUMENT_ID

@@ -13,7 +13,7 @@ internal class LibraryQuery
             '"", ""Description"" : ""' || regexp_replace(l.description, '([""\])', '\\\1') || 
             '"", ""IsVoided"" : ""'  || decode(l.isVoided,'Y', 'true', 'N', 'false') ||
             '"", ""Type"" : ""' || regexp_replace(l.librarytype, '([""\])', '\\\1') ||
-            '"", ""LastUpdated"" : ""' || TO_CHAR(l.LAST_UPDATED, 'YYYY-MM-DD hh:mm:ss') ||
+            '"", ""LastUpdated"" : ""' || TO_CHAR(l.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:ss') ||
             '""}}'  as message
             from library l
             where l.projectschema = '{schema}'";

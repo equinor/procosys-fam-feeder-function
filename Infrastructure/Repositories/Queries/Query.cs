@@ -29,9 +29,9 @@ internal class Query
         || '"", ""ScheduleImpact"" : ""'||  decode(q.SCHEDULEIMPACT,'Y', 'true', 'N', 'false')
         || '"", ""PossibleWarrentyClaim"" : ""'||  decode(q.POSSIBLEWARRENTYCLAIM,'Y', 'true', 'N', 'false')
         || '"", ""IsVoided"" : ""' || decode(e.IsVoided,'Y', 'true', 'N', 'false')
-        || '"", ""RequiredDate"" : ""'||  TO_CHAR(q.REQUIREDREPLYDATE, 'YYYY-MM-DD hh:mm:ss')
-        || '"", ""CreatedAt"" :""'||  TO_CHAR(e.CREATEDAT, 'YYYY-MM-DD hh:mm:ss')
-        || '"", ""LastUpdated"" : ""'|| TO_CHAR(q.last_updated, 'YYYY-MM-DD hh:mm:ss')
+        || '"", ""RequiredDate"" : ""'||  TO_CHAR(q.REQUIREDREPLYDATE, 'yyyy-mm-dd hh24:mi:ss')
+        || '"", ""CreatedAt"" :""'||  TO_CHAR(e.CREATEDAT, 'yyyy-mm-dd hh24:mi:ss')
+        || '"", ""LastUpdated"" : ""'|| TO_CHAR(q.last_updated, 'yyyy-mm-dd hh24:mi:ss')
         || '""}}'  as message
         from query q
             join document DO ON do.DOCUMENT_ID = q.DOCUMENT_ID
