@@ -8,7 +8,7 @@ internal class WorkOrderQuery
          '{{""Plant"" : ""' || w.projectschema || 
          '"", ""PlantName"" : ""' || regexp_replace(ps.TITLE, '([""\])', '\\\1') ||          
          '"", ""ProjectName"" : ""' || p.NAME || 
-         '"", ""WoNo"" : ""' || w.WONO ||
+         '"", ""WoNo"" : ""' || regexp_replace(w.wono, '([""\])', '\\\1') ||
          '"", ""WoId"" : ""' || w.WO_ID ||
          '"", ""CommPkgNo"" : ""' || c.COMMPKGNO || 
          '"", ""Title"" : ""' || regexp_replace(w.DESCRIPTIONSHORT, '([""\])', '\\\1') || 
@@ -57,8 +57,8 @@ internal class WorkOrderQuery
          '"", ""PlannedFinishedAtDate"" : ""' || TO_CHAR(w.WOPLANNEDCOMPLETIONDATE, 'yyyy-mm-dd hh24:mi:ss') ||
          '"", ""ActualFinishedAtDate"" : ""' ||  TO_CHAR(w.WOACTUALCOMPLETIONDATE, 'yyyy-mm-dd hh24:mi:ss') ||
          '"", ""CreatedAt"" : ""' || TO_CHAR(e.CREATEDAT, 'yyyy-mm-dd hh24:mi:ss') ||
-         '"", ""IsVoided"" : ""' || decode(e.isVoided,'Y', 'true', 'N', 'false') ||
-         '"", ""LastUpdated"" : ""' || TO_CHAR(w.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:ss') ||        
+         '"", ""IsVoided"" : ' || decode(e.isVoided,'Y', 'true', 'N', 'false') ||
+         ', ""LastUpdated"" : ""' || TO_CHAR(w.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:ss') ||        
          '""}}' as message
          from WO w
             join projectschema ps on ps.projectschema = w.projectschema

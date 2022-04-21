@@ -7,7 +7,7 @@ internal class WorkOrderChecklistsQuery
         return @$"select
     '{{""Plant"" : ""' || wotc.projectschema ||
     '"", ""ProjectName"" : ""' || p.NAME ||
-    '"", ""WoNo"" : ""' || wo.wono ||
+    '"", ""WoNo"" : ""' || regexp_replace(w.wono, '([""\])', '\\\1') ||
     '"", ""ChecklistId"" : ""' || wotc.tagcheck_id ||
     '""}}'
     FROM wo_tagcheck wotc

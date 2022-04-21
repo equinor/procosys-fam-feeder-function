@@ -9,7 +9,7 @@ public class WorkOrderMaterialQuery
         return @$"select
          '{{""Plant"" : ""' || wm.projectschema || 
          '"", ""ProjectName"" : ""' || p.NAME || 
-         '"", ""WoNo"" : ""' || wo.wono ||
+         '"", ""WoNo"" : ""' || regexp_replace(w.wono, '([""\])', '\\\1') ||
          '"", ""WoId"" : ""' || wo.wo_id ||
          '"", ""ItemNo"" : ""' || wm.itemno || 
          '"", ""TagNo"" : ""' || regexp_replace(t.tagno, '([""\])', '\\\1') ||
