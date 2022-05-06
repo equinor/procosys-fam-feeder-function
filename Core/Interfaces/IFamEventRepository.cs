@@ -32,11 +32,17 @@ public interface IFamEventRepository
     Task<List<FamEvent>> GetQuery(string plant);
 
     Task<List<FamEvent>> GetQuerySignature(string plant);
+
     Task<List<FamEvent>> GetPipingRevision(string plant);
-    Task<List<FamEvent>> GetPipingSpool(string plant);
     Task<List<FamEvent>> GetWoMilestones(string plant);
+
     Task<List<FamEvent>> GetWoMaterials(string plant);
+
     Task<List<FamEvent>> GetStock(string plant);
+
     Task<List<FamEvent>> GetResponsible(string plant);
+
     Task<List<FamEvent>> GetLibrary(string plant);
+
+    Task<List<FamEvent>> GetDocument(string plant);
 }
