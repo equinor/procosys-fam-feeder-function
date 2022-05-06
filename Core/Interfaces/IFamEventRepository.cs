@@ -9,6 +9,7 @@ public interface IFamEventRepository
     Task<List<FamEvent>> GetMcPackages(string plant);
 
     Task<List<FamEvent>> GetCommPackages(string plant);
+    Task<List<FamEvent>> GetCommPkgOperations(string plant);
 
     Task<List<FamEvent>> GetPunchItems(string plant);
 
@@ -32,6 +33,7 @@ public interface IFamEventRepository
 
     Task<List<FamEvent>> GetQuerySignature(string plant);
     Task<List<FamEvent>> GetPipingRevision(string plant);
+    Task<List<FamEvent>> GetPipingSpool(string plant);
     Task<List<FamEvent>> GetWoMilestones(string plant);
     Task<List<FamEvent>> GetWoMaterials(string plant);
     Task<List<FamEvent>> GetStock(string plant);

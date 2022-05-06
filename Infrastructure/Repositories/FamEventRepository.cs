@@ -28,6 +28,11 @@ public class FamEventRepository : IFamEventRepository
         return await ExecuteQuery(CommPkgQuery.GetQuery(plant));
     }
 
+    public async Task<List<FamEvent>> GetCommPkgOperations(string plant)
+    {
+        return await ExecuteQuery(CommPkgOperationQuery.GetQuery(plant));
+    }
+
     public async Task<List<FamEvent>> GetPunchItems(string plant)
     {
         return await ExecuteQuery(PunchListItemQuery.GetQuery(plant));
@@ -86,6 +91,11 @@ public class FamEventRepository : IFamEventRepository
     public async Task<List<FamEvent>> GetPipingRevision(string plant)
     {
         return await ExecuteQuery(PipingRevisionQuery.GetQuery(plant));
+    }
+
+    public async Task<List<FamEvent>> GetPipingSpool(string plant)
+    {
+        return await ExecuteQuery(PipingSpoolQuery.GetQuery(plant));
     }
 
     public async Task<List<FamEvent>> GetWoMilestones(string plant)

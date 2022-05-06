@@ -95,6 +95,9 @@ public class FamFeederService : IFamFeederService
             case PcsTopic.PipingRevision:
                 events = await _repo.GetPipingRevision(queryParameters.Plant);
                 break;
+            case PcsTopic.PipingSpool:
+                events = await _repo.GetPipingSpool(queryParameters.Plant);
+                break;
             case PcsTopic.WoMaterial:
                 events = await _repo.GetWoMaterials(queryParameters.Plant);
                 break;
@@ -104,6 +107,10 @@ public class FamFeederService : IFamFeederService
             case PcsTopic.WoMilestone:
                 events = await _repo.GetWoMilestones(queryParameters.Plant);
                 break;
+            case PcsTopic.CommPkgOperation:
+                events = await _repo.GetCommPkgOperations(queryParameters.Plant):
+                break;
+                
             default:
             {
                 _logger.LogInformation("Default switch statement, returning");
@@ -171,7 +178,7 @@ public class FamFeederService : IFamFeederService
         foreach (var batch in mappedMessages.Batch(250)) await SendFamMessages(batch);
 
         logger.LogDebug("Sent WoCutoff to FAM");
-        return $"Sendt {mappedMessages.Count} WoCutoff to FAM  for {month} done";
+        return $"Sent {mappedMessages.Count} WoCutoff to FAM  for {month} done";
 
     }
 
