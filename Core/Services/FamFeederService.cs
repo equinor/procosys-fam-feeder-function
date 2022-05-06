@@ -127,7 +127,7 @@ public class FamFeederService : IFamFeederService
                 events = await _repo.GetWoMilestones(queryParameters.Plant);
                 break;
             case PcsTopic.CommPkgOperation:
-                events = await _repo.GetCommPkgOperations(queryParameters.Plant):
+                events = await _repo.GetCommPkgOperations(queryParameters.Plant);
                 break;
 
             case PcsTopic.Document:
