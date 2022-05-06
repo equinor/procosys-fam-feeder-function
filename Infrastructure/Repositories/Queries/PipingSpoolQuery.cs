@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Infrastructure.Repositories.Queries;
+﻿namespace Infrastructure.Repositories.Queries;
 
 public class PipingSpoolQuery
 {
@@ -13,13 +7,14 @@ public class PipingSpoolQuery
         return @$"select
             '{{""Plant"" : ""' || ps.projectschema || '"",
             ""Project"" : ""' ||  regexp_replace(p.name, '([""\])', '\\\1') || '"",
+            ""PipingSpoolId"" : ""' || ps.pipingspoolid || '"",
             ""PipingRevisionId"" : ""' || ps.pipingrevision_id || '"",
             ""Revision"" : ""' || pr.testrevisionno || '"",
             ""McPkgNo"" : ""' || regexp_replace(m.mcpkgno, '([""\])', '\\\1') || '"",
-            ""ISODrawing"" : ""' || regexp_replace(iso.documentno, '([""\])', '\\\1') ||  '"",
+            ""ISODrawing"" : ""' || regexp_replace(iso.documentno, '([""\])', '\\\1') || '"",
             ""Spool"" : ""' || regexp_replace(ps.spool, '([""\])', '\\\1') || '"",
             ""LineNo"" : ""' || regexp_replace(t.tagno, '([""\])', '\\\1') || '"",
-            ""N2Hetest"" : ""' || ps.n2_he_test || '"",
+            ""N2HeTest"" : ""' || ps.n2_he_test || '"",
             ""AlternativeTest"" : ""' || ps.Alternativetest || '"",
             ""AlternativeTestNoOfWelds"" : ""' || ps.NOOFWELDSAT || '"",
             ""Installed"" : ' || decode(ps.installed,'Y', 'true', 'false') || ',

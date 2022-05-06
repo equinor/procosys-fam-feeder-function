@@ -36,110 +36,13 @@ public class FamFeederService : IFamFeederService
     public async Task<string> RunFeeder(QueryParameters queryParameters, ILogger logger)
     {
         _logger = logger;
-        var mapper = CreateCommonLibMapper();
+        
         if (queryParameters.PcsTopic == PcsTopic.WorkOrderCutoff)
         {
             return "Cutoff Should have its own call";
         }
 
-        var events = new List<FamEvent>();
-        switch (queryParameters.PcsTopic)
-        {
-            case PcsTopic.CommPkg:
-                events = await _repo.GetCommPackages(queryParameters.Plant);
-                break;
-
-            case PcsTopic.Ipo:
-                break;
-
-            case PcsTopic.McPkg:
-                events = await _repo.GetMcPackages(queryParameters.Plant);
-                break;
-
-            case PcsTopic.Project:
-                events = await _repo.GetProjects(queryParameters.Plant);
-                break;
-
-            case PcsTopic.Responsible:
-                events = await _repo.GetResponsible(queryParameters.Plant);
-                break;
-
-            case PcsTopic.Tag:
-                events = await _repo.GetTags(queryParameters.Plant);
-                break;
-
-            case PcsTopic.TagFunction:
-                break;
-
-            case PcsTopic.PunchListItem:
-                events = await _repo.GetPunchItems(queryParameters.Plant);
-                break;
-
-            case PcsTopic.Library:
-                events = await _repo.GetLibrary(queryParameters.Plant);
-                break;
-
-            case PcsTopic.WorkOrder:
-                events = await _repo.GetWorkOrders(queryParameters.Plant);
-                break;
-
-            case PcsTopic.Checklist:
-                events = await _repo.GetCheckLists(queryParameters.Plant);
-                break;
-
-            case PcsTopic.Milestone:
-                events = await _repo.GetMilestones(queryParameters.Plant);
-                break;
-
-            case PcsTopic.WorkOrderCutoff:
-                break;
-
-            case PcsTopic.Certificate:
-                break;
-
-            case PcsTopic.WoChecklist:
-                events = await _repo.GetWoChecklists(queryParameters.Plant);
-                break;
-
-            case PcsTopic.SWCR:
-                events = await _repo.GetSwcr(queryParameters.Plant);
-                break;
-
-            case PcsTopic.SWCRSignature:
-                events = await _repo.GetSwcrSignature(queryParameters.Plant);
-                break;
-
-            case PcsTopic.PipingRevision:
-                events = await _repo.GetPipingRevision(queryParameters.Plant);
-                break;
-            case PcsTopic.PipingSpool:
-                events = await _repo.GetPipingSpool(queryParameters.Plant);
-                break;
-            case PcsTopic.WoMaterial:
-                events = await _repo.GetWoMaterials(queryParameters.Plant);
-                break;
-
-            case PcsTopic.Stock:
-                events = await _repo.GetStock(queryParameters.Plant);
-                break;
-
-            case PcsTopic.WoMilestone:
-                events = await _repo.GetWoMilestones(queryParameters.Plant);
-                break;
-            case PcsTopic.CommPkgOperation:
-                events = await _repo.GetCommPkgOperations(queryParameters.Plant);
-                break;
-
-            case PcsTopic.Document:
-                events = await _repo.GetDocument(queryParameters.Plant);
-                break;
-
-            default:
-                {
-                    _logger.LogInformation("Default switch statement, returning");
-                    return "default error";
-                }
-        }
+        var events = await GetFamEventsBasedOnTopicAndPlant(queryParameters);
 
         if (events.Count == 0)
         {
@@ -148,22 +51,23 @@ public class FamFeederService : IFamFeederService
         }
 
         _logger.LogInformation(
-            $"Found {events.Count} events for topic {queryParameters.PcsTopic} and plant {queryParameters.Plant}");
+            "Found {events} events for topic {topic} and plant {plant}",events.Count,queryParameters.PcsTopic,queryParameters.Plant);
 
         var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e.Message!, queryParameters.PcsTopic));
+        var mapper = CreateCommonLibMapper();
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
 
-        foreach (var batch in mappedMessages.Batch(250)) await SendFamMessages(batch);
+        foreach (var batch in mappedMessages.Batch(250))
+        {
+            await SendFamMessages(batch);
+        }
 
-        _logger.LogInformation($"Finished sending {queryParameters.PcsTopic} to fam");
+        _logger.LogInformation("Finished sending {topic} to fam",queryParameters.PcsTopic);
 
         return $"finished successfully sending {mappedMessages.Count} messages to fam for {queryParameters.PcsTopic}";
     }
 
-    public Task<List<string>> GetAllPlants()
-    {
-        return _plantRepository.GetAllPlants();
-    }
+    public Task<List<string>> GetAllPlants() => _plantRepository.GetAllPlants();
 
     private SchemaMapper CreateCommonLibMapper()
     {
@@ -191,7 +95,7 @@ public class FamFeederService : IFamFeederService
         var mapper = CreateCommonLibMapper();
         var connectionString = _famFeederOptions.ProCoSysConnectionString;
         var response = await _repo.GetWoCutoffs(month, plant, connectionString);
-        logger.LogInformation($"Found {response.Count} cutoffs for month {month} in {plant}");
+        logger.LogInformation("Found {count} cutoffs for month {month} in {plant}",response.Count,month,plant);
 
         var messages = response.SelectMany(e =>
             TieMapper.CreateTieMessage(e.Message!, PcsTopic.WorkOrderCutoff));
@@ -218,5 +122,86 @@ public class FamFeederService : IFamFeederService
         {
             throw new Exception("Error: Could not send message.", e);
         }
+    }
+    private async Task<List<FamEvent>> GetFamEventsBasedOnTopicAndPlant(QueryParameters queryParameters)
+    {
+        var events = new List<FamEvent>();
+        switch (queryParameters.PcsTopic)
+        {
+            case PcsTopic.CommPkg:
+                events = await _repo.GetCommPackages(queryParameters.Plant);
+                break;
+            case PcsTopic.Ipo:
+                break;
+            case PcsTopic.McPkg:
+                events = await _repo.GetMcPackages(queryParameters.Plant);
+                break;
+            case PcsTopic.Project:
+                events = await _repo.GetProjects(queryParameters.Plant);
+                break;
+            case PcsTopic.Responsible:
+                events = await _repo.GetResponsible(queryParameters.Plant);
+                break;
+            case PcsTopic.Tag:
+                events = await _repo.GetTags(queryParameters.Plant);
+                break;
+            case PcsTopic.TagFunction:
+                break;
+            case PcsTopic.PunchListItem:
+                events = await _repo.GetPunchItems(queryParameters.Plant);
+                break;
+            case PcsTopic.Library:
+                events = await _repo.GetLibrary(queryParameters.Plant);
+                break;
+            case PcsTopic.WorkOrder:
+                events = await _repo.GetWorkOrders(queryParameters.Plant);
+                break;
+            case PcsTopic.Checklist:
+                events = await _repo.GetCheckLists(queryParameters.Plant);
+                break;
+            case PcsTopic.Milestone:
+                events = await _repo.GetMilestones(queryParameters.Plant);
+                break;
+            case PcsTopic.WorkOrderCutoff:
+                break;
+            case PcsTopic.Certificate:
+                break;
+            case PcsTopic.WoChecklist:
+                events = await _repo.GetWoChecklists(queryParameters.Plant);
+                break;
+            case PcsTopic.SWCR:
+                events = await _repo.GetSwcr(queryParameters.Plant);
+                break;
+            case PcsTopic.SWCRSignature:
+                events = await _repo.GetSwcrSignature(queryParameters.Plant);
+                break;
+            case PcsTopic.PipingRevision:
+                events = await _repo.GetPipingRevision(queryParameters.Plant);
+                break;
+            case PcsTopic.PipingSpool:
+                events = await _repo.GetPipingSpool(queryParameters.Plant);
+                break;
+            case PcsTopic.WoMaterial:
+                events = await _repo.GetWoMaterials(queryParameters.Plant);
+                break;
+            case PcsTopic.Stock:
+                events = await _repo.GetStock(queryParameters.Plant);
+                break;
+            case PcsTopic.WoMilestone:
+                events = await _repo.GetWoMilestones(queryParameters.Plant);
+                break;
+            case PcsTopic.CommPkgOperation:
+                events = await _repo.GetCommPkgOperations(queryParameters.Plant);
+                break;
+            case PcsTopic.Document:
+                events = await _repo.GetDocument(queryParameters.Plant);
+                break;
+            default:
+            {
+                _logger.LogInformation("{topic} not included in switch statement",queryParameters.PcsTopic);
+                break;
+            }
+        }
+        return events;
     }
 }
