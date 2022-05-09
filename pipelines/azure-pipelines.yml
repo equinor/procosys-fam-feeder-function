@@ -86,30 +86,6 @@ stages:
        repository: ${{ variables.repositoryName }}
        dockerRegistryServiceConnection: $(dockerRegistryServiceConnectionName)
 
- - stage: dev
-   displayName: 'dev'
-   dependsOn: 'common'
-   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/dev'))
-   variables:
-    envName: 'dev'
-    serviceConnection: '${{ variables.nonProdServiceConnection }}'
-    envGroupName: '$(globalPrefix)-$(fullAppName)-${{ variables.envName }}'
-    envRg: 'pcs-fam-non-prod-rg'
-
-   jobs:
-   - template: /src/resources/fam/jobs/deploy-function.yml@templates
-     parameters:
-      dependsOn: ''
-      deploymentName: 'publish'
-      serviceConnection: ${{ variables.serviceConnection }}
-      functionApp: '$(globalPrefix)-$(fullAppName)-dev-func'
-      envGroup: '${{ variables.envGroupName }}'
-      rgName: '${{ variables.envRg }}'
-      env: '${{ variables.envName }}'
-      repository: ${{ variables.repositoryName }}
-      containerRegistry: '${{ variables.containerRegistry }}'
-      keyVaultUrl: 'pcs-fam-non-prod-kv'
-
  - stage: test
    displayName: 'test'
    dependsOn: 'common'
