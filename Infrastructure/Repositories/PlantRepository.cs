@@ -8,10 +8,7 @@ public class PlantRepository : IPlantRepository
 {
     private readonly AppDbContext _context;
 
-    public PlantRepository(AppDbContext context)
-    {
-        _context = context;
-    }
+    public PlantRepository(AppDbContext context) => _context = context;
 
     public async Task<List<string>> GetAllPlants()
     {
@@ -22,7 +19,10 @@ public class PlantRepository : IPlantRepository
         await using var result = await command.ExecuteReaderAsync();
         var plants = new List<string>();
 
-        while (await result.ReadAsync()) plants.Add((string)result[0]);
+        while (await result.ReadAsync())
+        {
+            plants.Add((string)result[0]);
+        }
 
         return plants;
     }

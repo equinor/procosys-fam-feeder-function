@@ -11,16 +11,14 @@ public static class ServiceCollectionSetup
     private const int MaxOpenCursors = 200;
 
     public static readonly LoggerFactory LoggerFactory =
-        new(new[]
-        {
-            new DebugLoggerProvider()
-        });
+        new(new[] { new DebugLoggerProvider() });
 
     public static IServiceCollection AddDbContext(this IServiceCollection services, string connectionString)
     {
         return services.AddDbContext<AppDbContext>(options =>
         {
-            options.UseOracle(connectionString, b => b.MaxBatchSize(MaxOpenCursors));
+            options.UseOracle(connectionString, 
+                b => b.MaxBatchSize(MaxOpenCursors));
             options.UseLoggerFactory(LoggerFactory);
             options.EnableSensitiveDataLogging();
         });

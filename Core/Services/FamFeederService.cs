@@ -36,12 +36,93 @@ public class FamFeederService : IFamFeederService
     public async Task<string> RunFeeder(QueryParameters queryParameters, ILogger logger)
     {
         _logger = logger;
-        var mapper = CreateCommonLibMapper();
+        
         if (queryParameters.PcsTopic == PcsTopic.WorkOrderCutoff)
         {
             return "Cutoff Should have its own call";
         }
 
+        var events = await GetFamEventsBasedOnTopicAndPlant(queryParameters);
+
+        if (events.Count == 0)
+        {
+            _logger.LogInformation("found no events, or field is null");
+            return "found no events, or field is null";
+        }
+
+        _logger.LogInformation(
+            "Found {events} events for topic {topic} and plant {plant}",events.Count,queryParameters.PcsTopic,queryParameters.Plant);
+
+        var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e.Message!, queryParameters.PcsTopic));
+        var mapper = CreateCommonLibMapper();
+        var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
+
+        foreach (var batch in mappedMessages.Batch(250))
+        {
+            await SendFamMessages(batch);
+        }
+
+        _logger.LogInformation("Finished sending {topic} to fam",queryParameters.PcsTopic);
+
+        return $"finished successfully sending {mappedMessages.Count} messages to fam for {queryParameters.PcsTopic}";
+    }
+
+    public Task<List<string>> GetAllPlants() => _plantRepository.GetAllPlants();
+
+    private SchemaMapper CreateCommonLibMapper()
+    { ISchemaSource source = new ApiSource(new ApiSourceOptions
+        {
+            TokenProviderConnectionString = "RunAs=App;" +
+                                            $"AppId={_commonLibConfig.ClientId};" +
+                                            $"TenantId={_commonLibConfig.TenantId};" +
+                                            $"AppKey={_commonLibConfig.ClientSecret}"
+        });
+
+        // Add caching functionality
+        source = new CacheWrapper(
+            source,
+            maxCacheAge: TimeSpan.FromDays(1), // Use TimeSpan.Zero for no recache based on age
+            checkForChangesFrequency: TimeSpan
+                .FromHours(1)); // Use TimeSpan.Zero when cache should never check for changes.
+
+        var mapper = new SchemaMapper("ProCoSys_Events", "FAM", source);
+        return mapper;
+    }
+
+    public async Task<string> WoCutoff(string plant, string month, ILogger logger)
+    {
+        var mapper = CreateCommonLibMapper();
+        var connectionString = _famFeederOptions.ProCoSysConnectionString;
+        var response = await _repo.GetWoCutoffs(month, plant, connectionString);
+        logger.LogInformation("Found {count} cutoffs for month {month} in {plant}",response.Count,month,plant);
+
+        var messages = response.SelectMany(e =>
+            TieMapper.CreateTieMessage(e.Message!, PcsTopic.WorkOrderCutoff));
+        var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
+
+        foreach (var batch in mappedMessages.Batch(250)) await SendFamMessages(batch);
+
+        logger.LogDebug("Sent WoCutoff to FAM");
+        return $"Sent {mappedMessages.Count} WoCutoff to FAM  for {month} done";
+    }
+
+    private async Task SendFamMessages(IEnumerable<Message> messages)
+    {
+        try
+        {
+            await _eventHubProducerService.SendDataAsync(messages);
+        }
+        catch (FamConfigException e)
+        {
+            throw new Exception("Configuration error: Could not send message.", e);
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Error: Could not send message.", e);
+        }
+    }
+    private async Task<List<FamEvent>> GetFamEventsBasedOnTopicAndPlant(QueryParameters queryParameters)
+    {
         var events = new List<FamEvent>();
         switch (queryParameters.PcsTopic)
         {
@@ -95,6 +176,9 @@ public class FamFeederService : IFamFeederService
             case PcsTopic.PipingRevision:
                 events = await _repo.GetPipingRevision(queryParameters.Plant);
                 break;
+            case PcsTopic.PipingSpool:
+                events = await _repo.GetPipingSpool(queryParameters.Plant);
+                break;
             case PcsTopic.WoMaterial:
                 events = await _repo.GetWoMaterials(queryParameters.Plant);
                 break;
@@ -104,90 +188,18 @@ public class FamFeederService : IFamFeederService
             case PcsTopic.WoMilestone:
                 events = await _repo.GetWoMilestones(queryParameters.Plant);
                 break;
+            case PcsTopic.CommPkgOperation:
+                events = await _repo.GetCommPkgOperations(queryParameters.Plant);
+                break;
+            case PcsTopic.Document:
+                events = await _repo.GetDocument(queryParameters.Plant);
+                break;
             default:
             {
-                _logger.LogInformation("Default switch statement, returning");
-                return "default error";
+                _logger.LogInformation("{topic} not included in switch statement",queryParameters.PcsTopic);
+                break;
             }
         }
-
-        if (events.Count == 0)
-        {
-            _logger.LogInformation("found no events, or field is null");
-            return "found no events, or field is null";
-        }
-
-        _logger.LogInformation(
-            $"Found {events.Count} events for topic {queryParameters.PcsTopic} and plant {queryParameters.Plant}");
-
-
-        var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e.Message!, queryParameters.PcsTopic));
-        var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
-
-        foreach (var batch in mappedMessages.Batch(250)) await SendFamMessages(batch);
-
-        _logger.LogInformation($"Finished sending {queryParameters.PcsTopic} to fam");
-
-        return $"finished successfully sending {mappedMessages.Count} messages to fam for {queryParameters.PcsTopic}";
-    }
-
-    public Task<List<string>> GetAllPlants()
-    {
-        return _plantRepository.GetAllPlants();
-    }
-
-    private SchemaMapper CreateCommonLibMapper()
-    {
-        ISchemaSource source = new ApiSource(new ApiSourceOptions
-        {
-            TokenProviderConnectionString = "RunAs=App;" +
-                                            $"AppId={_commonLibConfig.ClientId};" +
-                                            $"TenantId={_commonLibConfig.TenantId};" +
-                                            $"AppKey={_commonLibConfig.ClientSecret}"
-        });
-
-        // Add caching functionality
-        source = new CacheWrapper(
-            source,
-            maxCacheAge: TimeSpan.FromDays(1), // Use TimeSpan.Zero for no recache based on age
-            checkForChangesFrequency: TimeSpan
-                .FromHours(1)); // Use TimeSpan.Zero when cache should never check for changes.
-
-        var mapper = new SchemaMapper("ProCoSys_Events", "FAM", source);
-        return mapper;
-    }
-
-    public async Task<string> WoCutoff(string plant, string month, ILogger logger)
-    {
-        var mapper = CreateCommonLibMapper();
-        var connectionString = _famFeederOptions.ProCoSysConnectionString;
-        var response = await _repo.GetWoCutoffs(month, plant, connectionString);
-        logger.LogInformation($"Found {response.Count} cutoffs for month {month} in {plant}");
-
-        var messages = response.SelectMany(e =>
-            TieMapper.CreateTieMessage(e.Message!, PcsTopic.WorkOrderCutoff));
-        var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
-
-        foreach (var batch in mappedMessages.Batch(250)) await SendFamMessages(batch);
-
-        logger.LogDebug("Sent WoCutoff to FAM");
-        return $"Sendt {mappedMessages.Count} WoCutoff to FAM  for {month} done";
-
-    }
-
-    private async Task SendFamMessages(IEnumerable<Message> messages)
-    {
-        try
-        {
-            await _eventHubProducerService.SendDataAsync(messages);
-        }
-        catch (FamConfigException e)
-        {
-            throw new Exception("Configuration error: Could not send message.", e);
-        }
-        catch (Exception e)
-        {
-            throw new Exception("Error: Could not send message.", e);
-        }
+        return events;
     }
 }
