@@ -104,7 +104,6 @@ public class FamFeederService : IFamFeederService
 
         logger.LogDebug("Sent WoCutoff to FAM");
         return $"Sent {mappedMessages.Count} WoCutoff to FAM  for {month} done";
-
     }
 
     private async Task SendFamMessages(IEnumerable<Message> messages)
