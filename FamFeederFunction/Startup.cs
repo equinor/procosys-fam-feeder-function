@@ -28,20 +28,13 @@ public class Startup : FunctionsStartup
             .AddEnvironmentVariables()
             .Build();
 
-        services.AddOptions<CommonLibConfig>().Configure<IConfiguration>((settings, configuration) =>
-        {
-            configuration.GetSection("CommonLibConfig");
-        });
-
         services.Configure<CommonLibConfig>(config.GetSection("CommonLibConfig"));
         services.Configure<FamFeederOptions>(config.GetSection("FamFeederOptions"));
         services.AddEventHubProducer(configBuilder
             => config.Bind("EventHubProducerConfig", configBuilder));
 
         services.AddLogging();
-
-        if (config["BlobStorage:ConnectionString"] != null)
-            AddWalletToDirectory(config);
+        AddWalletToDirectory(config);
 
         services.AddDbContext(config.GetSection("FamFeederOptions")["ProCoSysConnectionString"]);
         services.AddScoped<IFamEventRepository, FamEventRepository>();
@@ -51,6 +44,11 @@ public class Startup : FunctionsStartup
 
     private static void AddWalletToDirectory(IConfiguration config)
     {
+        if (config["BlobStorage:ConnectionString"] == null)
+        {
+            return;
+        }
+
         var rep = new BlobRepository(config["BlobStorage:ConnectionString"], config["BlobStorage:ContainerName"]);
         const string walletPath = "/home/site/wwwroot/wallet";
         Directory.CreateDirectory(walletPath);

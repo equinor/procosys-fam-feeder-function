@@ -70,8 +70,7 @@ public class FamFeederService : IFamFeederService
     public Task<List<string>> GetAllPlants() => _plantRepository.GetAllPlants();
 
     private SchemaMapper CreateCommonLibMapper()
-    {
-        ISchemaSource source = new ApiSource(new ApiSourceOptions
+    { ISchemaSource source = new ApiSource(new ApiSourceOptions
         {
             TokenProviderConnectionString = "RunAs=App;" +
                                             $"AppId={_commonLibConfig.ClientId};" +

@@ -7,7 +7,7 @@ public class PipingSpoolQuery
         return @$"select
             '{{""Plant"" : ""' || ps.projectschema || '"",
             ""Project"" : ""' ||  regexp_replace(p.name, '([""\])', '\\\1') || '"",
-            ""PipingSpoolId"" : ""' || ps.pipingspoolid || '"",
+            ""PipingSpoolId"" : ""' || ps.pipingspool_id || '"",
             ""PipingRevisionId"" : ""' || ps.pipingrevision_id || '"",
             ""Revision"" : ""' || pr.testrevisionno || '"",
             ""McPkgNo"" : ""' || regexp_replace(m.mcpkgno, '([""\])', '\\\1') || '"",
