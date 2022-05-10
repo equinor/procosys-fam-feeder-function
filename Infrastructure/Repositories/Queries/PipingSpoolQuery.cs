@@ -6,7 +6,7 @@ public class PipingSpoolQuery
     {
         return @$"select
             '{{""Plant"" : ""' || ps.projectschema || '"",
-            ""Project"" : ""' ||  regexp_replace(p.name, '([""\])', '\\\1') || '"",
+            ""ProjectName"" : ""' ||  regexp_replace(p.name, '([""\])', '\\\1') || '"",
             ""PipingSpoolId"" : ""' || ps.pipingspool_id || '"",
             ""PipingRevisionId"" : ""' || ps.pipingrevision_id || '"",
             ""Revision"" : ""' || pr.testrevisionno || '"",
@@ -29,7 +29,7 @@ public class PipingSpoolQuery
             from pipingspool ps
                 join pipingrevision pr on pr.pipingrevision_id = ps.pipingrevision_id
                 join mcpkg m on m.mcpkg_id = pr.mcpkg_id
-                join project p on p.project_id=m.project_id
+                join project p on p.project_id = m.project_id
                 left join document iso on iso.document_id = ps.document_id
                 join tag t on t.tag_id = ps.tag_id
             where ps.projectschema = '{schema}'";
