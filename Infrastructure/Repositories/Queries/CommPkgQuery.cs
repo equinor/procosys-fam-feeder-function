@@ -13,7 +13,7 @@ internal class CommPkgQuery
          '"", ""Description"" : ""' || regexp_replace(c.DESCRIPTION, '([""\])', '\\\1') ||
          '"", ""DescriptionOfWork"" : ""' || regexp_replace(c.DESCRIPTIONOFWORK, '([""\])', '\\\1') ||
          '"", ""Remark"" : ""' || regexp_replace(c.REMARK, '([""\])', '\\\1') ||         
-         '"", ""ResponsibleCode"" : ""' || regexp_replace(r.CODE, '([""\])', '\\\1')  ||                    
+         '"", ""ResponsibleCode"" : ""' || regexp_replace(r.CODE, '([""\])', '\\\1') ||                    
          '"", ""ResponsibleDescription"" : ""' || regexp_replace(r.DESCRIPTION, '([""\])', '\\\1')  ||                                 
          '"", ""AreaCode"" : ""' || CASE WHEN l.CODE IS NOT NULL THEN regexp_replace(l.CODE, '([""\])', '\\\1') ELSE '' END ||  
          '"", ""AreaDescription"" : ""' || CASE WHEN l.CODE IS NOT NULL THEN regexp_replace(l.DESCRIPTION, '([""\])', '\\\1') ELSE '' END ||  
@@ -25,6 +25,8 @@ internal class CommPkgQuery
          '"", ""Priority1"" : ""' || pri1.code  ||
          '"", ""Priority2"" : ""' || pri2.code  ||
          '"", ""Priority3"" : ""' || pri3.code  ||
+         '"", ""CommPkgStatus"" : ""' || regexp_replace(commStatus.CODE, '([""\])', '\\\1')  ||
+         '"", ""DCCommPkgStatus"" : ""' || regexp_replace(dcStatus.CODE, '([""\])', '\\\1')  ||
          '"", ""LastUpdated"" : ""' || TO_CHAR(c.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:ss') ||                                    
          '""}}' as message
         from commpkg c
@@ -37,6 +39,8 @@ internal class CommPkgQuery
             left join library pri2 on pri2.library_id = c.COMMPRIORITY2_ID
             left join library pri3 on pri3.library_id = c.COMMPRIORITY3_ID
             left join library phase on phase.library_id = c.COMMPHASE_ID
+            left join library commStatus on commStatus.library_id = c.COMMSTATUS_ID
+            left join library dcStatus on dcStatus.library_id = c.DCSTATUS_ID
             left join library identifier on identifier.library_id = c.IDENTIFIER_ID
         where c.projectschema ='{schema}'";
     }
