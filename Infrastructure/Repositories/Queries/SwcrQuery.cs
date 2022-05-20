@@ -19,6 +19,7 @@ internal class SwcrQuery
     '"", ""Contract"" : ""' || con.code ||
     '"", ""Supplier"" : ""' || sup.code ||
     '"", ""Node"" : ""' ||  regexp_replace(n.NODENO, '([""\])', '\\\1') ||
+    '"", ""Status"" : ""' ||  STATUSFORSWCR(n.swcr_ID) || 
     '"", ""CreatedAt"" : ""' || TO_CHAR(e.createdat, 'yyyy-mm-dd hh24:mi:ss')  ||
     '"", ""IsVoided"" : ""' || decode(e.IsVoided,'Y', 'true', 'N', 'false')  ||
     '"", ""LastUpdated"" : ""' || TO_CHAR(sw.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:ss')  ||
@@ -26,16 +27,16 @@ internal class SwcrQuery
     '"", ""EstimatedHours"" : ""' || sw.estimatedmhrs  ||
     '""}}' as message
     from swcr sw
-        JOIN element e on  E.ELEMENT_ID = sw.swcr_ID
-        JOIN projectschema ps ON ps.projectschema = sw.projectschema
-        JOIN project p ON p.project_id = sw.project_id
-        LEFT JOIN commpkg c ON c.commpkg_id = sw.commpkg_id
-        LEFT JOIN library pri ON pri.library_id = sw.priority_id
-        LEFT JOIN library sys On sys.library_id = sw.processsystem_id
-        LEFT JOIN library con ON con.library_id =sw.contract_id
-        LEFT JOIN library cs ON cs.library_id = sw.controlsystem_id
-        LEFT JOIN library sup ON sup.library_id = sw.supplier_id
-        LEFT JOIN node n ON n.node_id = sw.node_id
-    WHERE sw.projectschema = '{schema}'";
+        join element e on  E.ELEMENT_ID = sw.swcr_ID
+        join projectschema ps ON ps.projectschema = sw.projectschema
+        join project p ON p.project_id = sw.project_id
+        left join commpkg c ON c.commpkg_id = sw.commpkg_id
+        left join library pri ON pri.library_id = sw.priority_id
+        left join library sys On sys.library_id = sw.processsystem_id
+        left join library con ON con.library_id =sw.contract_id
+        left join library cs ON cs.library_id = sw.controlsystem_id
+        left join library sup ON sup.library_id = sw.supplier_id
+        left join node n ON n.node_id = sw.node_id
+    where sw.projectschema = '{schema}'";
     }
 }
