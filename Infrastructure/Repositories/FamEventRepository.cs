@@ -40,6 +40,7 @@ public class FamEventRepository : IFamEventRepository
     public async Task<List<FamEvent>> GetLibrary(string plant) => await ExecuteQuery(LibraryQuery.GetQuery(plant));
     public async Task<List<FamEvent>> GetWoCutoffs(string month, string plant, string? connectionString) => await _workOrderCutoffRepository.GetWoCutoffs(month, plant, connectionString);
     public async Task<List<FamEvent>> GetDocument(string plant) => await ExecuteQuery(DocumentQuery.GetQuery(plant));
+    public async Task<List<FamEvent>> GetLoopContent(string plant) => await ExecuteQuery(LoopContentQuery.GetQuery(plant));
 
     internal async Task<List<FamEvent>> ExecuteQuery(string query)
     {

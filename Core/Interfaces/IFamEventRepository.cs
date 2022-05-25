@@ -27,4 +27,5 @@ public interface IFamEventRepository
     Task<List<FamEvent>> GetResponsible(string plant);
     Task<List<FamEvent>> GetLibrary(string plant);
     Task<List<FamEvent>> GetDocument(string plant);
+    Task<List<FamEvent>> GetLoopContent(string plant);
 }

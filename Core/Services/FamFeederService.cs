@@ -194,6 +194,10 @@ public class FamFeederService : IFamFeederService
             case PcsTopic.Document:
                 events = await _repo.GetDocument(queryParameters.Plant);
                 break;
+            case PcsTopic.LoopContent:
+                events = await _repo.GetLoopContent(queryParameters.Plant);
+                break;
+
             default:
             {
                 _logger.LogInformation("{topic} not included in switch statement",queryParameters.PcsTopic);
