@@ -13,7 +13,7 @@ internal class PunchListItemQuery
        '"", ""Description"" : ""' || regexp_replace(pl.Description, '([""\])', '\\\1') || 
        '"", ""TagNo"" : ""' || regexp_replace(t.TagNo, '([""\])', '\\\1') ||
        '"", ""TagId"" : ""' || t.tag_id ||
-       '"", ""TagRegisterId"" : ""' || t.register_id ||
+       '"", ""RegisterCode"" : ""' || regexp_replace(reg.Code, '([""\])', '\\\1') ||
        '"", ""ResponsibleCode"" : ""' || regexp_replace(r.Code, '([""\])', '\\\1')  ||                    
        '"", ""ResponsibleDescription"" : ""' || regexp_replace(r.Description, '([""\])', '\\\1')  ||                                 
        '"", ""FormType"" : ""' || regexp_replace(ft.FormularType, '([""\])', '\\\1') ||  
@@ -22,12 +22,13 @@ internal class PunchListItemQuery
        from PUNCHLISTITEM pl
            join TAGCHECK tc on tc.tagcheck_id = pl.tagcheck_id
            join projectschema ps on ps.projectschema = tc.projectschema
-           LEFT JOIN Responsible r ON tc.Responsible_id = r.Responsible_Id
-           LEFT JOIN TagFormularType tft ON tc.TagFormularType_Id = tft.TagFormularType_Id
-           LEFT JOIN FormularType ft ON tft.FormularType_Id = ft.FormularType_Id
-           LEFT JOIN Tag t on tft.Tag_Id = t.Tag_Id
-           LEFT JOIN Project p on p.Project_Id=t.Project_Id
-           LEFT JOIN Library l on l.Library_Id = pl.Status_Id
+           left join Responsible r ON tc.Responsible_id = r.Responsible_Id
+           left join TagFormularType tft ON tc.TagFormularType_Id = tft.TagFormularType_Id
+           left join FormularType ft ON tft.FormularType_Id = ft.FormularType_Id
+           left join Tag t on tft.Tag_Id = t.Tag_Id
+           left join library reg on reg.library_id = tag.register_id
+           left join Project p on p.Project_Id=t.Project_Id
+           left join Library l on l.Library_Id = pl.Status_Id
        where tc.projectschema = '{schema}'";
     }
 }
