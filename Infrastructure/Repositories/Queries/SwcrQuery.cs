@@ -19,7 +19,7 @@ internal class SwcrQuery
     '"", ""Contract"" : ""' || con.code ||
     '"", ""Supplier"" : ""' || sup.code ||
     '"", ""Node"" : ""' ||  regexp_replace(n.NODENO, '([""\])', '\\\1') ||
-    '"", ""Status"" : ""' ||  STATUSFORSWCR(n.swcr_ID) || 
+    '"", ""Status"" : ""' ||  STATUSFORSWCR(sw.swcr_ID) || 
     '"", ""CreatedAt"" : ""' || TO_CHAR(e.createdat, 'yyyy-mm-dd hh24:mi:ss')  ||
     '"", ""IsVoided"" : ""' || decode(e.IsVoided,'Y', 'true', 'N', 'false')  ||
     '"", ""LastUpdated"" : ""' || TO_CHAR(sw.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:ss')  ||

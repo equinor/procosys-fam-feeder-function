@@ -10,8 +10,7 @@ internal class QuerySignature
         ||'"", ""ProjectName"" : ""' || p.NAME
         ||'"", ""QueryId"": ""'|| do.document_id
         ||'"", ""QueryNo"": ""'|| do.documentno
-        ||'"", ""SignatureRoleCode"": ""' || regexp_replace(sr.code, '([""\])', '\\\1')
-        ||'"", ""SignatureRoleDescription"": ""' || regexp_replace(sr.description, '([""\])', '\\\1')
+        ||'"", ""SignatureRoleCode"": ""' || regexp_replace(sr.code, '([""\])', '\\\1')   
         ||'"", ""FunctionalRoleCode"": ""' || regexp_replace(fr.code, '([""\])', '\\\1')
         ||'"", ""Sequence"": ""' || q.ranking
         ||'"", ""SignedByAzureOid"": ""' || p.azure_oid
