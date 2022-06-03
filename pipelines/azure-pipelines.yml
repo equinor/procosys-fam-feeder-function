@@ -33,9 +33,6 @@ stages:
 
      steps:
      - task: NuGetToolInstaller@1
-       inputs:
-         versionSpec: '6.1'
-         checkLatest: true
 
      - task: UseDotNet@2
        displayName: 'Use .NET 6 sdk'
