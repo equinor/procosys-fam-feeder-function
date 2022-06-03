@@ -37,6 +37,13 @@ stages:
          versionSpec: '6.1'
          checkLatest: true
 
+     - task: UseDotNet@2
+       displayName: 'Use .NET 6 sdk'
+       inputs:
+         packageType: 'sdk'
+         version: '6.x.x'
+         includePreviewVersions: true
+
      - task: NuGetCommand@2
        inputs:
          command: 'restore'
