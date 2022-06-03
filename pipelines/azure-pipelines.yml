@@ -33,6 +33,9 @@ stages:
 
      steps:
      - task: NuGetToolInstaller@1
+       inputs:
+         versionSpec: '6.1'
+         checkLatest: true
 
      - task: NuGetCommand@2
        inputs:
