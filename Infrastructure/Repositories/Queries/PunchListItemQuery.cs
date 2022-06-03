@@ -11,23 +11,18 @@ internal class PunchListItemQuery
       '"", ""PunchItemNo"" : ""' || pl.PunchListItem_Id ||
       '"", ""Description"" : ""' || regexp_replace(pl.Description, '([""\])', '\\\1') ||
       '"", ""ChecklistId"" : ""' || pl.tagcheck_id ||
-      '"", ""TagNo"" : ""' || regexp_replace(t.tagno, '([""\])', '\\\1') ||
-      '"", ""RegisterCode"" : ""' ||regexp_replace(reg.code, '([""\])', '\\\1') ||
-      '"", ""ResponsibleCode"" : ""' || l_resp_code  ||         
-      '"", ""ResponsibleDescription"" : ""' || l_resp_descr  ||                         
-      '"", ""FormType"" : ""' || l_form_type ||
-      '"", ""Category"" : ""' || l_category ||
-      '"", ""RaisedByOrg"" : ""' || l_raised_by_org ||
-      '"", ""ClearingByOrg"" : ""' || l_clear_by_org ||
+      '"", ""Category"" : ""' || regexp_replace(cat.code, '([""\])', '\\\1') ||
+      '"", ""RaisedByOrg"" : ""' || regexp_replace(raised.code, '([""\])', '\\\1') ||
+      '"", ""ClearingByOrg"" : ""' || regexp_replace(cleared.code, '([""\])', '\\\1') ||
       '"", ""DueDate"" : ""' || TO_CHAR(pl.duedate, 'yyyy-mm-dd hh24:mi:ss') ||
-      '"", ""PunchListSorting"" : ""' || l_pl_sorting ||
-      '"", ""PunchListType"" : ""' || l_pl_type ||
-      '"", ""PunchPriority"" : ""' || l_pl_pri ||
+      '"", ""PunchListSorting"" : ""' || regexp_replace(plsorting.code, '([""\])', '\\\1') ||
+      '"", ""PunchListType"" : ""' || regexp_replace(pltype.code, '([""\])', '\\\1') ||
+      '"", ""PunchPriority"" : ""' || regexp_replace(plpri.code, '([""\])', '\\\1') ||
       '"", ""Estimate"" : ""' || pl.estimate ||
-      '"", ""OriginalWoNo"" : ""' || l_original_wo_no ||
-      '"", ""WoNo"" : ""' || wo.wono ||
-      '"", ""SWCRNo"" : ""' || l_swcr_no ||
-      '"", ""DocumentNo"" : ""' || l_document_no ||
+      '"", ""OriginalWoNo"" : ""' || regexp_replace(orgwo.wono, '([""\])', '\\\1') ||
+      '"", ""WoNo"" : ""' || regexp_replace(wo.wono, '([""\])', '\\\1') ||
+      '"", ""SWCRNo"" : ""' || swcr.swcrno ||
+      '"", ""DocumentNo"" : ""' || regexp_replace(doc.documentno, '([""\])', '\\\1') ||
       '"", ""ExternalItemNo"" : ""' ||  regexp_replace(pl.external_itemno, '([""\])', '\\\1') ||
       '"", ""MaterialRequired"" : ' || decode(pl.ismaterialrequired,'Y', 'true', 'false') ||
       ', ""IsVoided"" : ' || decode(pl.isVoided,'Y', 'true', 'false') ||
@@ -43,7 +38,7 @@ internal class PunchListItemQuery
            left join TagFormularType tft ON tc.TagFormularType_Id = tft.TagFormularType_Id
            left join FormularType ft ON tft.FormularType_Id = ft.FormularType_Id
            left join Tag t on tft.Tag_Id = t.tag_id
-           left join library reg on reg.library_id = tag.register_id
+           left join library reg on reg.library_id = t.register_id
            left join Project p on p.project_id=t.project_id
            left join wo on wo.wo_id = pl.wo_id
            left join library cat on cat.library_id = pl.Status_Id
