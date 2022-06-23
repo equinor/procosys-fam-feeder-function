@@ -1,14 +1,13 @@
-﻿using Core.Models;
-using Infrastructure.Data;
-using Infrastructure.Repositories.Queries;
+﻿using Infrastructure.Data;
+using Equinor.ProCoSys.PcsServiceBus.Queries;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
 public class WorkOrderCutoffRepository
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static")]
-    public async Task<List<FamEvent>> GetWoCutoffs(string month, string plant, string? connectionString)
+    public async Task<List<string>> GetWoCutoffs(string month, string plant, string? connectionString)
     {
         var options = new DbContextOptionsBuilder<AppDbContext>();
         options.UseOracle(connectionString!, b => b.MaxBatchSize(200));
@@ -17,11 +16,11 @@ public class WorkOrderCutoffRepository
         command.CommandText = WorkOrderCutoffQuery.GetQuery(plant, month);
         await context.Database.OpenConnectionAsync();
         await using var result = await command.ExecuteReaderAsync();
-        var entities = new List<FamEvent>();
+        var entities = new List<string>();
 
         while (await result.ReadAsync())
         {
-            entities.Add(new FamEvent { Message = (string)result[0] });
+            entities.Add( (string)result[0]);
         }
         return entities;
     }

@@ -42,7 +42,7 @@ public class FamFeederService : IFamFeederService
             return "Cutoff Should have its own call";
         }
 
-        var events = await GetFamEventsBasedOnTopicAndPlant(queryParameters);
+        var events = await GetstringsBasedOnTopicAndPlant(queryParameters);
 
         if (events.Count == 0)
         {
@@ -53,7 +53,7 @@ public class FamFeederService : IFamFeederService
         _logger.LogInformation(
             "Found {events} events for topic {topic} and plant {plant}",events.Count,queryParameters.PcsTopic,queryParameters.Plant);
 
-        var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e.Message!, queryParameters.PcsTopic));
+        var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, queryParameters.PcsTopic));
         var mapper = CreateCommonLibMapper();
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
 
@@ -69,8 +69,29 @@ public class FamFeederService : IFamFeederService
 
     public Task<List<string>> GetAllPlants() => _plantRepository.GetAllPlants();
 
+    public async Task<string> WoCutoff(string plant, string month, ILogger logger)
+    {
+        var mapper = CreateCommonLibMapper();
+        var connectionString = _famFeederOptions.ProCoSysConnectionString;
+        var response = await _repo.GetWoCutoffs(month, plant, connectionString);
+        logger.LogInformation("Found {count} cutoffs for month {month} in {plant}",response.Count,month,plant);
+
+        var messages = response.SelectMany(e =>
+            TieMapper.CreateTieMessage(e, PcsTopic.WorkOrderCutoff));
+        var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
+
+        foreach (var batch in mappedMessages.Batch(250))
+        {
+            await SendFamMessages(batch);
+        }
+
+        logger.LogDebug("Sent WoCutoff to FAM");
+        return $"Sent {mappedMessages.Count} WoCutoff to FAM  for {month} done";
+    }
+
     private SchemaMapper CreateCommonLibMapper()
-    { ISchemaSource source = new ApiSource(new ApiSourceOptions
+    {
+        ISchemaSource source = new ApiSource(new ApiSourceOptions
         {
             TokenProviderConnectionString = "RunAs=App;" +
                                             $"AppId={_commonLibConfig.ClientId};" +
@@ -89,23 +110,6 @@ public class FamFeederService : IFamFeederService
         return mapper;
     }
 
-    public async Task<string> WoCutoff(string plant, string month, ILogger logger)
-    {
-        var mapper = CreateCommonLibMapper();
-        var connectionString = _famFeederOptions.ProCoSysConnectionString;
-        var response = await _repo.GetWoCutoffs(month, plant, connectionString);
-        logger.LogInformation("Found {count} cutoffs for month {month} in {plant}",response.Count,month,plant);
-
-        var messages = response.SelectMany(e =>
-            TieMapper.CreateTieMessage(e.Message!, PcsTopic.WorkOrderCutoff));
-        var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
-
-        foreach (var batch in mappedMessages.Batch(250)) await SendFamMessages(batch);
-
-        logger.LogDebug("Sent WoCutoff to FAM");
-        return $"Sent {mappedMessages.Count} WoCutoff to FAM  for {month} done";
-    }
-
     private async Task SendFamMessages(IEnumerable<Message> messages)
     {
         try
@@ -121,9 +125,9 @@ public class FamFeederService : IFamFeederService
             throw new Exception("Error: Could not send message.", e);
         }
     }
-    private async Task<List<FamEvent>> GetFamEventsBasedOnTopicAndPlant(QueryParameters queryParameters)
+    private async Task<List<string>> GetstringsBasedOnTopicAndPlant(QueryParameters queryParameters)
     {
-        var events = new List<FamEvent>();
+        var events = new List<string>();
         switch (queryParameters.PcsTopic)
         {
             case PcsTopic.CommPkg:
@@ -196,6 +200,12 @@ public class FamFeederService : IFamFeederService
                 break;
             case PcsTopic.LoopContent:
                 events = await _repo.GetLoopContent(queryParameters.Plant);
+                break;
+            case PcsTopic.Query:
+                events = await _repo.GetQuery(queryParameters.Plant);
+                break;
+            case PcsTopic.QuerySignature:
+                events = await _repo.GetQuerySignature(queryParameters.Plant);
                 break;
 
             default:

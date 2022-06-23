@@ -40,8 +40,7 @@ public class FamFeederFunction
             return new BadRequestObjectResult("Please provide both plant and topic");
         }
 
-        var parsed = TryParse(topicString, out PcsTopic topic);
-        if (!parsed)
+        if (!TryParse(topicString, out PcsTopic topic))
         {
             return new BadRequestObjectResult("Please provide valid topic");
         }
@@ -57,8 +56,6 @@ public class FamFeederFunction
         return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
     }
 
-
-
     [FunctionName("FamFeederFunction_RunAll")]
     public async Task<IActionResult> RunAllHttpTrigger(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
@@ -70,7 +67,7 @@ public class FamFeederFunction
         dynamic data = JsonConvert.DeserializeObject(requestBody);
         plant ??= data?.Facility;
 
-        log.LogInformation($"Running feeder for all topics for plant {plant} for ");
+        log.LogInformation($"Running feeder for all topics for plant {plant}");
 
         if (plant == null)
         {
@@ -85,18 +82,6 @@ public class FamFeederFunction
         var instanceId = await orchestrationClient.StartNewAsync("RunAllExceptCutoff", null, plant);
         return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
     }
-
-    [FunctionName("GetStatuses")]
-    public static async Task<IActionResult> Statuses(
-        [DurableClient] IDurableOrchestrationClient client,
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]
-        HttpRequest request)
-    {
-        var statuses = await client.ListInstancesAsync(new OrchestrationStatusQueryCondition(), CancellationToken.None);
-        return new OkObjectResult(statuses);
-    }
-
-
 
     [FunctionName("FamFeederFunction")]
     public static async Task<List<string>> RunOrchestrator(
@@ -127,7 +112,9 @@ public class FamFeederFunction
 
         var topics = new List<PcsTopic> { PcsTopic.CommPkg, PcsTopic.McPkg,PcsTopic.Tag,PcsTopic.Milestone,
             PcsTopic.Checklist,PcsTopic.WorkOrder,PcsTopic.WoChecklist, PcsTopic.PipingRevision, PcsTopic.SWCR,
-            PcsTopic.SWCRSignature, PcsTopic.Stock, PcsTopic.WoMaterial, PcsTopic.WoMilestone, PcsTopic.Library,PcsTopic.Responsible};
+            PcsTopic.SWCRSignature, PcsTopic.Stock, PcsTopic.WoMaterial, PcsTopic.WoMilestone, PcsTopic.Library,
+            PcsTopic.Responsible, PcsTopic.Query,PcsTopic.QuerySignature,PcsTopic.LoopContent,
+            PcsTopic.CommPkgOperation};
         foreach (var topic in topics)
         {
             results.Add(await context.CallActivityAsync<string>("RunFeeder", new QueryParameters(plant, topic)));
