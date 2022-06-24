@@ -55,7 +55,7 @@ public class FamFeederService : IFamFeederService
 
         var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, queryParameters.PcsTopic));
         var mapper = CreateCommonLibMapper();
-        var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
+        var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m=> m.Objects.Any()).ToList();
 
         foreach (var batch in mappedMessages.Batch(250))
         {
