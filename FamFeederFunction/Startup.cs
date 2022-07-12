@@ -39,6 +39,8 @@ public class Startup : FunctionsStartup
         services.AddDbContext(config.GetSection("FamFeederOptions")["ProCoSysConnectionString"]);
         services.AddScoped<IFamEventRepository, FamEventRepository>();
         services.AddScoped<IFamFeederService, FamFeederService>();
+        services.AddScoped<ISearchItemRepository, SearchItemRepository>();
+        services.AddScoped<ISearchFeederService, SearchFeederService>();
         services.AddScoped<IPlantRepository, PlantRepository>();
     }
 

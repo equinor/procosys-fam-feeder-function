@@ -12,4 +12,7 @@ public class FamFeederOptions
     }
 
     public string? ProCoSysConnectionString { get; set; }
+    public string? SearchIndexEndpoint { get; set; }
+    public string? SearchIndexName { get; set; }
+    public string? SearchIndexAccessKey { get; set; }
 }
