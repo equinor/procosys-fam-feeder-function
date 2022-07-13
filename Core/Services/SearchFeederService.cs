@@ -40,7 +40,7 @@ public class SearchFeederService : ISearchFeederService
     public async Task<string> RunFeeder(QueryParameters queryParameters, ILogger logger)
     {
         _logger = logger;
-        
+        var batchSize = int.Parse(_famFeederOptions.SearchIndexBatchSize ?? "20");
         var items = await GetItemsBasedOnTopicAndPlant(queryParameters);
 
         if (items.Count == 0)
@@ -52,15 +52,15 @@ public class SearchFeederService : ISearchFeederService
         _logger.LogInformation(
             "Found {events} events for topic {topic} and plant {plant}",items.Count,queryParameters.PcsTopic,queryParameters.Plant);
 
-        foreach (var batch in items.Batch(20))
+        foreach (var batch in items.Batch(batchSize))
         {
-            _logger.LogInformation($"Sending {batch.Count()} items to Search Index");
+            _logger.LogInformation($"Sending {batch.Count()} items to Search Index {queryParameters.Plant} {queryParameters.PcsTopic}");
             await SendIndexDocuments(batch);
         }
 
         _logger.LogInformation("Finished adding {topic} to Index",queryParameters.PcsTopic);
 
-        return $"finished successfully sending {items.Count} documents to Search Index {queryParameters.PcsTopic}";
+        return $"finished successfully sending {items.Count} documents to Search Index {queryParameters.Plant} {queryParameters.PcsTopic}";
     }
 
     public Task<List<string>> GetAllPlants() => _plantRepository.GetAllPlants();
@@ -70,6 +70,8 @@ public class SearchFeederService : ISearchFeederService
         var endPoint = _famFeederOptions.SearchIndexEndpoint;
         var indexName = _famFeederOptions.SearchIndexName;
         var accessKey = _famFeederOptions.SearchIndexAccessKey;
+        var batchDelay = int.Parse(_famFeederOptions.SearchIndexBatchDelay ?? "1000");
+
 
         if (indexName == null || endPoint == null || accessKey == null)
         {
@@ -88,7 +90,7 @@ public class SearchFeederService : ISearchFeederService
             var resp = await client.IndexDocumentsAsync(batch, options1);
             
             Console.WriteLine($"Index Document batch finished. Results: {resp.Value.Results.Count}");
-            Thread.Sleep(1000);
+            Thread.Sleep(batchDelay);
 
         }
         catch (Exception e)
