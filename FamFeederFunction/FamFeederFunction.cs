@@ -67,7 +67,7 @@ public class FamFeederFunction
         dynamic data = JsonConvert.DeserializeObject(requestBody);
         plant ??= data?.Facility;
 
-        log.LogInformation($"Running feeder for all topics for plant {plant}");
+        log.LogTrace($"Running feeder for all topics for plant {plant}");
 
         if (plant == null)
         {
