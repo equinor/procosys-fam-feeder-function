@@ -13,7 +13,7 @@ public class WorkOrderCutoffRepository
         options.UseOracle(connectionString!, b => b.MaxBatchSize(200));
         await using var context = new AppDbContext(options.Options);
         await using var command = context.Database.GetDbConnection().CreateCommand();
-        command.CommandText = WorkOrderCutoffQuery.GetQuery(plant, month);
+        command.CommandText = WorkOrderCutoffQuery.GetQuery(null, plant, month);
         await context.Database.OpenConnectionAsync();
         await using var result = await command.ExecuteReaderAsync();
         var entities = new List<string>();
