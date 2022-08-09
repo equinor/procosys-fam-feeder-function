@@ -42,7 +42,7 @@ public class FamFeederService : IFamFeederService
             return "Cutoff Should have its own call";
         }
 
-        var events = await GetstringsBasedOnTopicAndPlant(queryParameters);
+        var events = await GetEventsBasedOnTopicAndPlant(queryParameters);
 
         if (events.Count == 0)
         {
@@ -125,87 +125,90 @@ public class FamFeederService : IFamFeederService
             throw new Exception("Error: Could not send message.", e);
         }
     }
-    private async Task<List<string>> GetstringsBasedOnTopicAndPlant(QueryParameters queryParameters)
+    private async Task<List<string>> GetEventsBasedOnTopicAndPlant(QueryParameters queryParameters)
     {
         var events = new List<string>();
+        var plant = queryParameters.Plant;
         switch (queryParameters.PcsTopic)
         {
             case PcsTopic.CommPkg:
-                events = await _repo.GetCommPackages(queryParameters.Plant);
+                events = await _repo.GetCommPackages(plant);
                 break;
             case PcsTopic.Ipo:
                 break;
             case PcsTopic.McPkg:
-                events = await _repo.GetMcPackages(queryParameters.Plant);
+                events = await _repo.GetMcPackages(plant);
                 break;
             case PcsTopic.Project:
-                events = await _repo.GetProjects(queryParameters.Plant);
+                events = await _repo.GetProjects(plant);
                 break;
             case PcsTopic.Responsible:
-                events = await _repo.GetResponsible(queryParameters.Plant);
+                events = await _repo.GetResponsible(plant);
                 break;
             case PcsTopic.Tag:
-                events = await _repo.GetTags(queryParameters.Plant);
-                break;
-            case PcsTopic.TagFunction:
+                events = await _repo.GetTags(plant);
                 break;
             case PcsTopic.PunchListItem:
-                events = await _repo.GetPunchItems(queryParameters.Plant);
+                events = await _repo.GetPunchItems(plant);
                 break;
             case PcsTopic.Library:
-                events = await _repo.GetLibrary(queryParameters.Plant);
+                events = await _repo.GetLibrary(plant);
                 break;
             case PcsTopic.WorkOrder:
-                events = await _repo.GetWorkOrders(queryParameters.Plant);
+                events = await _repo.GetWorkOrders(plant);
                 break;
             case PcsTopic.Checklist:
-                events = await _repo.GetCheckLists(queryParameters.Plant);
+                events = await _repo.GetCheckLists(plant);
                 break;
             case PcsTopic.Milestone:
-                events = await _repo.GetMilestones(queryParameters.Plant);
-                break;
-            case PcsTopic.WorkOrderCutoff:
+                events = await _repo.GetMilestones(plant);
                 break;
             case PcsTopic.Certificate:
                 break;
             case PcsTopic.WoChecklist:
-                events = await _repo.GetWoChecklists(queryParameters.Plant);
+                events = await _repo.GetWoChecklists(plant);
                 break;
             case PcsTopic.SWCR:
-                events = await _repo.GetSwcr(queryParameters.Plant);
+                events = await _repo.GetSwcr(plant);
                 break;
             case PcsTopic.SWCRSignature:
-                events = await _repo.GetSwcrSignature(queryParameters.Plant);
+                events = await _repo.GetSwcrSignature(plant);
                 break;
             case PcsTopic.PipingRevision:
-                events = await _repo.GetPipingRevision(queryParameters.Plant);
+                events = await _repo.GetPipingRevision(plant);
                 break;
             case PcsTopic.PipingSpool:
-                events = await _repo.GetPipingSpool(queryParameters.Plant);
+                events = await _repo.GetPipingSpool(plant);
                 break;
             case PcsTopic.WoMaterial:
-                events = await _repo.GetWoMaterials(queryParameters.Plant);
+                events = await _repo.GetWoMaterials(plant);
                 break;
             case PcsTopic.Stock:
-                events = await _repo.GetStock(queryParameters.Plant);
+                events = await _repo.GetStock(plant);
                 break;
             case PcsTopic.WoMilestone:
-                events = await _repo.GetWoMilestones(queryParameters.Plant);
+                events = await _repo.GetWoMilestones(plant);
                 break;
             case PcsTopic.CommPkgOperation:
-                events = await _repo.GetCommPkgOperations(queryParameters.Plant);
+                events = await _repo.GetCommPkgOperations(plant);
                 break;
             case PcsTopic.Document:
-                events = await _repo.GetDocument(queryParameters.Plant);
+                events = await _repo.GetDocument(plant);
                 break;
             case PcsTopic.LoopContent:
-                events = await _repo.GetLoopContent(queryParameters.Plant);
+                events = await _repo.GetLoopContent(plant);
                 break;
             case PcsTopic.Query:
-                events = await _repo.GetQuery(queryParameters.Plant);
+                events = await _repo.GetQuery(plant);
                 break;
             case PcsTopic.QuerySignature:
-                events = await _repo.GetQuerySignature(queryParameters.Plant);
+                events = await _repo.GetQuerySignature(plant);
+                break;
+            case PcsTopic.CallOff:
+                events = await _repo.GetCallOff(plant);
+                break;
+            case PcsTopic.CommPkgQuery:
+                events = await _repo.GetCommPkgQuery(plant);
                 break;
 
             default:

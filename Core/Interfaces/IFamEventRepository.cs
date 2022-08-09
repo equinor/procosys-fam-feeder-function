@@ -28,4 +28,6 @@ public interface IFamEventRepository
     Task<List<string>> GetLibrary(string plant);
     Task<List<string>> GetDocument(string plant);
     Task<List<string>> GetLoopContent(string plant);
+    Task<List<string>> GetCallOff(string plant);
+    Task<List<string>> GetCommPkgQuery(string plant);
 }
