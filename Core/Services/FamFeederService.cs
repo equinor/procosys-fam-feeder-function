@@ -163,8 +163,6 @@ public class FamFeederService : IFamFeederService
             case PcsTopic.Milestone:
                 events = await _repo.GetMilestones(plant);
                 break;
-            case PcsTopic.Certificate:
-                break;
             case PcsTopic.WoChecklist:
                 events = await _repo.GetWoChecklists(plant);
                 break;
