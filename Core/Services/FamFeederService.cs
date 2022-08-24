@@ -211,7 +211,7 @@ public class FamFeederService : IFamFeederService
 
             default:
             {
-                _logger.LogInformation("{topic} not included in switch statement",queryParameters.PcsTopic);
+                _logger?.LogInformation("{topic} not included in switch statement",queryParameters.PcsTopic);
                 break;
             }
         }
