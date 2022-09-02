@@ -131,7 +131,7 @@ public class FamFeederFunction
         return result;
     }
 
-  
+
 
     [FunctionName("RunFeeder")]
     public async Task<string> RunFeeder([ActivityTrigger] IDurableActivityContext context, ILogger logger)
@@ -147,11 +147,11 @@ public class FamFeederFunction
         HttpRequest req,
         [DurableClient] IDurableOrchestrationClient orchestrationClient, ILogger log)
     {
-        var (cutoffWeek, plant) = await DeserializeCutoffWeekAndPlant(req);       
+        var (cutoffWeek, plant) = await DeserializeCutoffWeekAndPlant(req);
 
         log.LogTrace($"Running feeder for wocutoff for plant {plant} and week {cutoffWeek}");
 
-        if(!(cutoffWeek == "202234" || cutoffWeek  == "202235"))
+        if (!(cutoffWeek == "202234" || cutoffWeek == "202235"))
         {
             return new BadRequestObjectResult("Jone, bruk rett CutoffWeek: 202235. ");
         }
@@ -173,14 +173,25 @@ public class FamFeederFunction
 
 
     [FunctionName("RunWoCutoffFeederForCutoffWeek")]
-    public async Task<string> RunWoCutoffFeederForCutoffWeek([OrchestrationTrigger] IDurableOrchestrationContext context, ILogger logger)
+    public static async Task<string> RunWoCutoffFeederForCutoffWeek([OrchestrationTrigger] IDurableOrchestrationContext context, ILogger logger)
     //public async Task<string> RunWoCutoffFeederForCutoffWeek([ActivityTrigger] IDurableActivityContext context, ILogger logger)
     {
         var (cutoffWeek, plant) = context.GetInput<(string, string)>();
+        //var result = await _famFeederService.RunForCutoffWeek(cutoffWeek, plant, logger);
+        logger.LogDebug($"RunWoCutoffFeederForCutoffWeek");
+        //return result;
+        return await context.CallActivityAsync<string>("RunFeeder", new { cutoffWeek, plant });
+    }
+
+    [FunctionName("RunWoCutoffFeederForAutocutoffWekkActivity")]
+    public async Task<string> RunWoCutoffFeederForAutocutoffWeekActivity([ActivityTrigger] IDurableActivityContext context, ILogger logger)
+    {
+        var (cutoffWeek, plant) = context.GetInput<(string, string)>();
         var result = await _famFeederService.RunForCutoffWeek(cutoffWeek, plant, logger);
-        logger.LogDebug($"RunWoCutoffFeederForCutoffWeek returned {result}");
+        logger.LogDebug($"RunWoCutoffFeederForAutocutoffWekkActivity returned {result}");
         return result;
     }
+
 
     private static async Task<(string topicString, string plant)> DeserializeTopicAndPlant(HttpRequest req)
     {
