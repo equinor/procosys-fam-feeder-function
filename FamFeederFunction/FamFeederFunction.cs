@@ -167,12 +167,14 @@ public class FamFeederFunction
             return new BadRequestObjectResult("Please provide valid plant");
         }
 
-        var instanceId = await orchestrationClient.StartNewAsync("RunWoCutoffFeederForCutoffWeek", cutoffWeek, plant);
+        var instanceId = await orchestrationClient.StartNewAsync("RunWoCutoffFeederForCutoffWeek", null, new { cutoffWeek, plant });
         return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
     }
 
+
     [FunctionName("RunWoCutoffFeederForCutoffWeek")]
-    public async Task<string> RunWoCutoffFeederForCutoffWeek([ActivityTrigger] IDurableActivityContext context, ILogger logger)
+    public async Task<string> RunWoCutoffFeederForCutoffWeek([OrchestrationTrigger] IDurableOrchestrationContext context, ILogger logger)
+    //public async Task<string> RunWoCutoffFeederForCutoffWeek([ActivityTrigger] IDurableActivityContext context, ILogger logger)
     {
         var (cutoffWeek, plant) = context.GetInput<(string, string)>();
         var result = await _famFeederService.RunForCutoffWeek(cutoffWeek, plant, logger);
