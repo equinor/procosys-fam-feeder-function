@@ -9,4 +9,5 @@ public interface IFamFeederService
     Task<string> RunFeeder(QueryParameters queryParams, ILogger logger);
     Task<List<string>> GetAllPlants();
     Task<string> WoCutoff(string plant, string month, ILogger logger);
+    Task<string> RunForCutoffWeek(string cutoffWeek, string plant, ILogger logger);
 }

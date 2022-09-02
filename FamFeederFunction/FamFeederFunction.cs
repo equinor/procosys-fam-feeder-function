@@ -31,7 +31,7 @@ public class FamFeederFunction
         HttpRequest req,
         [DurableClient] IDurableOrchestrationClient orchestrationClient, ILogger log)
     {
-        var (topicString, plant) = await Deserialize(req);
+        var (topicString, plant) = await DeserializeTopicAndPlant(req);
 
         log.LogInformation($"Querying {plant} for {topicString}");
 
@@ -131,6 +131,8 @@ public class FamFeederFunction
         return result;
     }
 
+  
+
     [FunctionName("RunFeeder")]
     public async Task<string> RunFeeder([ActivityTrigger] IDurableActivityContext context, ILogger logger)
     {
@@ -139,7 +141,46 @@ public class FamFeederFunction
         return runFeeder;
     }
 
-    private static async Task<(string topicString, string plant)> Deserialize(HttpRequest req)
+    [FunctionName("FamFeederFunction_RunCutoffForWeek")]
+    public async Task<IActionResult> RunCutoffForWeek(
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
+        HttpRequest req,
+        [DurableClient] IDurableOrchestrationClient orchestrationClient, ILogger log)
+    {
+        var (cutoffWeek, plant) = await DeserializeCutoffWeekAndPlant(req);       
+
+        log.LogTrace($"Running feeder for wocutoff for plant {plant} and week {cutoffWeek}");
+
+        if(cutoffWeek != "202234" || cutoffWeek  != "202235")
+        {
+            return new BadRequestObjectResult("Jone, bruk rett CutoffWeek: 202235. ");
+        }
+
+        if (plant == null)
+        {
+            return new BadRequestObjectResult("Please provide plant");
+        }
+
+        var plants = await _famFeederService.GetAllPlants();
+        if (!plants.Contains(plant))
+        {
+            return new BadRequestObjectResult("Please provide valid plant");
+        }
+
+        var instanceId = await orchestrationClient.StartNewAsync("RunWoCutoffFeederForCutoffWeek", cutoffWeek, plant);
+        return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
+    }
+
+    [FunctionName("RunWoCutoffFeederForCutoffWeek")]
+    public async Task<string> RunWoCutoffFeederForCutoffWeek([ActivityTrigger] IDurableActivityContext context, ILogger logger)
+    {
+        var (cutoffWeek, plant) = context.GetInput<(string, string)>();
+        var result = await _famFeederService.RunForCutoffWeek(cutoffWeek, plant, logger);
+        logger.LogDebug($"RunWoCutoffFeederForCutoffWeek returned {result}");
+        return result;
+    }
+
+    private static async Task<(string topicString, string plant)> DeserializeTopicAndPlant(HttpRequest req)
     {
         string topicString = req.Query["PcsTopic"];
         string plant = req.Query["Plant"];
@@ -149,5 +190,17 @@ public class FamFeederFunction
         topicString ??= data?.PcsTopic;
         plant ??= data?.Facility;
         return (topicString, plant);
+    }
+
+    private static async Task<(string topicString, string plant)> DeserializeCutoffWeekAndPlant(HttpRequest req)
+    {
+        string cutoffWeek = req.Query["CutoffWeek"];
+        string plant = req.Query["Plant"];
+
+        var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+        dynamic data = JsonConvert.DeserializeObject(requestBody);
+        cutoffWeek ??= data?.CutoffWeek;
+        plant ??= data?.Facility;
+        return (cutoffWeek, plant);
     }
 }

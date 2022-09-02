@@ -8,5 +8,6 @@
         "excludedTypes": "Request"
       }
     }
-  }
+  },
+  "UseDevelopmentStorage": "true"
 }
