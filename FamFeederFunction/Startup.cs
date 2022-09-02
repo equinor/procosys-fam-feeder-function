@@ -30,8 +30,8 @@ public class Startup : FunctionsStartup
 
         services.Configure<CommonLibConfig>(config.GetSection("CommonLibConfig"));
         services.Configure<FamFeederOptions>(config.GetSection("FamFeederOptions"));
-        //services.AddEventHubProducer(configBuilder
-        //    => config.Bind("EventHubProducerConfig", configBuilder));
+        services.AddEventHubProducer(configBuilder
+            => config.Bind("EventHubProducerConfig", configBuilder));
 
         services.AddLogging();
         AddWalletToDirectory(config);
