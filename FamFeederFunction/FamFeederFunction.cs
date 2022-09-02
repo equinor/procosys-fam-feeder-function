@@ -151,7 +151,7 @@ public class FamFeederFunction
 
         log.LogTrace($"Running feeder for wocutoff for plant {plant} and week {cutoffWeek}");
 
-        if(cutoffWeek != "202234" || cutoffWeek  != "202235")
+        if(!(cutoffWeek == "202234" || cutoffWeek  == "202235"))
         {
             return new BadRequestObjectResult("Jone, bruk rett CutoffWeek: 202235. ");
         }
