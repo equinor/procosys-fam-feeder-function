@@ -180,7 +180,7 @@ public class FamFeederFunction
         //var result = await _famFeederService.RunForCutoffWeek(cutoffWeek, plant, logger);
         logger.LogDebug($"RunWoCutoffFeederForCutoffWeek");
         //return result;
-        return await context.CallActivityAsync<string>("RunFeeder", new { cutoffWeek, plant });
+        return await context.CallActivityAsync<string>("RunWoCutoffFeederForAutocutoffWekkActivity", new { cutoffWeek, plant });
     }
 
     [FunctionName("RunWoCutoffFeederForAutocutoffWekkActivity")]
