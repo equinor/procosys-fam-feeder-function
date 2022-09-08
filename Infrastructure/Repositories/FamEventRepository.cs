@@ -43,7 +43,7 @@ public class FamEventRepository : IFamEventRepository
     public async Task<List<string>> GetLoopContent(string plant) => await ExecuteQuery(LoopContentQuery.GetQuery(null, plant));
     public async Task<List<string>> GetCallOff(string plant) => await ExecuteQuery(CallOffQuery.GetQuery(null,plant));
     public async Task<List<string>> GetCommPkgQuery(string plant) => await ExecuteQuery(QueryCommPkgQuery.GetQuery(null, null, plant));
-    public async Task<List<string>> GetWoCutoffsByWeekAndPlant(string cutoffWeek, string plant) => await ExecuteQuery(WorkOrderCutoffQuery.GetQuery(null, cutoffWeek: cutoffWeek, plant: plant));
+    public async Task<List<string>> GetWoCutoffsByWeekAndPlant(string cutoffWeek, string plant) => await ExecuteQuery(WorkOrderCutoffQuery.GetQuery(null, cutoffWeek, plant,null));
 
     internal async Task<List<string>> ExecuteQuery(string query)
     {

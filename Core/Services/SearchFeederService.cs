@@ -2,13 +2,8 @@
 using Core.Models;
 using Core.Models.Search;
 using Azure;
-using Equinor.ProCoSys.FamWebJob.Core.Mappers;
 using Equinor.ProCoSys.PcsServiceBus;
-using Equinor.TI.Common.Messaging;
-using Equinor.TI.CommonLibrary.Mapper;
-using Equinor.TI.CommonLibrary.Mapper.Core;
 using Fam.Core.EventHubs.Contracts;
-using Fam.Models.Exceptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoreLinq;
@@ -75,7 +70,7 @@ public class SearchFeederService : ISearchFeederService
 
         if (indexName == null || endPoint == null || accessKey == null)
         {
-            _logger.LogError($"Missing required env value (required: SearchIndexEndpoint, SearchIndexName and SearchIndexAccessKey");
+            _logger?.LogError($"Missing required env value (required: SearchIndexEndpoint, SearchIndexName and SearchIndexAccessKey");
             return;
         }
 
@@ -85,8 +80,8 @@ public class SearchFeederService : ISearchFeederService
             var credential = new AzureKeyCredential(accessKey);
             var client = new SearchClient(endPointUri, indexName, credential);
             // Add batch to index
-            IndexDocumentsBatch<IndexDocument> batch = IndexDocumentsBatch.MergeOrUpload(docs);
-            IndexDocumentsOptions options1 = new IndexDocumentsOptions { ThrowOnAnyError = true };
+            var batch = IndexDocumentsBatch.MergeOrUpload(docs);
+            var options1 = new IndexDocumentsOptions { ThrowOnAnyError = true };
             var resp = await client.IndexDocumentsAsync(batch, options1);
             
             Console.WriteLine($"Index Document batch finished. Results: {resp.Value.Results.Count}");
@@ -117,7 +112,7 @@ public class SearchFeederService : ISearchFeederService
                 break;
             default:
             {
-                _logger.LogInformation("{topic} not included in switch statement",queryParameters.PcsTopic);
+                _logger?.LogInformation("{topic} not included in switch statement",queryParameters.PcsTopic);
                 break;
             }
         }
