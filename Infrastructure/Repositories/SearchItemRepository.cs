@@ -183,6 +183,11 @@ public class SearchItemRepository : ISearchItemRepository
         busEventMessage = busEventMessage.Replace("\f", "");
         busEventMessage = _rx.Replace(busEventMessage, m => Regex.Escape(m.Value));
 
+        busEventMessage = busEventMessage.Replace((char)31, ' ');
+        busEventMessage = busEventMessage.Replace((char)11, ' ');
+        busEventMessage = busEventMessage.Replace((char)4, ' ');
+
+
         ////Removes non printable characters 
         /// THIS ALSO REMOVES NORWEGIAN CHARACTERS LIKE ø !!!
         //const string Pattern = "[^ -~]+";
