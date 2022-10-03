@@ -235,6 +235,8 @@ public class FamFeederService : IFamFeederService
             case PcsTopic.CommPkgQuery:
                 events = await _repo.GetCommPkgQuery(plant);
                 break;
+            case PcsTopic.HeatTrace:
+                events = await _repo.GetHeatTrace(plant);
 
             default:
             {
