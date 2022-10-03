@@ -1,7 +1,8 @@
 {
   "profiles": {
     "FamFeederFunction": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "--verbose"
     },
     "Docker": {
       "commandName": "Docker",

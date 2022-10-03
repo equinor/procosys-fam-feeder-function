@@ -21,7 +21,7 @@ public class FamEventRepository : IFamEventRepository
     public async Task<List<string>> GetCommPackages(string plant) => await ExecuteQuery(CommPkgQuery.GetQuery(null,plant));
     public async Task<List<string>> GetCommPkgOperations(string plant) => await ExecuteQuery(CommPkgOperationQuery.GetQuery(null,plant));
     public async Task<List<string>> GetPunchItems(string plant) => await ExecuteQuery(PunchListItemQuery.GetQuery(null,plant));
-    public async Task<List<string>> GetWorkOrders(string plant) => await ExecuteQuery(WorkOrderQuery.GetQuery(null,plant));
+    public async Task<List<string>> GetWorkOrders(string plant) => await ExecuteQuery(WorkOrderQuery.GetQuery(17675724, plant));
     public async Task<List<string>> GetCheckLists(string plant) => await ExecuteQuery(ChecklistQuery.GetQuery(null,plant));
     public async Task<List<string>> GetTags(string plant) => await ExecuteQuery(TagQuery.GetQuery(null,plant));
     public async Task<List<string>> GetMilestones(string plant) => await ExecuteQuery(MilestonesQuery.GetQuery(null,null,plant));
@@ -58,7 +58,9 @@ public class FamEventRepository : IFamEventRepository
         {
             if (result.HasRows)
             {
-                entities.Add( (string)result[0] );
+                var s = (string)result[0];
+                
+                entities.Add(s.Replace("\"WoNo\" : \"���\"", "\"WoNo\" : \"ÆØÅ\"") );
             }
         }
         return entities;
