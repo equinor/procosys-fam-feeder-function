@@ -237,6 +237,7 @@ public class FamFeederService : IFamFeederService
                 break;
             case PcsTopic.HeatTrace:
                 events = await _repo.GetHeatTrace(plant);
+                break;
 
             default:
             {
