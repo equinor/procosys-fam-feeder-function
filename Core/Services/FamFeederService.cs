@@ -59,7 +59,7 @@ public class FamFeederService : IFamFeederService
 
         foreach (var batch in mappedMessages.Batch(250))
         {
-            await SendFamMessages(batch);
+            //await SendFamMessages(batch);
         }
 
         _logger.LogInformation("Finished sending {topic} to fam",queryParameters.PcsTopic);
