@@ -10,6 +10,7 @@ using Infrastructure.Repositories;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Oracle.ManagedDataAccess.Client;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 
@@ -42,6 +43,10 @@ public class Startup : FunctionsStartup
         services.AddScoped<ISearchItemRepository, SearchItemRepository>();
         services.AddScoped<ISearchFeederService, SearchFeederService>();
         services.AddScoped<IPlantRepository, PlantRepository>();
+
+        //128mb (up from default 10) 
+        OracleConfiguration.FetchSize = 128 * 1024 * 1024;
+       
     }
 
     private static void AddWalletToDirectory(IConfiguration config)
