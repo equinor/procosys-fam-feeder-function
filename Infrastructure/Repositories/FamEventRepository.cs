@@ -17,6 +17,8 @@ public class FamEventRepository : IFamEventRepository
         _workOrderCutoffRepository = new WorkOrderCutoffRepository();
     }
 
+    public async Task<List<string>> GetCommPkgTasks(string plant) => await ExecuteQuery(CommPkgTaskQuery.GetQuery(null, null, plant));
+    public async Task<List<string>> GetTasks(string plant) => await ExecuteQuery(TaskQuery.GetQuery(null, plant));
     public async Task<List<string>> GetMcPackages(string plant) => await ExecuteQuery(McPkgQuery.GetQuery(null,plant));
     public async Task<List<string>> GetCommPackages(string plant) => await ExecuteQuery(CommPkgQuery.GetQuery(null,plant));
     public async Task<List<string>> GetCommPkgOperations(string plant) => await ExecuteQuery(CommPkgOperationQuery.GetQuery(null,plant));
