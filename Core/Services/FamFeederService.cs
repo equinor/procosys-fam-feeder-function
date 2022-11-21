@@ -22,8 +22,10 @@ public class FamFeederService : IFamFeederService
     private readonly IPlantRepository _plantRepository;
     private readonly IFamEventRepository _repo;
 
-    public FamFeederService(IEventHubProducerService eventHubProducerService, IFamEventRepository repo,
-        IOptions<CommonLibConfig> commonLibConfig, IOptions<FamFeederOptions> famFeederOptions,
+    public FamFeederService(IEventHubProducerService eventHubProducerService, 
+        IFamEventRepository repo,
+        IOptions<CommonLibConfig> commonLibConfig,
+        IOptions<FamFeederOptions> famFeederOptions,
         IPlantRepository plantRepository)
     {
         _eventHubProducerService = eventHubProducerService;
