@@ -2,6 +2,8 @@
 
 public interface IFamEventRepository
 {
+    Task<List<string>> GetCommPkgTasks(string plant);
+    Task<List<string>> GetTasks(string plant);
     Task<List<string>> GetProjects(string plant);
     Task<List<string>> GetMcPackages(string plant);
     Task<List<string>> GetCommPackages(string plant);
