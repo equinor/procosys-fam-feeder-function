@@ -22,8 +22,10 @@ public class FamFeederService : IFamFeederService
     private readonly IPlantRepository _plantRepository;
     private readonly IFamEventRepository _repo;
 
-    public FamFeederService(IEventHubProducerService eventHubProducerService, IFamEventRepository repo,
-        IOptions<CommonLibConfig> commonLibConfig, IOptions<FamFeederOptions> famFeederOptions,
+    public FamFeederService(IEventHubProducerService eventHubProducerService, 
+        IFamEventRepository repo,
+        IOptions<CommonLibConfig> commonLibConfig,
+        IOptions<FamFeederOptions> famFeederOptions,
         IPlantRepository plantRepository)
     {
         _eventHubProducerService = eventHubProducerService;
@@ -158,6 +160,12 @@ public class FamFeederService : IFamFeederService
         var plant = queryParameters.Plant;
         switch (queryParameters.PcsTopic)
         {
+            case PcsTopic.CommPkgTask:
+                events = await _repo.GetCommPkgTasks(plant);
+                break;
+            case PcsTopic.Task:
+                events = await _repo.GetTasks(plant);
+                break;
             case PcsTopic.CommPkg:
                 events = await _repo.GetCommPackages(plant);
                 break;

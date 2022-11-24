@@ -1,5 +1,7 @@
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using Core;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +9,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace FamFeederFunction;
@@ -14,10 +17,12 @@ namespace FamFeederFunction;
 public class WoCutoffFunction
 {
     private readonly IFamFeederService _famFeederService;
+    private readonly WoCutoffOptions _cutoffOptions;
 
-    public WoCutoffFunction(IFamFeederService famFeederService)
+    public WoCutoffFunction(IFamFeederService famFeederService, IOptions<WoCutoffOptions> cutoffOptions)
     {
         _famFeederService = famFeederService;
+        _cutoffOptions = cutoffOptions.Value;
     }
 
     [FunctionName("RunCutoffForWeek")]
@@ -44,6 +49,12 @@ public class WoCutoffFunction
         if (!plants.Contains(plant))
         {
             return new BadRequestObjectResult("Please provide valid plant");
+        }
+
+        var enabledPlants = _cutoffOptions.EnabledPlants?.Split(",").ToList();
+        if (enabledPlants == null || !enabledPlants.Contains(plant))
+        {
+            return new OkObjectResult($"{plant} not enabled in fff");
         }
 
         var instanceId = await orchestrationClient.StartNewAsync("CutoffForWeekOrchestration", null, (cutoffWeek, plant));

@@ -72,8 +72,8 @@ public class SearchFeederFunction
         [OrchestrationTrigger] IDurableOrchestrationContext context)
     {
         var param = context.GetInput<QueryParameters>();
-        var results = new List<string>();
-        results.Add(await context.CallActivityAsync<string>("RunSearchFeeder", param));
+        var results = new List<string> 
+            { await context.CallActivityAsync<string>("RunSearchFeeder", param) };
         return results;
     }
     
