@@ -11,6 +11,7 @@ internal class TagQuery
               '""ProjectName"" : ""' || p.name || '"",' ||
               '""McPkgNo"" : ""' || mcpkg.mcpkgno || '"",' ||
               '""CommPkgNo"" : ""' || commpkg.commpkgno || '"",' ||
+              '""ProCoSysGuid"" : ""' || t.PROCOSYS_GUID || '"",' ||
               '""TagId"" : ""' || t.tag_id || '"",' ||
               '""AreaCode"" : ""' || area.code || '"",' ||
               '""AreaDescription"" : ""' || regexp_replace(area.description, '([""\])', '\\\1') || '"",' ||

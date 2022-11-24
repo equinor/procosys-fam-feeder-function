@@ -8,6 +8,7 @@ internal class CommPkgQuery
         '{{""Plant"" : ""' || c.projectschema || 
          '"", ""PlantName"" : ""' || regexp_replace(ps.TITLE, '([""\])', '\\\1') ||
          '"", ""ProjectName"" : ""' || p.name || 
+         '"", ""ProCoSysGuid"" : ""' || c.PROCOSYS_GUID ||
          '"", ""CommPkgNo"" : ""' || c.COMMPKGNO ||
          '"", ""CommPkgId"" : ""' || c.COMMPKG_ID || 
          '"", ""Description"" : ""' || regexp_replace(c.DESCRIPTION, '([""\])', '\\\1') ||

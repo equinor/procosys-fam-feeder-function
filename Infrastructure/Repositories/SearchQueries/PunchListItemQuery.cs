@@ -9,6 +9,7 @@ internal class PunchListItemQuery
       '"", ""ProjectName"" : ""' || p.name ||
       '"", ""LastUpdated"" : ""' || TO_CHAR(pl.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:ss') ||                                           
       '"", ""PunchItemNo"" : ""' || pl.PunchListItem_Id ||
+      '"", ""ProCoSysGuid"" : ""' || pl.PROCOSYS_GUID ||
       '"", ""Description"" : ""' || regexp_replace(pl.Description, '([""\])', '\\\1') ||
       '"", ""ChecklistId"" : ""' || pl.tagcheck_id ||
       '"", ""Category"" : ""' || regexp_replace(cat.code, '([""\])', '\\\1') ||

@@ -8,6 +8,7 @@ public static class McPkgQuery
     '{{""Plant"" : ""' || e.projectschema || 
     '"", ""PlantName"" : ""' || regexp_replace(ps.TITLE, '([""\])', '\\\1') ||
     '"", ""ProjectName"" : ""' || p.name || 
+    '"", ""ProCoSysGuid"" : ""' || m.PROCOSYS_GUID ||
     '"", ""McPkgNo"" : ""' || m.MCPKGNO ||
     '"", ""McPkgId"" : ""' || m.MCPKG_ID ||
     '"", ""CommPkgNo"" : ""' || c.commpkgno ||
