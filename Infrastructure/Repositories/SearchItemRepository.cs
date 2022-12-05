@@ -45,7 +45,7 @@ public class SearchItemRepository : ISearchItemRepository
                     var msgCommPkg = JsonSerializer.Deserialize<CommPkgTopic>(cleanString);
                     if (msgCommPkg != null)
                     {
-                        key = GenerateKey($"commpkg:{msgCommPkg.Plant}:{msgCommPkg.ProjectName}:{ msgCommPkg.CommPkgNo}");
+                        key = $"commpkg_{msgCommPkg.ProCoSysGuid}";
                         doc = new IndexDocument
                         {
                             Key = key,
@@ -54,6 +54,7 @@ public class SearchItemRepository : ISearchItemRepository
                             PlantName = msgCommPkg.PlantName,
                             Project = msgCommPkg.ProjectName,
                             ProjectNames = msgCommPkg.ProjectNames ?? new List<string>(),
+                            ProCoSysGuid = msgCommPkg.ProCoSysGuid,
                             CommPkg = new CommPkg
                             {
                                 CommPkgNo = msgCommPkg.CommPkgNo,
@@ -71,7 +72,7 @@ public class SearchItemRepository : ISearchItemRepository
                     var msgMcPkg = JsonSerializer.Deserialize<McPkgTopic>(cleanString);
                     if(msgMcPkg != null)
                     {
-                        key = GenerateKey($"mcpkg:{msgMcPkg.Plant}:{msgMcPkg.ProjectName}:{msgMcPkg.CommPkgNo}:{msgMcPkg.McPkgNo}");
+                        key = $"commpkg_{msgMcPkg.ProCoSysGuid}";
                         doc = new IndexDocument
                         {
                             Key = key,
@@ -80,6 +81,7 @@ public class SearchItemRepository : ISearchItemRepository
                             PlantName = msgMcPkg.PlantName,
                             Project = msgMcPkg.ProjectName,
                             ProjectNames = msgMcPkg.ProjectNames ?? new List<string>(),
+                            ProCoSysGuid = msgMcPkg.ProCoSysGuid,
                             McPkg = new McPkg
                             {
                                 McPkgNo = msgMcPkg.McPkgNo,
@@ -99,7 +101,7 @@ public class SearchItemRepository : ISearchItemRepository
                     var msgPunchItem = JsonSerializer.Deserialize<PunchListItemTopic>(cleanString);
                     if (msgPunchItem != null)
                     {
-                        key = GenerateKey($"punchitem:{msgPunchItem.Plant}:{msgPunchItem.ProjectName}:{msgPunchItem.PunchItemNo}");
+                        key = $"punchlistitem_{msgPunchItem.ProCoSysGuid}";
                         doc = new IndexDocument
                         {
                             Key = key,
@@ -108,7 +110,7 @@ public class SearchItemRepository : ISearchItemRepository
                             PlantName = msgPunchItem.PlantName,
                             Project = msgPunchItem.ProjectName,
                             ProjectNames = msgPunchItem.ProjectNames ?? new List<string>(),
-
+                            ProCoSysGuid = msgPunchItem.ProCoSysGuid,
                             PunchItem = new PunchItem
                             {
                                 PunchItemNo = msgPunchItem.PunchItemNo,
@@ -127,7 +129,7 @@ public class SearchItemRepository : ISearchItemRepository
                     var msgTag = JsonSerializer.Deserialize<TagTopic>(cleanString);
                     if (msgTag != null)
                     {
-                        key = GenerateKey($"tag:{msgTag.Plant}:{msgTag.ProjectName}:{ Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(msgTag.TagNo))}");
+                        key = $"tag_{msgTag.ProCoSysGuid}";
                         doc = new IndexDocument
                         {
                             Key = key,
@@ -136,7 +138,7 @@ public class SearchItemRepository : ISearchItemRepository
                             PlantName = msgTag.PlantName,
                             Project = msgTag.ProjectName,
                             ProjectNames = msgTag.ProjectNames ?? new List<string>(),
-
+                            ProCoSysGuid = msgTag.ProCoSysGuid,
                             Tag = new Tag
                             {
                                 TagNo = msgTag.TagNo,
@@ -161,12 +163,6 @@ public class SearchItemRepository : ISearchItemRepository
             }
         }
         return entities;
-    }
-
-    public static string GenerateKey(string keyString)
-    {
-        var keyBytes = Encoding.UTF8.GetBytes(keyString);
-        return Convert.ToBase64String(keyBytes).Replace("/", "_").Replace("+", "-"); // URL safe base64
     }
 
 

@@ -5,10 +5,12 @@ internal class PunchListItemQuery
     internal static string GetQueryWithProjectNames(string schema)
     {
         return @$"select
-      '{{""Plant"" : ""' || pl.projectschema ||                  
+      '{{""Plant"" : ""' || pl.projectschema ||     
+      '"", ""PlantName"" : ""' || regexp_replace(ps.TITLE, '([""\])', '\\\1') || 
       '"", ""ProjectName"" : ""' || p.name ||
       '"", ""LastUpdated"" : ""' || TO_CHAR(pl.LAST_UPDATED, 'yyyy-mm-dd hh24:mi:ss') ||                                           
       '"", ""PunchItemNo"" : ""' || pl.PunchListItem_Id ||
+      '"", ""ProCoSysGuid"" : ""' || pl.PROCOSYS_GUID ||
       '"", ""Description"" : ""' || regexp_replace(pl.Description, '([""\])', '\\\1') ||
       '"", ""ChecklistId"" : ""' || pl.tagcheck_id ||
       '"", ""Category"" : ""' || regexp_replace(cat.code, '([""\])', '\\\1') ||
@@ -35,6 +37,7 @@ internal class PunchListItemQuery
       ']}}' as message
        from punchlistitem pl
            join tagcheck tc on tc.tagcheck_id = pl.tagcheck_id
+           join projectschema ps on ps.projectschema = tc.projectschema
            left join Responsible r ON tc.Responsible_id = r.Responsible_Id
            left join TagFormularType tft ON tc.TagFormularType_Id = tft.TagFormularType_Id
            left join FormularType ft ON tft.FormularType_Id = ft.FormularType_Id
