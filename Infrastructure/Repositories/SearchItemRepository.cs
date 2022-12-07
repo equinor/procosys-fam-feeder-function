@@ -45,7 +45,8 @@ public class SearchItemRepository : ISearchItemRepository
                     var msgCommPkg = JsonSerializer.Deserialize<CommPkgTopic>(cleanString);
                     if (msgCommPkg != null)
                     {
-                        key = $"commpkg_{msgCommPkg.ProCoSysGuid}";
+                        var proCoSysGuidString = msgCommPkg.ProCoSysGuid.ToString().Replace("-", "").ToUpper();
+                        key = $"commpkg_{proCoSysGuidString}";
                         doc = new IndexDocument
                         {
                             Key = key,
@@ -54,7 +55,7 @@ public class SearchItemRepository : ISearchItemRepository
                             PlantName = msgCommPkg.PlantName,
                             Project = msgCommPkg.ProjectName,
                             ProjectNames = msgCommPkg.ProjectNames ?? new List<string>(),
-                            ProCoSysGuid = msgCommPkg.ProCoSysGuid,
+                            ProCoSysGuid = proCoSysGuidString,
                             CommPkg = new CommPkg
                             {
                                 CommPkgNo = msgCommPkg.CommPkgNo,
@@ -72,7 +73,8 @@ public class SearchItemRepository : ISearchItemRepository
                     var msgMcPkg = JsonSerializer.Deserialize<McPkgTopic>(cleanString);
                     if(msgMcPkg != null)
                     {
-                        key = $"commpkg_{msgMcPkg.ProCoSysGuid}";
+                        var proCoSysGuidString = msgMcPkg.ProCoSysGuid.ToString().Replace("-", "").ToUpper();
+                        key = $"commpkg_{proCoSysGuidString}";
                         doc = new IndexDocument
                         {
                             Key = key,
@@ -81,7 +83,7 @@ public class SearchItemRepository : ISearchItemRepository
                             PlantName = msgMcPkg.PlantName,
                             Project = msgMcPkg.ProjectName,
                             ProjectNames = msgMcPkg.ProjectNames ?? new List<string>(),
-                            ProCoSysGuid = msgMcPkg.ProCoSysGuid,
+                            ProCoSysGuid = proCoSysGuidString,
                             McPkg = new McPkg
                             {
                                 McPkgNo = msgMcPkg.McPkgNo,
@@ -101,7 +103,8 @@ public class SearchItemRepository : ISearchItemRepository
                     var msgPunchItem = JsonSerializer.Deserialize<PunchListItemTopic>(cleanString);
                     if (msgPunchItem != null)
                     {
-                        key = $"punchlistitem_{msgPunchItem.ProCoSysGuid}";
+                        var proCoSysGuidString = msgPunchItem.ProCoSysGuid.ToString().Replace("-", "").ToUpper();
+                        key = $"punchlistitem_{proCoSysGuidString}";
                         doc = new IndexDocument
                         {
                             Key = key,
@@ -129,7 +132,8 @@ public class SearchItemRepository : ISearchItemRepository
                     var msgTag = JsonSerializer.Deserialize<TagTopic>(cleanString);
                     if (msgTag != null)
                     {
-                        key = $"tag_{msgTag.ProCoSysGuid}";
+                        var proCoSysGuidString = msgTag.ProCoSysGuid.ToString().Replace("-", "").ToUpper();
+                        key = $"tag_{proCoSysGuidString}";
                         doc = new IndexDocument
                         {
                             Key = key,
@@ -138,7 +142,7 @@ public class SearchItemRepository : ISearchItemRepository
                             PlantName = msgTag.PlantName,
                             Project = msgTag.ProjectName,
                             ProjectNames = msgTag.ProjectNames ?? new List<string>(),
-                            ProCoSysGuid = msgTag.ProCoSysGuid,
+                            ProCoSysGuid = proCoSysGuidString,
                             Tag = new Tag
                             {
                                 TagNo = msgTag.TagNo,
