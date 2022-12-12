@@ -160,6 +160,9 @@ public class FamFeederService : IFamFeederService
         var plant = queryParameters.Plant;
         switch (queryParameters.PcsTopic)
         {
+            case PcsTopic.Action:
+                events = await _repo.GetActions(plant);
+                break;
             case PcsTopic.CommPkgTask:
                 events = await _repo.GetCommPkgTasks(plant);
                 break;
