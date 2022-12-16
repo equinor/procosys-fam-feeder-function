@@ -34,7 +34,10 @@ public class SearchItemRepository : ISearchItemRepository
         var entities = new List<IndexDocument>();
 
         string key;
+        string guidString;
+        string messageWithFormatedGuid;
         IndexDocument doc;
+        Dictionary<string, object>? dictionary;
 
         while (await result.ReadAsync())
         {
@@ -42,8 +45,12 @@ public class SearchItemRepository : ISearchItemRepository
             switch (topic)
             {
                 case "CommPkg":
-                    var msgCommPkg = JsonSerializer.Deserialize<CommPkgTopic>(cleanString);
+
+                    dictionary = JsonSerializer.Deserialize<Dictionary<string, object>>(cleanString);
                     guidString = dictionary?["ProCoSysGuid"].ToString();
+                    dictionary["ProCoSysGuid"] = Guid.Parse(guidString).ToString();
+                    messageWithFormatedGuid = JsonSerializer.Serialize(dictionary);
+                    var msgCommPkg = JsonSerializer.Deserialize<CommPkgTopic>(messageWithFormatedGuid);
                     if (msgCommPkg != null)
                     {
                         var proCoSysGuidString = msgCommPkg.ProCoSysGuid.ToString().Replace("-", "").ToUpper();
@@ -71,7 +78,11 @@ public class SearchItemRepository : ISearchItemRepository
                     }
                     break;
                 case "McPkg":
-                    var msgMcPkg = JsonSerializer.Deserialize<McPkgTopic>(cleanString);
+                    dictionary = JsonSerializer.Deserialize<Dictionary<string, object>>(cleanString);
+                    guidString = dictionary?["ProCoSysGuid"].ToString();
+                    dictionary["ProCoSysGuid"] = Guid.Parse(guidString).ToString();
+                    messageWithFormatedGuid = JsonSerializer.Serialize(dictionary);
+                    var msgMcPkg = JsonSerializer.Deserialize<McPkgTopic>(messageWithFormatedGuid);
                     if(msgMcPkg != null)
                     {
                         var proCoSysGuidString = msgMcPkg.ProCoSysGuid.ToString().Replace("-", "").ToUpper();
@@ -101,7 +112,11 @@ public class SearchItemRepository : ISearchItemRepository
 
                     break;
                 case "PunchItem":
-                    var msgPunchItem = JsonSerializer.Deserialize<PunchListItemTopic>(cleanString);
+                    dictionary = JsonSerializer.Deserialize<Dictionary<string, object>>(cleanString);
+                    guidString = dictionary?["ProCoSysGuid"].ToString();
+                    dictionary["ProCoSysGuid"] = Guid.Parse(guidString).ToString();
+                    messageWithFormatedGuid = JsonSerializer.Serialize(dictionary);
+                    var msgPunchItem = JsonSerializer.Deserialize<PunchListItemTopic>(messageWithFormatedGuid);
                     if (msgPunchItem != null)
                     {
                         var proCoSysGuidString = msgPunchItem.ProCoSysGuid.ToString().Replace("-", "").ToUpper();
@@ -130,7 +145,11 @@ public class SearchItemRepository : ISearchItemRepository
                     
                     break;
                 case "Tag":
-                    var msgTag = JsonSerializer.Deserialize<TagTopic>(cleanString);
+                    dictionary = JsonSerializer.Deserialize<Dictionary<string, object>>(cleanString);
+                    guidString = dictionary?["ProCoSysGuid"].ToString();
+                    dictionary["ProCoSysGuid"] = Guid.Parse(guidString).ToString();
+                    messageWithFormatedGuid = JsonSerializer.Serialize(dictionary);
+                    var msgTag = JsonSerializer.Deserialize<TagTopic>(messageWithFormatedGuid);
                     if (msgTag != null)
                     {
                         var proCoSysGuidString = msgTag.ProCoSysGuid.ToString().Replace("-", "").ToUpper();
