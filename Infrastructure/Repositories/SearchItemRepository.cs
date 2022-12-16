@@ -43,6 +43,7 @@ public class SearchItemRepository : ISearchItemRepository
             {
                 case "CommPkg":
                     var msgCommPkg = JsonSerializer.Deserialize<CommPkgTopic>(cleanString);
+                    guidString = dictionary?["ProCoSysGuid"].ToString();
                     if (msgCommPkg != null)
                     {
                         var proCoSysGuidString = msgCommPkg.ProCoSysGuid.ToString().Replace("-", "").ToUpper();
