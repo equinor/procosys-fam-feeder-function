@@ -43,6 +43,9 @@ public class Startup : FunctionsStartup
         services.AddScoped<IFamFeederService, FamFeederService>();
         services.AddScoped<ISearchItemRepository, SearchItemRepository>();
         services.AddScoped<ISearchFeederService, SearchFeederService>();
+        services.AddScoped<IDbStatusRepository, DbStatusRepository>();
+        services.AddScoped<IDbStatusFeederService, DbStatusFeederService>();
+
         services.AddScoped<IPlantRepository, PlantRepository>();
 
         //128mb (up from default 10) 

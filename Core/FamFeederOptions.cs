@@ -17,5 +17,7 @@ public class FamFeederOptions
     public string? SearchIndexAccessKey { get; set; }
     public string? SearchIndexBatchSize { get; set; }
     public string? SearchIndexBatchDelay { get; set; }
+    public string? DbStatusAiCs { get; set; }
+    
 
 }
