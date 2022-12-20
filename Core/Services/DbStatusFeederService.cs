@@ -27,22 +27,21 @@ public class DbStatusFeederService : IDbStatusFeederService
       
         var metrics = await GetSbStatus();
 
-        if (metrics == null || metrics?.Count == 0)
+        if (metrics != null)
         {
-            _logger.LogInformation("found no items");
-            return "found no items";
+            LogMetricsToAi(metrics);
+            return $"Finished logging {metrics.Count} metrics to AI";
         }
         else
         {
-            LogMetricsToAi(metrics);
+            _logger.LogInformation("found no items");
+            return "Found no items";
         }
-        return $"finished logging {metrics.Count} metrics to AI";
     }
 
 
     private void LogMetricsToAi(IEnumerable<MetricDto> metrics)
     {
-        
         var configuration = new TelemetryConfiguration
         {
             ConnectionString = _famFeederOptions.DbStatusAiCs
@@ -61,7 +60,6 @@ public class DbStatusFeederService : IDbStatusFeederService
 
                 _telemetryClient.TrackMetric(metric.Name, metric.Value, props);
             }
-
             _telemetryClient.TrackTrace($"Tracked {metrics.Count()} metrics");
         }
         else
@@ -70,11 +68,11 @@ public class DbStatusFeederService : IDbStatusFeederService
         }
 
         _telemetryClient.Flush();
+        configuration.Dispose();
     }
     private async Task<List<MetricDto>> GetSbStatus()
     {
-        var metrics = new List<MetricDto>();
-        metrics = await _dbStatusRepo.GetMetrics();
+        var metrics = await _dbStatusRepo.GetMetrics();
         return metrics;
     }
 }

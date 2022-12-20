@@ -1,13 +1,8 @@
 ﻿using Core.Interfaces;
 using Core.Models.DbStatus;
-using Equinor.ProCoSys.PcsServiceBus.Topics;
-using Equinor.TI.Common.Messaging;
 using Infrastructure.Data;
 using Infrastructure.Repositories.DbStatusQueries;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
-using System.Text.Json;
-using System.Text.RegularExpressions;
 
 namespace Infrastructure.Repositories;
 
@@ -42,7 +37,7 @@ public class DbStatusRepository : IDbStatusRepository
                 Serial = result.GetInt32(3),
                 Name = result.IsDBNull(4) ? "" : result.GetString(4),
                 Value = result.GetInt32(5),
-            }); ;
+            }); 
         }
         return metrics;
     }
