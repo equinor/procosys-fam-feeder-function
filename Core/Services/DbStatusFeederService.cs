@@ -23,6 +23,11 @@ public class DbStatusFeederService : IDbStatusFeederService
 
     public async Task<string> RunFeeder(ILogger logger)
     {
+        if (_famFeederOptions.DbStatusAiCs == null || _famFeederOptions.DbStatusAiCs == "")
+        {
+            return "AI connection-string for DbStatus not configured - exiting";
+        }
+
         _logger = logger;
       
         var metrics = await GetSbStatus();
