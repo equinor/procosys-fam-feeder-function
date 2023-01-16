@@ -2,6 +2,8 @@
 
 public interface IFamEventRepository
 {
+    Task<List<string>> GetSwcrOtherReferences(string plant);
+    Task<List<string>> GetSwcrType(string plant);
     Task<List<string>> GetActions(string plant);
     Task<List<string>> GetCommPkgTasks(string plant);
     Task<List<string>> GetTasks(string plant);
