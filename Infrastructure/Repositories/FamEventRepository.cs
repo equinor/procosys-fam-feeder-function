@@ -16,6 +16,7 @@ public class FamEventRepository : IFamEventRepository
         _context = context;
         _workOrderCutoffRepository = new WorkOrderCutoffRepository();
     }
+    public async Task<List<string>> GetSwcrAttachments(string plant) => await ExecuteQuery(SwcrAttachmentQuery.GetQuery(null, plant));
     public async Task<List<string>> GetSwcrOtherReferences(string plant) => await ExecuteQuery(SwcrTypeQuery.GetQuery(null, plant));
     public async Task<List<string>> GetSwcrType(string plant) => await ExecuteQuery(SwcrOtherReferencesQuery.GetQuery(null, plant));
     public async Task<List<string>> GetActions(string plant) => await ExecuteQuery(ActionQuery.GetQuery(null, plant));

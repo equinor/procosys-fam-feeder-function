@@ -160,11 +160,14 @@ public class FamFeederService : IFamFeederService
         var plant = queryParameters.Plant;
         switch (queryParameters.PcsTopic)
         {
+            case PcsTopic.SWCRAttachment:
+                events = await _repo.GetSwcrAttachments(plant);
+                break;
             case PcsTopic.SWCRType:
-                events = await _repo.GetActions(plant);
+                events = await _repo.GetSwcrType(plant);
                 break;
             case PcsTopic.SWCROtherReference:
-                events = await _repo.GetActions(plant);
+                events = await _repo.GetSwcrOtherReferences(plant);
                 break;
             case PcsTopic.Action:
                 events = await _repo.GetActions(plant);
