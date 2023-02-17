@@ -25,7 +25,7 @@ public class DbStatusFeederService : IDbStatusFeederService
         {
             return "AI connection-string for DbStatus not configured - exiting";
         }
-        var metrics = await GetSbStatus();
+        var metrics = await GetDatabaseStatus();
         LogMetricsToAi(metrics);
         return $"Finished logging {metrics.Count} metrics to AI";
     }
@@ -44,7 +44,7 @@ public class DbStatusFeederService : IDbStatusFeederService
             {
                 var props = new Dictionary<string, string>
                 {
-                    { "UserName", metric.UseName },
+                    { "UserName", metric.UserName },
                     { "Program", metric.Program },
                     { "SID", metric.Sid.ToString() },
                     { "Serial", metric.Serial.ToString() }
@@ -62,7 +62,7 @@ public class DbStatusFeederService : IDbStatusFeederService
         telemetryClient.Flush();
         configuration.Dispose();
     }
-    private async Task<List<MetricDto>> GetSbStatus()
+    private async Task<List<MetricDto>> GetDatabaseStatus()
     {
         var metrics = await _dbStatusRepo.GetMetrics();
         return metrics;

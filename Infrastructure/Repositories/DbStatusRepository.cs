@@ -39,7 +39,7 @@ public class DbStatusRepository : IDbStatusRepository
             {
                 metrics.Add(new MetricDto()
                 {
-                    UseName = result.IsDBNull(0) ? "" : result.GetString(0),
+                    UserName = result.IsDBNull(0) ? "" : result.GetString(0),
                     Program = result.IsDBNull(1) ? "" : result.GetString(1),
                     Sid = result.GetInt32(2),
                     Serial = result.GetInt32(3),

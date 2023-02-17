@@ -87,30 +87,32 @@ public class FamFeederFunction
         [OrchestrationTrigger] IDurableOrchestrationContext context)
     {
         var param = context.GetInput<QueryParameters>();
-        var results = new List<Task<string>>();
         if (param.PcsTopic == PcsTopic.WorkOrderCutoff)
         {
-            var months = new List<string> { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" };
-            foreach (var cutoffInput in months.Select(m => (param.Plant, m)))
-            {
-                var woForMonthTask = context.CallSubOrchestratorAsync<string>("RunWoCutoffFeeder", cutoffInput);
-                results.Add(woForMonthTask);
-               
-            }
-            var status = "";
-            results.ForEach(r => r.ContinueWith(str=>
-            {
-                status += str.Result+"\n";
-                context.SetCustomStatus(status);
-            }));
-            var toReturn = await Task.WhenAll(results);
-            return toReturn.ToList();
+            return await RunWoCutoffOrchestration(context, param);
+        }
+        var singleReturn = await context.CallActivityAsync<string>("RunFeeder", param);
+        return new List<string> {singleReturn};
+    }
+
+    private static async Task<List<string>> RunWoCutoffOrchestration(IDurableOrchestrationContext context, QueryParameters param)
+    {
+        var results = new List<Task<string>>();
+        var months = new List<string> { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" };
+        foreach (var cutoffInput in months.Select(m => (param.Plant, m)))
+        {
+            var woForMonthTask = context.CallSubOrchestratorAsync<string>("RunWoCutoffFeeder", cutoffInput);
+            results.Add(woForMonthTask);
         }
 
-        results.Add( context.CallActivityAsync<string>("RunFeeder", param));
-
-        var singleReturn = await Task.WhenAll(results);
-        return singleReturn.ToList();
+        var status = "";
+        results.ForEach(r => r.ContinueWith(str =>
+        {
+            status += str.Result + "\n";
+            context.SetCustomStatus(status);
+        }));
+        var toReturn = await Task.WhenAll(results);
+        return toReturn.ToList();
     }
 
     [FunctionName("RunAllExceptCutoff")]
@@ -158,7 +160,6 @@ public class FamFeederFunction
         return runFeeder;
     }
 
-
     private static async Task<(string topicString, string plant)> DeserializeTopicAndPlant(HttpRequest req)
     {
         string topicString = req.Query["PcsTopic"];
@@ -170,6 +171,4 @@ public class FamFeederFunction
         plant ??= data?.Facility;
         return (topicString, plant);
     }
-
-
 }

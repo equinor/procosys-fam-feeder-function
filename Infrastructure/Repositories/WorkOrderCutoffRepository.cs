@@ -11,10 +11,7 @@ public class WorkOrderCutoffRepository : IWorkOrderCutoffRepository
 {
     private readonly AppDbContext _context;
 
-    public WorkOrderCutoffRepository(AppDbContext context)
-    {
-        _context = context;
-    }
+    public WorkOrderCutoffRepository(AppDbContext context) => _context = context;
 
     public async Task<List<string>> GetWoCutoffs(string month, string plant)
     {
