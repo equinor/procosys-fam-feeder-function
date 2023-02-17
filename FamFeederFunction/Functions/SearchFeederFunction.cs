@@ -39,7 +39,7 @@ public class SearchFeederFunction
             return new BadRequestObjectResult("Please provide both plant and topic");
         }
 
-        var parsed = TryParse(topicString, out PcsTopic topic);
+        var parsed = TryParse(topicString, out PcsTopic _);
         if (!parsed)
         {
             return new BadRequestObjectResult("Please provide valid topic");
@@ -51,7 +51,7 @@ public class SearchFeederFunction
             return new BadRequestObjectResult("Please provide valid plant");
         }
 
-        var param = new QueryParameters(plant, topic);
+        var param = new QueryParameters(plant, topicString);
         var instanceId = await orchestrationClient.StartNewAsync("SearchFeederFunction", param);
         return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
     }

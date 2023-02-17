@@ -94,16 +94,16 @@ public class SearchFeederService : ISearchFeederService
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (queryParameters.PcsTopic)
         {
-            case PcsTopic.CommPkg:
+            case nameof(PcsTopic.CommPkg.ToString):
                 events = await _searchItemRepo.GetCommPackages(queryParameters.Plant);
                 break;
-            case PcsTopic.McPkg:
+            case nameof(PcsTopic.McPkg):
                 events = await _searchItemRepo.GetMcPackages(queryParameters.Plant);
                 break;
-            case PcsTopic.Tag:
+            case nameof(PcsTopic.Tag):
                 events = await _searchItemRepo.GetTags(queryParameters.Plant);
                 break;
-            case PcsTopic.PunchListItem:
+            case nameof(PcsTopic.PunchListItem):
                 events = await _searchItemRepo.GetPunchItems(queryParameters.Plant);
                 break;
             default:

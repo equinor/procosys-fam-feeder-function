@@ -39,7 +39,7 @@ public class FamFeederFunction
             return new BadRequestObjectResult("Please provide both plant and topic");
         }
 
-        if (!TryParse(topicString, out PcsTopic topic))
+        if (!TryParse(topicString, out PcsTopic _))
         {
             return new BadRequestObjectResult("Please provide valid topic");
         }
@@ -50,7 +50,7 @@ public class FamFeederFunction
             return new BadRequestObjectResult("Please provide valid plant");
         }
 
-        var param = new QueryParameters(plant, topic);
+        var param = new QueryParameters(plant, topicString);
         var instanceId = await orchestrationClient.StartNewAsync("FamFeederFunction", param);
         return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
     }
@@ -87,7 +87,7 @@ public class FamFeederFunction
         [OrchestrationTrigger] IDurableOrchestrationContext context)
     {
         var param = context.GetInput<QueryParameters>();
-        if (param.PcsTopic == PcsTopic.WorkOrderCutoff)
+        if (param.PcsTopic == PcsTopic.WorkOrderCutoff.ToString())
         {
             return await RunWoCutoffOrchestration(context, param);
         }
@@ -108,7 +108,15 @@ public class FamFeederFunction
         var status = "";
         results.ForEach(r => r.ContinueWith(str =>
         {
-            status += str.Result + "\n";
+            if (str.IsFaulted)
+            {
+                status += str.Exception + "\n";
+            }
+            else
+            {
+                status += str.Result + "\n";
+            }
+            
             context.SetCustomStatus(status);
         }));
         var toReturn = await Task.WhenAll(results);
@@ -127,7 +135,7 @@ public class FamFeederFunction
             PcsTopic.Checklist,PcsTopic.WorkOrder,PcsTopic.WoChecklist, PcsTopic.PipingRevision, PcsTopic.SWCR,
             PcsTopic.SWCRSignature, PcsTopic.Stock, PcsTopic.WoMaterial, PcsTopic.WoMilestone, PcsTopic.Library,
             PcsTopic.Responsible, PcsTopic.Query,PcsTopic.QuerySignature,PcsTopic.LoopContent,
-            PcsTopic.CommPkgOperation};
+            PcsTopic.CommPkgOperation}.Select(t => t.ToString());
 
         foreach (var topic in topics)
         {
