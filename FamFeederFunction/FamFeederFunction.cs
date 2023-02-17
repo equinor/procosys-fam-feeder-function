@@ -107,18 +107,28 @@ public class FamFeederFunction
         [OrchestrationTrigger] IDurableOrchestrationContext context)
     {
         var plant = context.GetInput<string>();
-        var results = new List<string>();
-
+        var results = new List<Task<string>>();
+        
         var topics = new List<PcsTopic> { PcsTopic.CommPkg, PcsTopic.McPkg,PcsTopic.Tag,PcsTopic.Milestone,
             PcsTopic.Checklist,PcsTopic.WorkOrder,PcsTopic.WoChecklist, PcsTopic.PipingRevision, PcsTopic.SWCR,
             PcsTopic.SWCRSignature, PcsTopic.Stock, PcsTopic.WoMaterial, PcsTopic.WoMilestone, PcsTopic.Library,
             PcsTopic.Responsible, PcsTopic.Query,PcsTopic.QuerySignature,PcsTopic.LoopContent,
             PcsTopic.CommPkgOperation};
+
         foreach (var topic in topics)
         {
-            results.Add(await context.CallActivityAsync<string>("RunFeeder", new QueryParameters(plant, topic)));
+            var callSubOrchestratorAsync =  context.CallSubOrchestratorAsync<string>("FamFeederFunction", new QueryParameters(plant, topic));
+            results.Add(callSubOrchestratorAsync);
         }
-        return results;
+
+        var status = "";
+        results.ForEach(r => r.ContinueWith(str =>
+        {
+            status += str.Result + "\n";
+            context.SetCustomStatus(status);
+        }));
+        var toReturn = await Task.WhenAll(results);
+        return toReturn.ToList();
     }
 
     [FunctionName("RunWoCutoffFeeder")]
