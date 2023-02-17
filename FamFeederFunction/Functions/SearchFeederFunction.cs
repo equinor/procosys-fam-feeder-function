@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Core.Interfaces;
@@ -14,7 +13,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using static System.Enum;
-namespace SearchFeederFunction;
+namespace FamFeederFunction.Functions;
 
 public class SearchFeederFunction
 {
@@ -72,11 +71,11 @@ public class SearchFeederFunction
         [OrchestrationTrigger] IDurableOrchestrationContext context)
     {
         var param = context.GetInput<QueryParameters>();
-        var results = new List<string> 
+        var results = new List<string>
             { await context.CallActivityAsync<string>("RunSearchFeeder", param) };
         return results;
     }
-    
+
     [FunctionName("RunSearchFeeder")]
     public async Task<string> RunSearchFeeder([ActivityTrigger] IDurableActivityContext context, ILogger logger)
     {

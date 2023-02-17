@@ -2,26 +2,50 @@
 using Equinor.ProCoSys.PcsServiceBus.Queries;
 
 using Microsoft.EntityFrameworkCore;
+using System.Data;
+using Core.Interfaces;
 
 namespace Infrastructure.Repositories;
 
-public class WorkOrderCutoffRepository
+public class WorkOrderCutoffRepository : IWorkOrderCutoffRepository
 {
-    public async Task<List<string>> GetWoCutoffs(string month, string plant, string? connectionString)
-    {
-        var options = new DbContextOptionsBuilder<AppDbContext>();
-        options.UseOracle(connectionString!, b => b.MaxBatchSize(200));
-        await using var context = new AppDbContext(options.Options);
-        await using var command = context.Database.GetDbConnection().CreateCommand();
-        command.CommandText = WorkOrderCutoffQuery.GetQuery(null, null,plant, month);
-        await context.Database.OpenConnectionAsync();
-        await using var result = await command.ExecuteReaderAsync();
-        var entities = new List<string>();
+    private readonly AppDbContext _context;
 
-        while (await result.ReadAsync())
+    public WorkOrderCutoffRepository(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<List<string>> GetWoCutoffs(string month, string plant)
+    {
+        var dbConnection = _context.Database.GetDbConnection();
+        await using var command = dbConnection.CreateCommand();
+        command.CommandText = WorkOrderCutoffQuery.GetQuery(null, null, plant, month);
+        var connectionWasClosed = dbConnection.State != ConnectionState.Open;
+        if (connectionWasClosed)
         {
-            entities.Add( (string)result[0]);
+            await _context.Database.OpenConnectionAsync();
         }
-        return entities;
+        try
+        {
+            await using var result = await command.ExecuteReaderAsync();
+            var entities = new List<string>();
+
+            while (await result.ReadAsync())
+            {
+                entities.Add((string)result[0]);
+            }
+
+            return entities;
+        }
+        finally
+        {
+            //If we open it, we have to close it.
+            if (connectionWasClosed)
+            {
+                await _context.Database.CloseConnectionAsync();
+            }
+        }
+   
     }
 }

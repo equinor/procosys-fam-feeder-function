@@ -1,6 +1,7 @@
 ﻿using Core.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Infrastructure.Repositories;
 
@@ -12,18 +13,32 @@ public class PlantRepository : IPlantRepository
 
     public async Task<List<string>> GetAllPlants()
     {
-        await using var context = _context;
-        await using var command = context.Database.GetDbConnection().CreateCommand();
-        command.CommandText = "Select projectschema from projectschema";
-        await context.Database.OpenConnectionAsync();
-        await using var result = await command.ExecuteReaderAsync();
-        var plants = new List<string>();
-
-        while (await result.ReadAsync())
+        var dbConnection = _context.Database.GetDbConnection();
+        var connectionWasClosed = dbConnection.State != ConnectionState.Open;
+        if (connectionWasClosed)
         {
-            plants.Add((string)result[0]);
+            await _context.Database.OpenConnectionAsync();
         }
+        try
+        {
+            await using var command = dbConnection.CreateCommand();
+            command.CommandText = "Select projectschema from projectschema";
+            await using var result = await command.ExecuteReaderAsync();
+            var plants = new List<string>();
 
-        return plants;
+            while (await result.ReadAsync())
+            {
+                plants.Add((string)result[0]);
+            }
+            return plants;
+        }
+        finally
+        {
+            //If we open it, we have to close it.
+            if (connectionWasClosed)
+            {
+                await _context.Database.CloseConnectionAsync();
+            }
+        }
     }
 }

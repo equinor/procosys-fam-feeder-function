@@ -17,22 +17,21 @@ public class FamFeederService : IFamFeederService
 {
     private readonly CommonLibConfig _commonLibConfig;
     private readonly IEventHubProducerService _eventHubProducerService;
-    private readonly FamFeederOptions _famFeederOptions;
     private ILogger? _logger;
     private readonly IPlantRepository _plantRepository;
     private readonly IFamEventRepository _repo;
+    private readonly IWorkOrderCutoffRepository _cutoffRepository;
 
     public FamFeederService(IEventHubProducerService eventHubProducerService, 
         IFamEventRepository repo,
         IOptions<CommonLibConfig> commonLibConfig,
-        IOptions<FamFeederOptions> famFeederOptions,
-        IPlantRepository plantRepository)
+        IPlantRepository plantRepository, IWorkOrderCutoffRepository cutoffRepository)
     {
         _eventHubProducerService = eventHubProducerService;
         _repo = repo;
         _plantRepository = plantRepository;
+        _cutoffRepository = cutoffRepository;
         _commonLibConfig = commonLibConfig.Value;
-        _famFeederOptions = famFeederOptions.Value;
     }
 
     public async Task<string> RunFeeder(QueryParameters queryParameters, ILogger logger)
@@ -101,18 +100,17 @@ public class FamFeederService : IFamFeederService
     public async Task<string> WoCutoff(string plant, string month, ILogger logger)
     {
         var mapper = CreateCommonLibMapper();
-        var connectionString = _famFeederOptions.ProCoSysConnectionString;
-        var response = await _repo.GetWoCutoffs(month, plant, connectionString);
+        var response = await _cutoffRepository.GetWoCutoffs(month, plant);
         logger.LogInformation("Found {count} cutoffs for month {month} in {plant}",response.Count,month,plant);
 
         var messages = response.SelectMany(e =>
             TieMapper.CreateTieMessage(e, PcsTopic.WorkOrderCutoff));
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
 
-        foreach (var batch in mappedMessages.Batch(250))
-        {
-            await SendFamMessages(batch);
-        }
+        //foreach (var batch in mappedMessages.Batch(250))
+        //{
+        //    await SendFamMessages(batch);
+        //}
 
         logger.LogDebug("Sent WoCutoff to FAM");
         return $"Sent {mappedMessages.Count} WoCutoff to FAM  for {month} done";
