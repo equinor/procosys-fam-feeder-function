@@ -2,7 +2,7 @@
 {
     public class MetricDto
     {
-        public string UseName { get; set; } = "";
+        public string UserName { get; set; } = "";
         public string Program { get; set; } = "";
         public int Sid { get; set; }
         public int Serial { get; set; }

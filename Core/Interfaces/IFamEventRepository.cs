@@ -17,7 +17,6 @@ public interface IFamEventRepository
     Task<List<string>> GetCheckLists(string plant);
     Task<List<string>> GetTags(string plant);
     Task<List<string>> GetMilestones(string plant);
-    Task<List<string>> GetWoCutoffs(string month, string plant, string? connectionString);
     Task<List<string>> GetWoChecklists(string plant);
     Task<List<string>> GetSwcr(string plant);
     Task<List<string>> GetSwcrSignature(string plant);

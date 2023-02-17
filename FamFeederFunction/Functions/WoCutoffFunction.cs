@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
-namespace FamFeederFunction;
+namespace FamFeederFunction.Functions;
 
 public class WoCutoffFunction
 {
