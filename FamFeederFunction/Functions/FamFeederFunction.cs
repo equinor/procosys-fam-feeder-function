@@ -13,7 +13,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using static System.Enum;
-namespace FamFeederFunction;
+namespace FamFeederFunction.Functions;
 
 public class FamFeederFunction
 {
@@ -83,23 +83,36 @@ public class FamFeederFunction
     }
 
     [FunctionName("FamFeederFunction")]
-    public static async Task<List<string>> RunOrchestrator(
+    public static async  Task<List<string>> RunOrchestrator(
         [OrchestrationTrigger] IDurableOrchestrationContext context)
     {
         var param = context.GetInput<QueryParameters>();
-        var results = new List<string>();
         if (param.PcsTopic == PcsTopic.WorkOrderCutoff)
         {
-            var months = new List<string> { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" };
-            foreach (var cutoffInput in months.Select(m => (param.Plant, m)))
-            {
-                results.Add(await context.CallActivityAsync<string>("RunWoCutoffFeeder", cutoffInput));
-            }
-            return results;
+            return await RunWoCutoffOrchestration(context, param);
+        }
+        var singleReturn = await context.CallActivityAsync<string>("RunFeeder", param);
+        return new List<string> {singleReturn};
+    }
+
+    private static async Task<List<string>> RunWoCutoffOrchestration(IDurableOrchestrationContext context, QueryParameters param)
+    {
+        var results = new List<Task<string>>();
+        var months = new List<string> { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" };
+        foreach (var cutoffInput in months.Select(m => (param.Plant, m)))
+        {
+            var woForMonthTask = context.CallSubOrchestratorAsync<string>("RunWoCutoffFeeder", cutoffInput);
+            results.Add(woForMonthTask);
         }
 
-        results.Add(await context.CallActivityAsync<string>("RunFeeder", param));
-        return results;
+        var status = "";
+        results.ForEach(r => r.ContinueWith(str =>
+        {
+            status += str.Result + "\n";
+            context.SetCustomStatus(status);
+        }));
+        var toReturn = await Task.WhenAll(results);
+        return toReturn.ToList();
     }
 
     [FunctionName("RunAllExceptCutoff")]
@@ -109,6 +122,7 @@ public class FamFeederFunction
         var plant = context.GetInput<string>();
         var results = new List<Task<string>>();
         
+        //TODO
         var topics = new List<PcsTopic> { PcsTopic.CommPkg, PcsTopic.McPkg,PcsTopic.Tag,PcsTopic.Milestone,
             PcsTopic.Checklist,PcsTopic.WorkOrder,PcsTopic.WoChecklist, PcsTopic.PipingRevision, PcsTopic.SWCR,
             PcsTopic.SWCRSignature, PcsTopic.Stock, PcsTopic.WoMaterial, PcsTopic.WoMilestone, PcsTopic.Library,
@@ -131,11 +145,20 @@ public class FamFeederFunction
         return toReturn.ToList();
     }
 
-    [FunctionName("RunWoCutoffFeeder")]
-    public async Task<string> RunWoCutoffFeeder([ActivityTrigger] IDurableActivityContext context, ILogger logger)
+    [FunctionName("RunWoCutoffActivity")]
+    public async Task<string> RunWoCutoffActivity([ActivityTrigger] IDurableActivityContext context, ILogger logger)
     {
         var (plant, month) = context.GetInput<(string, string)>();
         var result = await _famFeederService.WoCutoff(plant, month, logger);
+        logger.LogDebug($"RunFeeder returned {result}");
+        return result;
+    }
+
+    [FunctionName("RunWoCutoffFeeder")]
+    public static async Task<string> RunWoCutoffFeeder([OrchestrationTrigger] IDurableOrchestrationContext context, ILogger logger)
+    {
+        var (plant, month) = context.GetInput<(string, string)>();
+        var result= await context.CallActivityAsync<string>("RunWoCutoffActivity", (plant,month));
         logger.LogDebug($"RunFeeder returned {result}");
         return result;
     }
@@ -148,8 +171,6 @@ public class FamFeederFunction
         return runFeeder;
     }
 
-    
-
     private static async Task<(string topicString, string plant)> DeserializeTopicAndPlant(HttpRequest req)
     {
         string topicString = req.Query["PcsTopic"];
@@ -161,6 +182,4 @@ public class FamFeederFunction
         plant ??= data?.Facility;
         return (topicString, plant);
     }
-
-
 }
