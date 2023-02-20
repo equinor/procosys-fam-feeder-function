@@ -97,13 +97,11 @@ public class FamFeederFunction
 
     private static async Task<List<string>> RunWoCutoffOrchestration(IDurableOrchestrationContext context, QueryParameters param)
     {
-        var results = new List<Task<string>>();
         var months = new List<string> { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" };
-        foreach (var cutoffInput in months.Select(m => (param.Plant, m)))
-        {
-            var woForMonthTask =  context.CallActivityAsync<string>("RunWoCutoffActivity", cutoffInput);
-            results.Add(woForMonthTask);
-        }
+        var results = months
+            .Select(m => (param.Plant, m))
+            .Select(cutoffInput => context.CallActivityAsync<string>(
+                "RunWoCutoffActivity", cutoffInput)).ToList();
 
         var statuses = new List<string>();
         results.ForEach(r => r.ContinueWith(str =>
