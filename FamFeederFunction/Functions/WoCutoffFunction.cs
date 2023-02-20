@@ -66,7 +66,7 @@ public class WoCutoffFunction
         [OrchestrationTrigger] IDurableOrchestrationContext context, ILogger logger)
     {
         var (cutoffWeek, plant) = context.GetInput<(string, string)>();
-        logger.LogDebug("RunWoCutoffFeederForCutoffWeek");
+        logger.LogDebug("RunCutoffForWeekActivity");
         return await context.CallActivityAsync<string>("RunCutoffForWeekActivity", (cutoffWeek, plant));
     }
 

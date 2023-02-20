@@ -101,24 +101,17 @@ public class FamFeederFunction
         var months = new List<string> { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" };
         foreach (var cutoffInput in months.Select(m => (param.Plant, m)))
         {
-            var woForMonthTask = context.CallSubOrchestratorAsync<string>("RunWoCutoffFeeder", cutoffInput);
+            var woForMonthTask =  context.CallActivityAsync<string>("RunWoCutoffActivity", cutoffInput);
             results.Add(woForMonthTask);
         }
 
-        var status = "";
+        var statuses = new List<string>();
         results.ForEach(r => r.ContinueWith(str =>
         {
-            if (str.IsFaulted)
-            {
-                status += str.Exception + "\n";
-            }
-            else
-            {
-                status += str.Result + "\n";
-            }
-            
-            context.SetCustomStatus(status);
+            statuses.Add(str.IsFaulted ? str.Exception?.Message : str.Result);
+            context.SetCustomStatus(statuses);
         }));
+
         var toReturn = await Task.WhenAll(results);
         return toReturn.ToList();
     }
@@ -130,24 +123,23 @@ public class FamFeederFunction
         var plant = context.GetInput<string>();
         var results = new List<Task<string>>();
         
-        //TODO
-        var topics = new List<PcsTopic> { PcsTopic.CommPkg, PcsTopic.McPkg,PcsTopic.Tag,PcsTopic.Milestone,
-            PcsTopic.Checklist,PcsTopic.WorkOrder,PcsTopic.WoChecklist, PcsTopic.PipingRevision, PcsTopic.SWCR,
-            PcsTopic.SWCRSignature, PcsTopic.Stock, PcsTopic.WoMaterial, PcsTopic.WoMilestone, PcsTopic.Library,
-            PcsTopic.Responsible, PcsTopic.Query,PcsTopic.QuerySignature,PcsTopic.LoopContent,
-            PcsTopic.CommPkgOperation}.Select(t => t.ToString());
+        var topics = new List<PcsTopic> { PcsTopic.Action,PcsTopic.CommPkgTask,PcsTopic.Task,PcsTopic.CommPkg,PcsTopic.McPkg,PcsTopic.Project,PcsTopic.Responsible,PcsTopic.Tag,
+            PcsTopic.TagFunction,PcsTopic.PunchListItem,PcsTopic.Library,PcsTopic.WorkOrder,PcsTopic.Checklist,PcsTopic.Milestone,PcsTopic.WoChecklist,PcsTopic.SWCR,PcsTopic.SWCRSignature,PcsTopic.PipingRevision,
+            PcsTopic.WoMaterial,PcsTopic.WoMilestone,PcsTopic.Stock,PcsTopic.CommPkgOperation,PcsTopic.PipingSpool,PcsTopic.LoopContent,PcsTopic.Query,PcsTopic.QuerySignature,PcsTopic.CallOff,
+            PcsTopic.CommPkgQuery,PcsTopic.HeatTrace
+            }.Select(t => t.ToString());
 
         foreach (var topic in topics)
         {
-            var callSubOrchestratorAsync =  context.CallSubOrchestratorAsync<string>("FamFeederFunction", new QueryParameters(plant, topic));
-            results.Add(callSubOrchestratorAsync);
+            var activities =  context.CallActivityAsync<string>("RunFeeder", new QueryParameters(plant, topic));
+            results.Add(activities);
         }
 
-        var status = "";
+        var statuses = new List<string>();
         results.ForEach(r => r.ContinueWith(str =>
         {
-            status += str.Result + "\n";
-            context.SetCustomStatus(status);
+            statuses.Add(str.IsFaulted ? str.Exception?.Message : str.Result);
+            context.SetCustomStatus(statuses);
         }));
         var toReturn = await Task.WhenAll(results);
         return toReturn.ToList();
@@ -158,15 +150,6 @@ public class FamFeederFunction
     {
         var (plant, month) = context.GetInput<(string, string)>();
         var result = await _famFeederService.WoCutoff(plant, month, logger);
-        logger.LogDebug($"RunFeeder returned {result}");
-        return result;
-    }
-
-    [FunctionName("RunWoCutoffFeeder")]
-    public static async Task<string> RunWoCutoffFeeder([OrchestrationTrigger] IDurableOrchestrationContext context, ILogger logger)
-    {
-        var (plant, month) = context.GetInput<(string, string)>();
-        var result= await context.CallActivityAsync<string>("RunWoCutoffActivity", (plant,month));
         logger.LogDebug($"RunFeeder returned {result}");
         return result;
     }
