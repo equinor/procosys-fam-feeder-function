@@ -108,10 +108,10 @@ public class FamFeederService : IFamFeederService
             TieMapper.CreateTieMessage(e, PcsTopic.WorkOrderCutoff));
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
 
-        //foreach (var batch in mappedMessages.Batch(250))
-        //{
-        //    await SendFamMessages(batch);
-        //}
+        foreach (var batch in mappedMessages.Batch(250))
+        {
+            await SendFamMessages(batch);
+        }
 
         logger.LogDebug("Sent WoCutoff to FAM");
         return $"Sent {mappedMessages.Count} WoCutoff to FAM  for {month} done";
