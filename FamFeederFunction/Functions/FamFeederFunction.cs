@@ -24,36 +24,36 @@ public class FamFeederFunction
         _famFeederService = famFeederService;
     }
 
-    [FunctionName("FamFeederFunction_HttpStart")]
-    public async Task<IActionResult> HttpStart(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
-        HttpRequest req,
-        [DurableClient] IDurableOrchestrationClient orchestrationClient, ILogger log)
-    {
-        var (topicString, plant) = await DeserializeTopicAndPlant(req);
+    //[FunctionName("FamFeederFunction_HttpStart")]
+    //public async Task<IActionResult> HttpStart(
+    //    [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
+    //    HttpRequest req,
+    //    [DurableClient] IDurableOrchestrationClient orchestrationClient, ILogger log)
+    //{
+    //    var (topicString, plant) = await DeserializeTopicAndPlant(req);
 
-        log.LogInformation($"Querying {plant} for {topicString}");
+    //    log.LogInformation($"Querying {plant} for {topicString}");
 
-        if (topicString == null || plant == null)
-        {
-            return new BadRequestObjectResult("Please provide both plant and topic");
-        }
+    //    if (topicString == null || plant == null)
+    //    {
+    //        return new BadRequestObjectResult("Please provide both plant and topic");
+    //    }
 
-        if (!TryParse(topicString, out PcsTopic _))
-        {
-            return new BadRequestObjectResult("Please provide valid topic");
-        }
+    //    if (!TryParse(topicString, out PcsTopic _))
+    //    {
+    //        return new BadRequestObjectResult("Please provide valid topic");
+    //    }
 
-        var plants = await _famFeederService.GetAllPlants();
-        if (!plants.Contains(plant))
-        {
-            return new BadRequestObjectResult("Please provide valid plant");
-        }
+    //    var plants = await _famFeederService.GetAllPlants();
+    //    if (!plants.Contains(plant))
+    //    {
+    //        return new BadRequestObjectResult("Please provide valid plant");
+    //    }
 
-        var param = new QueryParameters(plant, topicString);
-        var instanceId = await orchestrationClient.StartNewAsync("FamFeederFunction", param);
-        return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
-    }
+    //    var param = new QueryParameters(plant, topicString);
+    //    var instanceId = await orchestrationClient.StartNewAsync("FamFeederFunction", param);
+    //    return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
+    //}
 
     [FunctionName("FamFeederFunction_RunAll")]
     public async Task<IActionResult> RunAllHttpTrigger(
