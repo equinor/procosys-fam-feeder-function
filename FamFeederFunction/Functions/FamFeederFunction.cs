@@ -1,18 +1,13 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Core.Interfaces;
 using Core.Models;
 using Equinor.ProCoSys.PcsServiceBus;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using static System.Enum;
+
 namespace FamFeederFunction.Functions;
 
 public class FamFeederFunction
@@ -24,63 +19,32 @@ public class FamFeederFunction
         _famFeederService = famFeederService;
     }
 
-    //[FunctionName("FamFeederFunction_HttpStart")]
-    //public async Task<IActionResult> HttpStart(
+    //[FunctionName("FamFeederFunction_RunAll")]
+    //public async Task<IActionResult> RunAllHttpTrigger(
     //    [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
     //    HttpRequest req,
     //    [DurableClient] IDurableOrchestrationClient orchestrationClient, ILogger log)
     //{
-    //    var (topicString, plant) = await DeserializeTopicAndPlant(req);
+    //    string plant = req.Query["Plant"];
+    //    var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+    //    dynamic data = JsonConvert.DeserializeObject(requestBody);
+    //    plant ??= data?.Facility;
 
-    //    log.LogInformation($"Querying {plant} for {topicString}");
+    //    log.LogTrace($"Running feeder for all topics for plant {plant}");
 
-    //    if (topicString == null || plant == null)
+    //    if (plant == null)
     //    {
     //        return new BadRequestObjectResult("Please provide both plant and topic");
     //    }
-
-    //    if (!TryParse(topicString, out PcsTopic _))
-    //    {
-    //        return new BadRequestObjectResult("Please provide valid topic");
-    //    }
-
     //    var plants = await _famFeederService.GetAllPlants();
     //    if (!plants.Contains(plant))
     //    {
     //        return new BadRequestObjectResult("Please provide valid plant");
     //    }
 
-    //    var param = new QueryParameters(plant, topicString);
-    //    var instanceId = await orchestrationClient.StartNewAsync("FamFeederFunction", param);
+    //    var instanceId = await orchestrationClient.StartNewAsync("RunAllExceptCutoff", null, plant);
     //    return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
     //}
-
-    [FunctionName("FamFeederFunction_RunAll")]
-    public async Task<IActionResult> RunAllHttpTrigger(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
-        HttpRequest req,
-        [DurableClient] IDurableOrchestrationClient orchestrationClient, ILogger log)
-    {
-        string plant = req.Query["Plant"];
-        var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-        dynamic data = JsonConvert.DeserializeObject(requestBody);
-        plant ??= data?.Facility;
-
-        log.LogTrace($"Running feeder for all topics for plant {plant}");
-
-        if (plant == null)
-        {
-            return new BadRequestObjectResult("Please provide both plant and topic");
-        }
-        var plants = await _famFeederService.GetAllPlants();
-        if (!plants.Contains(plant))
-        {
-            return new BadRequestObjectResult("Please provide valid plant");
-        }
-
-        var instanceId = await orchestrationClient.StartNewAsync("RunAllExceptCutoff", null, plant);
-        return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
-    }
 
     [FunctionName("FamFeederFunction")]
     public static async  Task<List<string>> RunOrchestrator(
@@ -158,17 +122,5 @@ public class FamFeederFunction
         var runFeeder = await _famFeederService.RunFeeder(context.GetInput<QueryParameters>(), logger);
         logger.LogInformation($"RunFeeder returned {runFeeder}");
         return runFeeder;
-    }
-
-    private static async Task<(string topicString, string plant)> DeserializeTopicAndPlant(HttpRequest req)
-    {
-        string topicString = req.Query["PcsTopic"];
-        string plant = req.Query["Plant"];
-
-        var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-        dynamic data = JsonConvert.DeserializeObject(requestBody);
-        topicString ??= data?.PcsTopic;
-        plant ??= data?.Facility;
-        return (topicString, plant);
     }
 }

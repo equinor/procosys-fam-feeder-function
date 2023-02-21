@@ -59,10 +59,7 @@ public class FamFeederService : IFamFeederService
         var mapper = CreateCommonLibMapper();
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m=> m.Objects.Any()).ToList();
 
-        foreach (var batch in mappedMessages.Batch(250))
-        {
-            await SendFamMessages(batch);
-        }
+        await SendFamMessages(mappedMessages);
 
         _logger.LogInformation("Finished sending {topic} to fam",queryParameters.PcsTopic);
 
@@ -88,10 +85,7 @@ public class FamFeederService : IFamFeederService
         var mapper = CreateCommonLibMapper();
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
 
-        foreach (var batch in mappedMessages.Batch(250))
-        {
-            await SendFamMessages(batch);
-        }       
+        await SendFamMessages(mappedMessages);
 
         return $"finished successfully sending {mappedMessages.Count} messages to fam for WoCutoff for week {cutoffWeek}";
     }
