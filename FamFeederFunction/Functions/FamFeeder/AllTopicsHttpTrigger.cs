@@ -1,7 +1,6 @@
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
-using Core.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -15,21 +14,15 @@ using Newtonsoft.Json;
 
 namespace FamFeederFunction.Functions.FamFeeder;
 
-public class AllTopicsHttpTrigger
+public static class AllTopicsHttpTrigger
 {
-    private readonly IFamFeederService _famFeederService;
-
-    public AllTopicsHttpTrigger( IFamFeederService famFeederService)
-    {
-        _famFeederService = famFeederService;
-    }
 
     [FunctionName("RunAllTopicsHttpTrigger")]
     [OpenApiOperation(operationId: "Run", tags: new[] { "name" })]
     [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
     [OpenApiParameter(name: "Plant", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The Plant parameter")]
     [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
-    public async Task<IActionResult> Run(
+    public static async Task<IActionResult> Run(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
         HttpRequest req,
         [DurableClient] IDurableOrchestrationClient orchestrationClient, ILogger log)
@@ -44,11 +37,6 @@ public class AllTopicsHttpTrigger
         if (plant == null)
         {
             return new BadRequestObjectResult("Please provide both plant and topic");
-        }
-        var plants = await _famFeederService.GetAllPlants();
-        if (!plants.Contains(plant))
-        {
-            return new BadRequestObjectResult("Please provide valid plant");
         }
 
         var instanceId = await orchestrationClient.StartNewAsync(nameof(AllTopicsOrchestrator), null, plant);
