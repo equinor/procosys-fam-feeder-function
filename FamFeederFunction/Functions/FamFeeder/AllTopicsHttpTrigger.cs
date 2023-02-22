@@ -15,11 +15,11 @@ using Newtonsoft.Json;
 
 namespace FamFeederFunction.Functions.FamFeeder;
 
-public class RunAllTopicsHttpTrigger
+public class AllTopicsHttpTrigger
 {
     private readonly IFamFeederService _famFeederService;
 
-    public RunAllTopicsHttpTrigger( IFamFeederService famFeederService)
+    public AllTopicsHttpTrigger( IFamFeederService famFeederService)
     {
         _famFeederService = famFeederService;
     }
@@ -51,7 +51,7 @@ public class RunAllTopicsHttpTrigger
             return new BadRequestObjectResult("Please provide valid plant");
         }
 
-        var instanceId = await orchestrationClient.StartNewAsync("RunAllExceptCutoff", null, plant);
+        var instanceId = await orchestrationClient.StartNewAsync(nameof(AllTopicsOrchestrator), null, plant);
         return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
     }
 }

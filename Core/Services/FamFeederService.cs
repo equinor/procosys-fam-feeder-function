@@ -41,7 +41,7 @@ public class FamFeederService : IFamFeederService
         
         if (queryParameters.PcsTopic == PcsTopic.WorkOrderCutoff.ToString())
         {
-            return "Cutoff Should have its own call";
+            return "Cutoff Should have its own call, this should never happen :D";
         }
 
         var events = await GetEventsBasedOnTopicAndPlant(queryParameters);
@@ -49,7 +49,7 @@ public class FamFeederService : IFamFeederService
         if (events.Count == 0)
         {
             _logger.LogInformation("found no events, or field is null");
-            return "found no events, or field is null";
+            return $"found no events of type {queryParameters.PcsTopic}, or field is null for {queryParameters.Plant}";
         }
 
         _logger.LogInformation(
@@ -63,7 +63,7 @@ public class FamFeederService : IFamFeederService
 
         _logger.LogInformation("Finished sending {topic} to fam",queryParameters.PcsTopic);
 
-        return $"finished successfully sending {mappedMessages.Count} messages to fam for {queryParameters.PcsTopic}";
+        return $"finished successfully sending {mappedMessages.Count} messages to fam for {queryParameters.PcsTopic} and plant {queryParameters.Plant}";
     }
 
     public async Task<string> RunForCutoffWeek(string cutoffWeek, string plant, ILogger logger)

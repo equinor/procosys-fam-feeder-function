@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Threading.Tasks;
 using Core.Models;
@@ -11,19 +10,11 @@ using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Extensions.Logging;
 using static System.Enum;
 using Newtonsoft.Json;
-using Core.Interfaces;
 
 namespace FamFeederFunction.Functions.FamFeeder;
 
-public class RunTopicHttpTriggerFunction
+public class TopicHttpTrigger
 {
-    private readonly IFamFeederService _famFeederService;
-
-    public RunTopicHttpTriggerFunction(IFamFeederService famFeederService)
-    {
-        _famFeederService = famFeederService;
-    }
-
     [FunctionName("FamFeederFunction_HttpStart")]
     public async Task<IActionResult> HttpStart(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
@@ -44,16 +35,11 @@ public class RunTopicHttpTriggerFunction
             return new BadRequestObjectResult("Please provide valid topic");
         }
 
-        var plants = await _famFeederService.GetAllPlants();
-        if (!plants.Contains(plant))
-        {
-            return new BadRequestObjectResult("Please provide valid plant");
-        }
-
         var param = new QueryParameters(plant, topicString);
-        var instanceId = await orchestrationClient.StartNewAsync("FamFeederFunction", param);
+        var instanceId = await orchestrationClient.StartNewAsync(nameof(TopicOrchestrator), param);
         return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
     }
+
     private static async Task<(string topicString, string plant)> DeserializeTopicAndPlant(HttpRequest req)
     {
         string topicString = req.Query["PcsTopic"];
