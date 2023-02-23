@@ -59,7 +59,7 @@ public class FamFeederService : IFamFeederService
         var mapper = CreateCommonLibMapper();
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m=> m.Objects.Any()).ToList();
 
-        await SendFamMessages(mappedMessages);
+     //   await SendFamMessages(mappedMessages);
 
         _logger.LogInformation("Finished sending {topic} to fam",queryParameters.PcsTopic);
 

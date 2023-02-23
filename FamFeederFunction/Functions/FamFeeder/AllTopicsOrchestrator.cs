@@ -30,10 +30,14 @@ public static class AllTopicsOrchestrator
 
         var topics = GetAllTopicsAsEnumerable();
 
-        var results = topics.Select(topic => context.CallActivityAsync<string>(nameof(TopicActivity), new QueryParameters(plant, topic)));
+        var tasksAndParams = topics.Select(topic =>
+        {
+            var queryParameters = new QueryParameters(plant, topic);
+            return (queryParameters, context.CallActivityAsync<string>(nameof(TopicActivity), queryParameters));
+        });
 
-        var toReturn = await Task.WhenAll(results);
-        return toReturn.ToList();
+        var toReturn = await WhenAllWithStatusUpdate(context, tasksAndParams.ToList());
+        return toReturn;
     }
 
     private static IEnumerable<string> GetAllTopicsAsEnumerable()
@@ -48,87 +52,113 @@ public static class AllTopicsOrchestrator
 
     private static async Task<List<string>> RunMultiPlantOrchestration(IDurableOrchestrationContext context, IEnumerable<string> validMultiPlants)
     {
-        var results = validMultiPlants.SelectMany(plant => GetAllTopicsAsEnumerable().Select(topic 
-            => context.CallActivityAsync<string>(nameof(TopicActivity), new QueryParameters(plant, topic))));
+        var results = validMultiPlants.SelectMany(plant => GetAllTopicsAsEnumerable().Select(topic =>
+        {
+            var queryParameters = new QueryParameters(plant, topic);
+            return (queryParameters, context.CallActivityAsync<string>(nameof(TopicActivity), queryParameters));
+        }));
 
         var toReturn = await WhenAllWithStatusUpdate(context, results.ToList());
-        //var toReturn = await Task.WhenAll(results);
         return toReturn;
     }
 
-
     /// <summary>
+    /// Update status of tasks continuously.
+    /// Loops through all pending tasks and updates status of done tasks until all tasks are completed.
+    /// 
+    /// Pattern found here
     /// https://joonasw.net/view/track-activity-and-sub-orchestrator-progress-in-azure-durable-functions-orchestrators
     /// </summary>
     /// <param name="context"></param>
     /// <param name="tasks"></param>
-    /// <returns></returns>
+    /// <returns>The combined result of all finished tasks</returns>
     /// <exception cref="Exception"></exception>
     /// <exception cref="AggregateException"></exception>
     [Deterministic]
     private static async Task<List<string>> WhenAllWithStatusUpdate(
     IDurableOrchestrationContext context,
-    List<Task<string>> tasks)
+    List<(QueryParameters queryParameters, Task<string> task)> tasks)
     {
-        var activityStatuses = new string[tasks.Count];
+        List<(TaskStatus TaskStatus, string custumStatus)> activityStatuses = tasks.Select(GetActivityStatusFromTaskAndParam).ToList();
+        
         var doneActivityCount = 0;
-        context.SetCustomStatus(activityStatuses.Select(s => s.ToString()));
+        context.SetCustomStatus(activityStatuses.Select(s => s.custumStatus));
 
         while (doneActivityCount < tasks.Count)
         {
             // Wait for one of the not done tasks to complete
-            var notDoneTasks = tasks.Where((t, i) => activityStatuses[i] == "Started");
+            var notDoneTasks = tasks.Where(t => TaskNotDone(t.task.Status)).Select(t => t.task);
+
             var doneTask = await Task.WhenAny(notDoneTasks);
 
             // Find which one completed
-            var doneTaskIndex = tasks.FindIndex(t => ReferenceEquals(t, doneTask));
+            var doneTaskIndex = tasks.FindIndex(t => ReferenceEquals(t.task, doneTask));
+            
             // Sanity check
-            if (doneTaskIndex < 0 || activityStatuses[doneTaskIndex] != "Started")
+            if (doneTaskIndex < 0 || !TaskNotDone(activityStatuses[doneTaskIndex].TaskStatus))
             {
                 throw new Exception(
                     "Something went wrong, completed task not found or it was already completed");
             }
 
-            activityStatuses[doneTaskIndex] = GetActivityStatusFromTask(doneTask);
+            activityStatuses[doneTaskIndex] = GetActivityStatusForFinishedTask(doneTask);
             doneActivityCount++;
 
+            // Only update status when not replaying
             if (!context.IsReplaying)
             {
-                // Only log and update status when not replaying
-                //logger.LogInformation(
-                //    "Task {Index} completed, status {Status}, {Count} tasks done",
-                //    doneTaskIndex,
-                //    activityStatuses[doneTaskIndex],
-                //    doneActivityCount);
-                context.SetCustomStatus(activityStatuses.Select(s => s.ToString()));
+                context.SetCustomStatus(activityStatuses.Select(s => s.custumStatus));
             }
         }
 
-        var failedTasks = tasks.Where(t => t.Exception != null).ToList();
+        var failedTasks = tasks.Select(t=> t.task).Where(t => t.Exception != null).ToList();
         if (failedTasks.Count > 0)
         {
             throw new AggregateException(
                 "One or more operations failed", failedTasks.Select(t => t.Exception));
         }
-        var toReturn = await Task.WhenAll(tasks);
+        var toReturn = await Task.WhenAll(tasks.Select(t => t.task));
         return toReturn.ToList();
     }
 
+    private static bool TaskNotDone(TaskStatus t) 
+        => t is TaskStatus.WaitingForActivation or TaskStatus.Created 
+            or TaskStatus.Running or TaskStatus.Running or TaskStatus.WaitingForChildrenToComplete or TaskStatus.WaitingToRun;
+
     [Deterministic]
-    private static string GetActivityStatusFromTask(Task<string> task)
+    private static (TaskStatus,string) GetActivityStatusFromTaskAndParam((QueryParameters queryParameters, Task<string>) item)
     {
+        var (parameters, task) = item;
+        var activityStatusFromTask = (task.Status,$"{parameters.Plant}({parameters.PcsTopic}) : Pending");
         return task.Status switch
         {
-            TaskStatus.Created => "Started",
-            TaskStatus.WaitingForActivation => "Started",
-            TaskStatus.WaitingToRun => "Started",
-            TaskStatus.Running => "Started",
-            TaskStatus.WaitingForChildrenToComplete =>" Started",
-            TaskStatus.RanToCompletion => task.Result,
-            TaskStatus.Canceled => "Failed",
-            TaskStatus.Faulted => "Failed",
-            _ => throw new NotImplementedException(),
+            TaskStatus.Created => activityStatusFromTask,
+            TaskStatus.WaitingForActivation => activityStatusFromTask,
+            TaskStatus.WaitingToRun => activityStatusFromTask,
+            TaskStatus.Running => activityStatusFromTask,
+            TaskStatus.WaitingForChildrenToComplete => activityStatusFromTask,
+            TaskStatus.RanToCompletion => (task.Status,task.Result),
+            TaskStatus.Canceled => (task.Status, "Failed"),
+            TaskStatus.Faulted => (task.Status, "Failed"),
+            _ => throw new NotImplementedException()
         };
     }
 
+    [Deterministic]
+    private static (TaskStatus, string) GetActivityStatusForFinishedTask(Task<string> task)
+    {
+        if (!task.IsCompleted)
+        {
+            throw new Exception(
+                "Should only be called on completed tasks");
+        }
+
+        return task.Status switch
+        {
+            TaskStatus.RanToCompletion => (task.Status, task.Result),
+            TaskStatus.Canceled => (task.Status, "Canceled"),
+            TaskStatus.Faulted => (task.Status, "Failed"),
+            _ => throw new NotImplementedException(),
+        };
+    }
 }
