@@ -59,7 +59,10 @@ public class FamFeederService : IFamFeederService
         var mapper = CreateCommonLibMapper();
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m=> m.Objects.Any()).ToList();
 
-     //   await SendFamMessages(mappedMessages);
+        if (Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") != "Development")
+        {
+            await SendFamMessages(mappedMessages);
+        }
 
         _logger.LogInformation("Finished sending {topic} to fam",queryParameters.PcsTopic);
 
