@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Core.Models;
 using Equinor.ProCoSys.PcsServiceBus;
@@ -80,7 +82,18 @@ public static class AllTopicsOrchestrator
     List<(QueryParameters queryParameters, Task<string> task)> tasks)
     {
         List<(TaskStatus TaskStatus, string custumStatus)> activityStatuses = tasks.Select(GetActivityStatusFromTaskAndParam).ToList();
-        
+
+
+        //Durable functions custom status takes a maximum payload of 16KB. For very large data sets we will not be updating the status continuously. 
+        var payloadSizeInKb = (int)(Encoding.Unicode.GetByteCount(JsonSerializer.Serialize(activityStatuses.Select(s => s.custumStatus))) / 1024.0);
+        var tooLargeSize = payloadSizeInKb > 14;
+        if (tooLargeSize)
+        {
+            context.SetCustomStatus($"No custom status update because the payload would be too large. {tasks.Count} tasks");
+            var returnWithoutStatus = await Task.WhenAll(tasks.Select(t => t.task));
+            return returnWithoutStatus.ToList();
+        }
+
         var doneActivityCount = 0;
         context.SetCustomStatus(activityStatuses.Select(s => s.custumStatus));
 
@@ -101,7 +114,8 @@ public static class AllTopicsOrchestrator
                     "Something went wrong, completed task not found or it was already completed");
             }
 
-            activityStatuses[doneTaskIndex] = GetActivityStatusForFinishedTask(doneTask);
+            //Here we just update the existing status.
+            activityStatuses[doneTaskIndex] = UpdateStatusForFinishedTask(activityStatuses[doneTaskIndex].custumStatus, doneTask);
             doneActivityCount++;
 
             // Only update status when not replaying
@@ -129,23 +143,26 @@ public static class AllTopicsOrchestrator
     private static (TaskStatus,string) GetActivityStatusFromTaskAndParam((QueryParameters queryParameters, Task<string>) item)
     {
         var (parameters, task) = item;
-        var activityStatusFromTask = (task.Status,$"{parameters.Plant}({parameters.PcsTopic}) : Pending");
+        var pendingActivity = (task.Status,$"{parameters.Plant}({parameters.PcsTopic}) :");
+        var finishedActivity = (task.Status,$"{parameters.Plant}({parameters.PcsTopic}) : Finished");
+        var failedActivity = (task.Status,$"{parameters.Plant}({parameters.PcsTopic}) : Failed");
         return task.Status switch
         {
-            TaskStatus.Created => activityStatusFromTask,
-            TaskStatus.WaitingForActivation => activityStatusFromTask,
-            TaskStatus.WaitingToRun => activityStatusFromTask,
-            TaskStatus.Running => activityStatusFromTask,
-            TaskStatus.WaitingForChildrenToComplete => activityStatusFromTask,
-            TaskStatus.RanToCompletion => (task.Status,task.Result),
-            TaskStatus.Canceled => (task.Status, "Failed"),
-            TaskStatus.Faulted => (task.Status, "Failed"),
+            TaskStatus.Created => pendingActivity,
+            TaskStatus.WaitingForActivation => pendingActivity,
+            TaskStatus.WaitingToRun => pendingActivity,
+            TaskStatus.Running => pendingActivity,
+            TaskStatus.WaitingForChildrenToComplete => pendingActivity,
+            TaskStatus.RanToCompletion =>  finishedActivity,
+            TaskStatus.Canceled => failedActivity,
+            TaskStatus.Faulted => failedActivity,
             _ => throw new NotImplementedException()
         };
     }
 
     [Deterministic]
-    private static (TaskStatus, string) GetActivityStatusForFinishedTask(Task<string> task)
+    private static (TaskStatus, string) UpdateStatusForFinishedTask(
+        string activityStatus, Task task)
     {
         if (!task.IsCompleted)
         {
@@ -155,9 +172,9 @@ public static class AllTopicsOrchestrator
 
         return task.Status switch
         {
-            TaskStatus.RanToCompletion => (task.Status, task.Result),
-            TaskStatus.Canceled => (task.Status, "Canceled"),
-            TaskStatus.Faulted => (task.Status, "Failed"),
+            TaskStatus.RanToCompletion => (task.Status, activityStatus + "Finished"),
+            TaskStatus.Canceled => (task.Status, activityStatus + "Canceled"),
+            TaskStatus.Faulted => (task.Status, activityStatus + "Failed"),
             _ => throw new NotImplementedException(),
         };
     }
