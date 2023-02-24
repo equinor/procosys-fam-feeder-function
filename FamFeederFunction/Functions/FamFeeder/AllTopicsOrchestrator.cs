@@ -17,24 +17,26 @@ public static class AllTopicsOrchestrator
     public static async Task<List<string>> RunAllExceptCutoffOrchestrator(
         [OrchestrationTrigger] IDurableOrchestrationContext context)
     {
-        var plant = context.GetInput<string>();
+        //Could either be a single plant ie: "PCS$JOHAN_CASTBERG" or a predetermined plantGroup ie. "OSEBERG" (keyword for group of the 4 Oseberg plants).
+        //If its a plant group, we will run the orchestrator for all plants in the group
+        var plantInput = context.GetInput<string>();
 
-        if (MultiPlantConstants.TryGetByMultiPlant(plant, out var validMultiPlants))
+        if (MultiPlantConstants.TryGetByMultiPlant(plantInput, out var validSubPlants))
         {
-            return await RunMultiPlantOrchestration(context, validMultiPlants);
+            return await RunMultiPlantOrchestration(context, validSubPlants);
         }
 
-        var plants = await context.CallActivityAsync<List<string>>(nameof(ValidatePlantActivity),context);
-        if (!plants.Contains(plant))
+        var allValidPlants = await context.CallActivityAsync<List<string>>(nameof(ValidatePlantActivity),context);
+        if (!allValidPlants.Contains(plantInput))
         {
             return new List<string> { "Please provide a valid plant" };
         }
 
-        var topics = GetAllTopicsAsEnumerable();
+        var allTopics = GetAllTopicsAsEnumerable();
 
-        var tasksAndParams = topics.Select(topic =>
+        var tasksAndParams = allTopics.Select(topic =>
         {
-            var queryParameters = new QueryParameters(plant, topic);
+            var queryParameters = new QueryParameters(plantInput, topic);
             return (queryParameters, context.CallActivityAsync<string>(nameof(TopicActivity), queryParameters));
         });
 
@@ -60,8 +62,8 @@ public static class AllTopicsOrchestrator
             return (queryParameters, context.CallActivityAsync<string>(nameof(TopicActivity), queryParameters));
         }));
 
-        var toReturn = await WhenAllWithStatusUpdate(context, results.ToList());
-        return toReturn;
+        var allFinishedTasks = await WhenAllWithStatusUpdate(context, results.ToList());
+        return allFinishedTasks;
     }
 
     /// <summary>
@@ -90,8 +92,8 @@ public static class AllTopicsOrchestrator
         if (tooLargeSize)
         {
             context.SetCustomStatus($"No custom status update because the payload would be too large. {tasks.Count} tasks");
-            var returnWithoutStatus = await Task.WhenAll(tasks.Select(t => t.task));
-            return returnWithoutStatus.ToList();
+            var allFinishedTasksWithoutUpdatingStatus = await Task.WhenAll(tasks.Select(t => t.task));
+            return allFinishedTasksWithoutUpdatingStatus.ToList();
         }
 
         var doneActivityCount = 0;
@@ -131,8 +133,8 @@ public static class AllTopicsOrchestrator
             throw new AggregateException(
                 "One or more operations failed", failedTasks.Select(t => t.Exception));
         }
-        var toReturn = await Task.WhenAll(tasks.Select(t => t.task));
-        return toReturn.ToList();
+        var allFinishedTasks = await Task.WhenAll(tasks.Select(t => t.task));
+        return allFinishedTasks.ToList();
     }
 
     private static bool TaskNotDone(TaskStatus t) 
