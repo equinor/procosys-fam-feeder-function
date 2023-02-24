@@ -11,7 +11,7 @@ public class DbStatusFeederFunction
     public DbStatusFeederFunction(IDbStatusFeederService dbStatusFeederService) 
         => _dbStatusFeederService = dbStatusFeederService;
 
-    [FunctionName("DbStatusFeederFunction")]
+    [FunctionName(nameof(DbStatusFeederFunction))]
     public void Run([TimerTrigger("0 */5 * * * *")] TimerInfo myTimer, ILogger log) // cron expression for every 5 minutes
         => _dbStatusFeederService.RunFeeder();
 }

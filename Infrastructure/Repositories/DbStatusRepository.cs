@@ -11,12 +11,11 @@ public class DbStatusRepository : IDbStatusRepository
 {
     private readonly AppDbContext _context;
 
-    public DbStatusRepository(AppDbContext context)
-    {
-        _context = context;
-    }
+    public DbStatusRepository(AppDbContext context) 
+        => _context = context;
 
-    public async Task<List<MetricDto>> GetMetrics() => await ExecuteQuery(MetricQuery.GetQuery());
+    public async Task<List<MetricDto>> GetMetrics() 
+        => await ExecuteQuery(MetricQuery.GetQuery());
 
     internal async Task<List<MetricDto>> ExecuteQuery(string query)
     {

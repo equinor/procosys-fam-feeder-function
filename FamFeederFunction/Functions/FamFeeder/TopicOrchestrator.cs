@@ -8,7 +8,7 @@ using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace FamFeederFunction.Functions.FamFeeder;
 
-public class TopicOrchestrator
+public static class TopicOrchestrator
 {
     [FunctionName(nameof(TopicOrchestrator))]
     public static async Task<List<string>> RunOrchestrator(
@@ -35,15 +35,15 @@ public class TopicOrchestrator
         return new List<string> { singleReturn };
     }
 
-    private static async Task<List<string>> RunMultiPlantOrchestration(IDurableOrchestrationContext context, List<string> validMultiPlants,
+    private static async Task<List<string>> RunMultiPlantOrchestration(IDurableOrchestrationContext context, IEnumerable<string> validMultiPlants,
         QueryParameters param)
     {
         var results = validMultiPlants
             .Select(plant => new QueryParameters(plant, param.PcsTopic))
             .Select(input => context.CallActivityAsync<string>(nameof(TopicActivity), input))
             .ToList();
-        var toReturn = await Task.WhenAll(results);
-        return toReturn.ToList();
+        var finishedTasks = await Task.WhenAll(results);
+        return finishedTasks.ToList();
     }
 
     private static async Task<List<string>> RunWoCutoffOrchestration(IDurableOrchestrationContext context, QueryParameters param)
@@ -51,9 +51,9 @@ public class TopicOrchestrator
         var months = new List<string> { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" };
         var results = months
             .Select(m => (param.Plant, m))
-            .Select(cutoffInput => context.CallActivityAsync<string>(
-                nameof(WorkOrderCutoffForMonthActivity), cutoffInput)).ToList();
-        var toReturn = await Task.WhenAll(results);
-        return toReturn.ToList();
+            .Select(cutoffInput => ($"{cutoffInput.Plant}({cutoffInput.m})", context.CallActivityAsync<string>(
+                nameof(CutoffForMonthActivity), cutoffInput))).ToList();
+        var allFinishedTasks = await CustomStatusExtension.WhenAllWithStatusUpdate(context,results);
+        return allFinishedTasks.ToList();
     }
 }
