@@ -12,10 +12,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Azure.Storage.Blobs" Version="12.14.1" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.10" />
+		<PackageReference Include="Azure.Storage.Blobs" Version="12.15.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.14" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0" />
-		<PackageReference Include="Oracle.EntityFrameworkCore" Version="6.21.61" />
+		<PackageReference Include="Oracle.EntityFrameworkCore" Version="6.21.90" />
 	</ItemGroup>
 
 	<ItemGroup>

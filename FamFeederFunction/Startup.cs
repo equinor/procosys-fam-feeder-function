@@ -45,8 +45,8 @@ public class Startup : FunctionsStartup
         services.AddScoped<ISearchFeederService, SearchFeederService>();
         services.AddScoped<IDbStatusRepository, DbStatusRepository>();
         services.AddScoped<IDbStatusFeederService, DbStatusFeederService>();
-
         services.AddScoped<IPlantRepository, PlantRepository>();
+        services.AddScoped<IWorkOrderCutoffRepository, WorkOrderCutoffRepository>();
 
         //128mb (up from default 10) 
         OracleConfiguration.FetchSize = 128 * 1024 * 1024;

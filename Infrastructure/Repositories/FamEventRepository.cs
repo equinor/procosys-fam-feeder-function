@@ -3,22 +3,19 @@ using Core.Models;
 using Equinor.ProCoSys.PcsServiceBus.Queries;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Data.Common;
+using System.Data;
 
 namespace Infrastructure.Repositories;
 
 public class FamEventRepository : IFamEventRepository
 {
     private readonly AppDbContext _context;
-    private readonly WorkOrderCutoffRepository _workOrderCutoffRepository;
-
-    public FamEventRepository(AppDbContext context)
-    {
-        _context = context;
-        _workOrderCutoffRepository = new WorkOrderCutoffRepository();
-    }
+    public FamEventRepository(AppDbContext context) 
+        => _context = context;
     public async Task<List<string>> GetSwcrAttachments(string plant) => await ExecuteQuery(SwcrAttachmentQuery.GetQuery(null, plant));
-    public async Task<List<string>> GetSwcrOtherReferences(string plant) => await ExecuteQuery(SwcrTypeQuery.GetQuery(null, plant));
-    public async Task<List<string>> GetSwcrType(string plant) => await ExecuteQuery(SwcrOtherReferencesQuery.GetQuery(null, plant));
+    public async Task<List<string>> GetSwcrOtherReferences(string plant) => await ExecuteQuery(SwcrOtherReferencesQuery.GetQuery(null, plant));
+    public async Task<List<string>> GetSwcrType(string plant) => await ExecuteQuery(SwcrTypeQuery.GetQuery(null, plant));
     public async Task<List<string>> GetActions(string plant) => await ExecuteQuery(ActionQuery.GetQuery(null, plant));
     public async Task<List<string>> GetCommPkgTasks(string plant) => await ExecuteQuery(CommPkgTaskQuery.GetQuery(null, null, plant));
     public async Task<List<string>> GetTasks(string plant) => await ExecuteQuery(TaskQuery.GetQuery(null, plant));
@@ -43,7 +40,6 @@ public class FamEventRepository : IFamEventRepository
     public async Task<List<string>> GetStock(string plant) => await ExecuteQuery(StockQuery.GetQuery(null,plant));
     public async Task<List<string>> GetResponsible(string plant) => await ExecuteQuery(ResponsibleQuery.GetQuery(null, plant));
     public async Task<List<string>> GetLibrary(string plant) => await ExecuteQuery(LibraryQuery.GetQuery(null, plant));
-    public async Task<List<string>> GetWoCutoffs(string month, string plant, string? connectionString) => await _workOrderCutoffRepository.GetWoCutoffs(month, plant, connectionString);
     public async Task<List<string>> GetDocument(string plant) => await ExecuteQuery(DocumentQuery.GetQuery(null,plant));
     public async Task<List<string>> GetLoopContent(string plant) => await ExecuteQuery(LoopContentQuery.GetQuery(null, plant));
     public async Task<List<string>> GetCallOff(string plant) => await ExecuteQuery(CallOffQuery.GetQuery(null,plant));
@@ -55,22 +51,42 @@ public class FamEventRepository : IFamEventRepository
 
     internal async Task<List<string>> ExecuteQuery(string query)
     {
-        await using var context = _context;
-        await using var command = context.Database.GetDbConnection().CreateCommand();
-        command.CommandText = query;
-        await context.Database.OpenConnectionAsync();
-        await using var result = await command.ExecuteReaderAsync();
-        var entities = new List<string>();
-
-        while (await result.ReadAsync())
+        var dbConnection = _context.Database.GetDbConnection();
+        var connectionWasClosed = dbConnection.State != ConnectionState.Open;
+        if (connectionWasClosed)
         {
-            if (result.HasRows)
+            await _context.Database.OpenConnectionAsync();
+        }
+        try
+        {
+            await using var command = dbConnection.CreateCommand();
+            command.CommandText = query;
+            await using var result = await command.ExecuteReaderAsync();
+            var entities = new List<string>();
+
+            while (await result.ReadAsync())
             {
+                //Last row
+                if (!result.HasRows)
+                {
+                    continue;
+                }
+
                 var s = (string)result[0];
-                
-                entities.Add(s.Replace("\"WoNo\" : \"���\"", "\"WoNo\" : \"ÆØÅ\"") );
+
+                //For local debugging
+                entities.Add(s.Replace("\"WoNo\" : \"���\"", "\"WoNo\" : \"ÆØÅ\""));
+            }
+
+            return entities;
+        }
+        finally
+        {
+            //If we open it, we have to close it.
+            if (connectionWasClosed)
+            {
+                await _context.Database.CloseConnectionAsync();
             }
         }
-        return entities;
     }    
 }

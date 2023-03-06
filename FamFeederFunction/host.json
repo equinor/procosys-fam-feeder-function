@@ -8,5 +8,11 @@
         "excludedTypes": "Request"
       }
     }
+  },
+  "extensions": {
+    "durableTask": {
+      "maxConcurrentActivityFunctions": 2,
+      "maxConcurrentOrchestratorFunctions": 5
+    }
   }
 }

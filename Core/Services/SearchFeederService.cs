@@ -3,7 +3,6 @@ using Core.Models;
 using Core.Models.Search;
 using Azure;
 using Equinor.ProCoSys.PcsServiceBus;
-using Fam.Core.EventHubs.Contracts;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoreLinq;
@@ -14,21 +13,16 @@ namespace Core.Services;
 
 public class SearchFeederService : ISearchFeederService
 {
-    private readonly CommonLibConfig _commonLibConfig;
-    private readonly IEventHubProducerService _eventHubProducerService;
     private readonly FamFeederOptions _famFeederOptions;
     private ILogger? _logger;
     private readonly IPlantRepository _plantRepository;
     private readonly ISearchItemRepository _searchItemRepo;
 
-    public SearchFeederService(IEventHubProducerService eventHubProducerService, ISearchItemRepository searchItemRepo,
-        IOptions<CommonLibConfig> commonLibConfig, IOptions<FamFeederOptions> famFeederOptions,
-        IPlantRepository plantRepository)
+    public SearchFeederService( ISearchItemRepository searchItemRepo,
+        IOptions<FamFeederOptions> famFeederOptions, IPlantRepository plantRepository)
     {
-        _eventHubProducerService = eventHubProducerService;
         _searchItemRepo = searchItemRepo;
         _plantRepository = plantRepository;
-        _commonLibConfig = commonLibConfig.Value;
         _famFeederOptions = famFeederOptions.Value;
     }
 
@@ -49,8 +43,9 @@ public class SearchFeederService : ISearchFeederService
 
         foreach (var batch in items.Batch(batchSize))
         {
-            _logger.LogInformation($"Sending {batch.Count()} items to Search Index {queryParameters.Plant} {queryParameters.PcsTopic}");
-            await SendIndexDocuments(batch);
+            var batchList = batch.ToList();
+            _logger.LogInformation($"Sending {batchList.Count} items to Search Index {queryParameters.Plant} {queryParameters.PcsTopic}");
+            await SendIndexDocuments(batchList);
         }
 
         _logger.LogInformation("Finished adding {topic} to Index",queryParameters.PcsTopic);
@@ -96,18 +91,19 @@ public class SearchFeederService : ISearchFeederService
     private async Task<List<IndexDocument>> GetItemsBasedOnTopicAndPlant(QueryParameters queryParameters)
     {
         var events = new List<IndexDocument>();
+        // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (queryParameters.PcsTopic)
         {
-            case PcsTopic.CommPkg:
+            case nameof(PcsTopic.CommPkg.ToString):
                 events = await _searchItemRepo.GetCommPackages(queryParameters.Plant);
                 break;
-            case PcsTopic.McPkg:
+            case nameof(PcsTopic.McPkg):
                 events = await _searchItemRepo.GetMcPackages(queryParameters.Plant);
                 break;
-            case PcsTopic.Tag:
+            case nameof(PcsTopic.Tag):
                 events = await _searchItemRepo.GetTags(queryParameters.Plant);
                 break;
-            case PcsTopic.PunchListItem:
+            case nameof(PcsTopic.PunchListItem):
                 events = await _searchItemRepo.GetPunchItems(queryParameters.Plant);
                 break;
             default:

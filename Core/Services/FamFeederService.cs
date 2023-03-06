@@ -10,6 +10,7 @@ using Fam.Models.Exceptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoreLinq;
+using static System.Enum;
 
 namespace Core.Services;
 
@@ -17,31 +18,30 @@ public class FamFeederService : IFamFeederService
 {
     private readonly CommonLibConfig _commonLibConfig;
     private readonly IEventHubProducerService _eventHubProducerService;
-    private readonly FamFeederOptions _famFeederOptions;
     private ILogger? _logger;
     private readonly IPlantRepository _plantRepository;
     private readonly IFamEventRepository _repo;
+    private readonly IWorkOrderCutoffRepository _cutoffRepository;
 
     public FamFeederService(IEventHubProducerService eventHubProducerService, 
         IFamEventRepository repo,
         IOptions<CommonLibConfig> commonLibConfig,
-        IOptions<FamFeederOptions> famFeederOptions,
-        IPlantRepository plantRepository)
+        IPlantRepository plantRepository, IWorkOrderCutoffRepository cutoffRepository)
     {
         _eventHubProducerService = eventHubProducerService;
         _repo = repo;
         _plantRepository = plantRepository;
+        _cutoffRepository = cutoffRepository;
         _commonLibConfig = commonLibConfig.Value;
-        _famFeederOptions = famFeederOptions.Value;
     }
 
     public async Task<string> RunFeeder(QueryParameters queryParameters, ILogger logger)
     {
         _logger = logger;
         
-        if (queryParameters.PcsTopic == PcsTopic.WorkOrderCutoff)
+        if (queryParameters.PcsTopic == PcsTopic.WorkOrderCutoff.ToString())
         {
-            return "Cutoff Should have its own call";
+            return "Cutoff Should have its own call, this should never happen :D";
         }
 
         var events = await GetEventsBasedOnTopicAndPlant(queryParameters);
@@ -49,24 +49,24 @@ public class FamFeederService : IFamFeederService
         if (events.Count == 0)
         {
             _logger.LogInformation("found no events, or field is null");
-            return "found no events, or field is null";
+            return $"found no events of type {queryParameters.PcsTopic}, or field is null for {queryParameters.Plant}";
         }
 
         _logger.LogInformation(
             "Found {events} events for topic {topic} and plant {plant}",events.Count,queryParameters.PcsTopic,queryParameters.Plant);
-
-        var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, queryParameters.PcsTopic));
+        _ = TryParse(queryParameters.PcsTopic, out PcsTopic topic);
+        var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, topic));
         var mapper = CreateCommonLibMapper();
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m=> m.Objects.Any()).ToList();
 
-        foreach (var batch in mappedMessages.Batch(250))
+        if (Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") != "Development")
         {
-            await SendFamMessages(batch);
+            await SendFamMessages(mappedMessages);
         }
 
         _logger.LogInformation("Finished sending {topic} to fam",queryParameters.PcsTopic);
 
-        return $"finished successfully sending {mappedMessages.Count} messages to fam for {queryParameters.PcsTopic}";
+        return $"finished successfully sending {mappedMessages.Count} messages to fam for {queryParameters.PcsTopic} and plant {queryParameters.Plant}";
     }
 
     public async Task<string> RunForCutoffWeek(string cutoffWeek, string plant, ILogger logger)
@@ -88,10 +88,7 @@ public class FamFeederService : IFamFeederService
         var mapper = CreateCommonLibMapper();
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
 
-        foreach (var batch in mappedMessages.Batch(250))
-        {
-            await SendFamMessages(batch);
-        }       
+        await SendFamMessages(mappedMessages);
 
         return $"finished successfully sending {mappedMessages.Count} messages to fam for WoCutoff for week {cutoffWeek}";
     }
@@ -101,8 +98,7 @@ public class FamFeederService : IFamFeederService
     public async Task<string> WoCutoff(string plant, string month, ILogger logger)
     {
         var mapper = CreateCommonLibMapper();
-        var connectionString = _famFeederOptions.ProCoSysConnectionString;
-        var response = await _repo.GetWoCutoffs(month, plant, connectionString);
+        var response = await _cutoffRepository.GetWoCutoffs(month, plant);
         logger.LogInformation("Found {count} cutoffs for month {month} in {plant}",response.Count,month,plant);
 
         var messages = response.SelectMany(e =>
@@ -160,105 +156,105 @@ public class FamFeederService : IFamFeederService
         var plant = queryParameters.Plant;
         switch (queryParameters.PcsTopic)
         {
-            case PcsTopic.SWCRAttachment:
+            case nameof(PcsTopic.SWCRAttachment):
                 events = await _repo.GetSwcrAttachments(plant);
                 break;
-            case PcsTopic.SWCRType:
+            case nameof(PcsTopic.SWCRType):
                 events = await _repo.GetSwcrType(plant);
                 break;
-            case PcsTopic.SWCROtherReference:
+            case nameof(PcsTopic.SWCROtherReference):
                 events = await _repo.GetSwcrOtherReferences(plant);
                 break;
-            case PcsTopic.Action:
+            case nameof(PcsTopic.Action):
                 events = await _repo.GetActions(plant);
                 break;
-            case PcsTopic.CommPkgTask:
+            case nameof(PcsTopic.CommPkgTask):
                 events = await _repo.GetCommPkgTasks(plant);
                 break;
-            case PcsTopic.Task:
+            case nameof(PcsTopic.Task):
                 events = await _repo.GetTasks(plant);
                 break;
-            case PcsTopic.CommPkg:
+            case nameof(PcsTopic.CommPkg):
                 events = await _repo.GetCommPackages(plant);
                 break;
-            case PcsTopic.Ipo:
+            case nameof(PcsTopic.Ipo):
                 break;
-            case PcsTopic.McPkg:
+            case nameof(PcsTopic.McPkg):
                 events = await _repo.GetMcPackages(plant);
                 break;
-            case PcsTopic.Project:
+            case nameof(PcsTopic.Project):
                 events = await _repo.GetProjects(plant);
                 break;
-            case PcsTopic.Responsible:
+            case nameof(PcsTopic.Responsible):
                 events = await _repo.GetResponsible(plant);
                 break;
-            case PcsTopic.Tag:
+            case nameof(PcsTopic.Tag):
                 events = await _repo.GetTags(plant);
                 break;
-            case PcsTopic.PunchListItem:
+            case nameof(PcsTopic.PunchListItem):
                 events = await _repo.GetPunchItems(plant);
                 break;
-            case PcsTopic.Library:
+            case nameof(PcsTopic.Library):
                 events = await _repo.GetLibrary(plant);
                 break;
-            case PcsTopic.WorkOrder:
+            case nameof(PcsTopic.WorkOrder):
                 events = await _repo.GetWorkOrders(plant);
                 break;
-            case PcsTopic.Checklist:
+            case nameof(PcsTopic.Checklist):
                 events = await _repo.GetCheckLists(plant);
                 break;
-            case PcsTopic.Milestone:
+            case nameof(PcsTopic.Milestone):
                 events = await _repo.GetMilestones(plant);
                 break;
-            case PcsTopic.WoChecklist:
+            case nameof(PcsTopic.WoChecklist):
                 events = await _repo.GetWoChecklists(plant);
                 break;
-            case PcsTopic.SWCR:
+            case nameof(PcsTopic.SWCR):
                 events = await _repo.GetSwcr(plant);
                 break;
-            case PcsTopic.SWCRSignature:
+            case nameof(PcsTopic.SWCRSignature):
                 events = await _repo.GetSwcrSignature(plant);
                 break;
-            case PcsTopic.PipingRevision:
+            case nameof(PcsTopic.PipingRevision):
                 events = await _repo.GetPipingRevision(plant);
                 break;
-            case PcsTopic.PipingSpool:
+            case nameof(PcsTopic.PipingSpool):
                 events = await _repo.GetPipingSpool(plant);
                 break;
-            case PcsTopic.WoMaterial:
+            case nameof(PcsTopic.WoMaterial):
                 events = await _repo.GetWoMaterials(plant);
                 break;
-            case PcsTopic.Stock:
+            case nameof(PcsTopic.Stock):
                 events = await _repo.GetStock(plant);
                 break;
-            case PcsTopic.WoMilestone:
+            case nameof(PcsTopic.WoMilestone):
                 events = await _repo.GetWoMilestones(plant);
                 break;
-            case PcsTopic.CommPkgOperation:
+            case nameof(PcsTopic.CommPkgOperation):
                 events = await _repo.GetCommPkgOperations(plant);
                 break;
-            case PcsTopic.Document:
+            case nameof(PcsTopic.Document):
                 events = await _repo.GetDocument(plant);
                 break;
-            case PcsTopic.LoopContent:
+            case nameof(PcsTopic.LoopContent):
                 events = await _repo.GetLoopContent(plant);
                 break;
-            case PcsTopic.Query:
+            case nameof(PcsTopic.Query):
                 events = await _repo.GetQuery(plant);
                 break;
-            case PcsTopic.QuerySignature:
+            case nameof(PcsTopic.QuerySignature):
                 events = await _repo.GetQuerySignature(plant);
                 break;
-            case PcsTopic.CallOff:
+            case nameof(PcsTopic.CallOff):
                 events = await _repo.GetCallOff(plant);
                 break;
-            case PcsTopic.CommPkgQuery:
+            case nameof(PcsTopic.CommPkgQuery):
                 events = await _repo.GetCommPkgQuery(plant);
                 break;
-            case PcsTopic.HeatTrace:
+            case nameof(PcsTopic.HeatTrace):
                 events = await _repo.GetHeatTrace(plant);
                 break;
-            case PcsTopic.LibraryField:
+            case nameof(PcsTopic.LibraryField):
                 events = await  _repo.GetLibraryField(plant);
                 break;
 

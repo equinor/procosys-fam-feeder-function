@@ -1,8 +1,8 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Core;
-using Core.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -12,18 +12,14 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
-namespace FamFeederFunction;
+namespace FamFeederFunction.Functions.FamFeeder;
 
-public class WoCutoffFunction
+public class CutoffForWeekFunction
 {
-    private readonly IFamFeederService _famFeederService;
     private readonly WoCutoffOptions _cutoffOptions;
 
-    public WoCutoffFunction(IFamFeederService famFeederService, IOptions<WoCutoffOptions> cutoffOptions)
-    {
-        _famFeederService = famFeederService;
-        _cutoffOptions = cutoffOptions.Value;
-    }
+    public CutoffForWeekFunction(IOptions<WoCutoffOptions> cutoffOptions)
+        => _cutoffOptions = cutoffOptions.Value;
 
     [FunctionName("RunCutoffForWeek")]
     public async Task<IActionResult> RunCutoffForWeek(
@@ -45,40 +41,31 @@ public class WoCutoffFunction
             return new BadRequestObjectResult("Please provide plant");
         }
 
-        var plants = await _famFeederService.GetAllPlants();
-        if (!plants.Contains(plant))
-        {
-            return new BadRequestObjectResult("Please provide valid plant");
-        }
-
         var enabledPlants = _cutoffOptions.EnabledPlants?.Split(",").ToList();
         if (enabledPlants == null || !enabledPlants.Contains(plant))
         {
             return new OkObjectResult($"{plant} not enabled in fff");
         }
 
-        var instanceId = await orchestrationClient.StartNewAsync("CutoffForWeekOrchestration", null, (cutoffWeek, plant));
+        var instanceId = await orchestrationClient.StartNewAsync(nameof(CutoffForWeekOrchestration), null, (cutoffWeek, plant));
         return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
     }
 
-    [FunctionName("CutoffForWeekOrchestration")]
+    [FunctionName(nameof(CutoffForWeekOrchestration))]
     public static async Task<string> CutoffForWeekOrchestration(
         [OrchestrationTrigger] IDurableOrchestrationContext context, ILogger logger)
     {
         var (cutoffWeek, plant) = context.GetInput<(string, string)>();
-        logger.LogDebug("RunWoCutoffFeederForCutoffWeek");
-        return await context.CallActivityAsync<string>("RunCutoffForWeekActivity", (cutoffWeek, plant));
-    }
 
-    [FunctionName("RunCutoffForWeekActivity")]
-    public async Task<string> RunCutoffForWeekActivity(
-        [ActivityTrigger] IDurableActivityContext context,
-        ILogger logger)
-    {
-        var (cutoffWeek, plant) = context.GetInput<(string, string)>();
-        var result = await _famFeederService.RunForCutoffWeek(cutoffWeek, plant, logger);
-        logger.LogDebug($"RunCutoffForWeekActivity returned {result}");
-        return result;
+        var allValidPlants = await context.CallActivityAsync<List<string>>(nameof(ValidatePlantActivity), context);
+
+        if (!allValidPlants.Contains(plant))
+        {
+            return "Please provide a valid plant";
+        }
+
+        logger.LogDebug("RunCutoffForWeekActivity");
+        return await context.CallActivityAsync<string>(nameof(CutoffForWeekActivity), (cutoffWeek, plant));
     }
 
     private static async Task<(string topicString, string plant)> DeserializeCutoffWeekAndPlant(HttpRequest req)
