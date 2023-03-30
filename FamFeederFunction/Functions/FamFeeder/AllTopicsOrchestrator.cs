@@ -5,6 +5,7 @@ using Core.Models;
 using Equinor.ProCoSys.PcsServiceBus;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using Enum = System.Enum;
 
 namespace FamFeederFunction.Functions.FamFeeder;
 
@@ -44,11 +45,9 @@ public static class AllTopicsOrchestrator
 
     private static IEnumerable<string> GetAllTopicsAsEnumerable()
     {
-        return new List<PcsTopic> { PcsTopic.Action,PcsTopic.CommPkgTask,PcsTopic.Task,PcsTopic.CommPkg,PcsTopic.McPkg,PcsTopic.Project,PcsTopic.Responsible,PcsTopic.Tag,
-            PcsTopic.TagFunction,PcsTopic.PunchListItem,PcsTopic.Library,PcsTopic.WorkOrder,PcsTopic.Checklist,PcsTopic.Milestone,PcsTopic.WoChecklist,PcsTopic.SWCR,PcsTopic.SWCRSignature,PcsTopic.PipingRevision,
-            PcsTopic.WoMaterial,PcsTopic.WoMilestone,PcsTopic.Stock,PcsTopic.CommPkgOperation,PcsTopic.PipingSpool,PcsTopic.LoopContent,PcsTopic.Query,PcsTopic.QuerySignature,PcsTopic.CallOff,
-            PcsTopic.CommPkgQuery,PcsTopic.HeatTrace
-        }.Select(t => t.ToString());
+        return Enum.GetValues(typeof(PcsTopic)).Cast<PcsTopic>()
+            .Where(t => t != PcsTopic.WorkOrderCutoff)
+            .Select(t => t.ToString());
     }
 
     private static async Task<List<string>> RunMultiPlantOrchestration(IDurableOrchestrationContext context, IEnumerable<string> validMultiPlants)
