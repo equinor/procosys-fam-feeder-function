@@ -46,7 +46,7 @@ public static class AllTopicsOrchestrator
     private static IEnumerable<string> GetAllTopicsAsEnumerable()
     {
         return Enum.GetValues(typeof(PcsTopic)).Cast<PcsTopic>()
-            .Where(t => t != PcsTopic.WorkOrderCutoff)
+            .Where(t => t != PcsTopic.WorkOrderCutoff && t != PcsTopic.Document)
             .Select(t => t.ToString());
     }
 
