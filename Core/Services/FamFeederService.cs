@@ -156,6 +156,9 @@ public class FamFeederService : IFamFeederService
         var plant = queryParameters.Plant;
         switch (queryParameters.PcsTopic)
         {
+            case nameof(PcsTopic.TagEquipment):
+                events = await _repo.GetTagEquipments(plant);
+                break;
             case nameof(PcsTopic.SWCRAttachment):
                 events = await _repo.GetSwcrAttachments(plant);
                 break;

@@ -13,6 +13,7 @@ public class FamEventRepository : IFamEventRepository
     private readonly AppDbContext _context;
     public FamEventRepository(AppDbContext context) 
         => _context = context;
+    public async Task<List<string>> GetTagEquipments(string plant) => await ExecuteQuery(TagEquipmentQuery.GetQuery(null, plant));
     public async Task<List<string>> GetSwcrAttachments(string plant) => await ExecuteQuery(SwcrAttachmentQuery.GetQuery(null, plant));
     public async Task<List<string>> GetSwcrOtherReferences(string plant) => await ExecuteQuery(SwcrOtherReferencesQuery.GetQuery(null, plant));
     public async Task<List<string>> GetSwcrType(string plant) => await ExecuteQuery(SwcrTypeQuery.GetQuery(null, plant));
