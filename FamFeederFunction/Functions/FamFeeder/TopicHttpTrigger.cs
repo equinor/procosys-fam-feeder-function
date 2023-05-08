@@ -23,7 +23,7 @@ public class TopicHttpTrigger
     {
         var (topicString, plant) = await DeserializeTopicAndPlant(req);
 
-        log.LogInformation($"Querying {plant} for {topicString}");
+        log.LogInformation("Querying {Plant} for {TopicString}", plant, topicString);
 
         if (topicString == null || plant == null)
         {
