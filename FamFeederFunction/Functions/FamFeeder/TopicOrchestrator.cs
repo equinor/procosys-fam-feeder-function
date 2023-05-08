@@ -38,7 +38,7 @@ public static class TopicOrchestrator
     private static async Task<List<string>> RunMultiPlantOrchestration(IDurableOrchestrationContext context, IEnumerable<string> validMultiPlants,
         QueryParameters param)
     {
-        var results = validMultiPlants
+        List<Task<string>> results = validMultiPlants
             .Select(plant => new QueryParameters(plant, param.PcsTopic))
             .Select(input => context.CallActivityAsync<string>(nameof(TopicActivity), input))
             .ToList();

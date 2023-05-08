@@ -29,7 +29,7 @@ public class CutoffForWeekFunction
     {
         var (cutoffWeek, plant) = await DeserializeCutoffWeekAndPlant(req);
 
-        log.LogTrace($"Running feeder for wo cutoff for plant {plant} and week {cutoffWeek}");
+        log.LogTrace("Running feeder for wo cutoff for plant {Plant} and week {CutoffWeek}", plant, cutoffWeek);
 
         if (cutoffWeek is null || !int.TryParse(cutoffWeek, out _)) //Avoid sql injection
         {
