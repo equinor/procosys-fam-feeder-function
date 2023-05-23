@@ -21,7 +21,7 @@ internal class MultiPlantConstants
             case "OSEBERG_STRICT":
                 plants = new List<string> { "PCS$OSEBERG_SOR", "PCS$OSF_DELTA", "PCS$KOLLSNES" };
                 return true;
-            case "All_ACCEPTED":
+            case "ALL_ACCEPTED":
                 plants = new List<string> { "PCS$JOHAN_CASTBERG", "PCS$OSEBERG_SOR", "PCS$OSF_DELTA", "PCS$KOLLSNES" };
                 return true;
             default:
