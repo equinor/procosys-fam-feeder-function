@@ -31,7 +31,6 @@ public class Startup : FunctionsStartup
 
         services.Configure<CommonLibConfig>(config.GetSection("CommonLibConfig"));
         services.Configure<FamFeederOptions>(config.GetSection("FamFeederOptions"));
-        services.Configure<WoCutoffOptions>(config.GetSection("WoCutoffOptions"));
         services.AddEventHubProducer(configBuilder
             => config.Bind("EventHubProducerConfig", configBuilder));
 

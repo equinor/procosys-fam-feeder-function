@@ -16,11 +16,7 @@ namespace FamFeederFunction.Functions.FamFeeder;
 
 public class CutoffForWeekFunction
 {
-    private readonly WoCutoffOptions _cutoffOptions;
-
-    public CutoffForWeekFunction(IOptions<WoCutoffOptions> cutoffOptions)
-        => _cutoffOptions = cutoffOptions.Value;
-
+    
     [FunctionName("RunCutoffForWeek")]
     public async Task<IActionResult> RunCutoffForWeek(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
@@ -41,7 +37,8 @@ public class CutoffForWeekFunction
             return new BadRequestObjectResult("Please provide plant");
         }
 
-        var enabledPlants = _cutoffOptions.EnabledPlants?.Split(",").ToList();
+        MultiPlantConstants.TryGetByMultiPlant("ALL_ACCEPTED", out List<string> enabledPlants);
+        
         if (enabledPlants == null || !enabledPlants.Contains(plant))
         {
             return new OkObjectResult($"{plant} not enabled in fff");
