@@ -26,7 +26,7 @@ public  class CutoffForWeekActivity
     {
         var (cutoffWeek, plant) = context.GetInput<(string, string)>();
         var result = await _famFeederService.RunForCutoffWeek(cutoffWeek, plant, logger);
-        logger.LogDebug($"RunCutoffForWeekActivity returned {result}");
+        logger.LogDebug("RunCutoffForWeekActivity returned {Result}", result);
         return result;
     }
 }

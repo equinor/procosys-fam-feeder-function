@@ -39,11 +39,11 @@ public class SearchFeederFunction
             return new BadRequestObjectResult("Please provide both plant and topic");
         }
 
-        var parsed = TryParse(topicString, out PcsTopic _);
-        if (!parsed)
-        {
-            return new BadRequestObjectResult("Please provide valid topic");
-        }
+        // var parsed = TryParse(topicString, out PcsTopic _);
+        // if (!parsed)
+        // {
+        //     return new BadRequestObjectResult("Please provide valid topic");
+        // }
 
         var plants = await _searchFeederService.GetAllPlants();
         if (!plants.Contains(plant))

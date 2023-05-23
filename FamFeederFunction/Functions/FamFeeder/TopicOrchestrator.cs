@@ -32,7 +32,7 @@ public static class TopicOrchestrator
             return new List<string> { "Please provide a valid plant" };
         }
 
-        if (param.PcsTopic == PcsTopic.WorkOrderCutoff.ToString())
+        if (param.PcsTopic == PcsTopicConstants.WorkOrderCutoff)
         {
             return await RunWoCutoffOrchestration(context, param);
         }
@@ -66,11 +66,11 @@ public static class TopicOrchestrator
     private static async Task<List<string>> RunWoCutoffOrchestration(IDurableOrchestrationContext context, QueryParameters param)
     {
         var months = new List<string> { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" };
-        var results = months
+        List<(string, Task<string>)> results = months
             .Select(m => (param.Plant, m))
             .Select(cutoffInput => ($"{cutoffInput.Plant}({cutoffInput.m})", context.CallActivityAsync<string>(
                 nameof(CutoffForMonthActivity), cutoffInput))).ToList();
-        var allFinishedTasks = await CustomStatusExtension.WhenAllWithStatusUpdate(context,results);
+        List<string> allFinishedTasks = await CustomStatusExtension.WhenAllWithStatusUpdate(context,results);
         return allFinishedTasks.ToList();
     }
 }

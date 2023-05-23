@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using Core.Misc;
 using Core.Models;
 using Equinor.ProCoSys.PcsServiceBus;
 using Microsoft.Azure.WebJobs;
@@ -31,34 +33,27 @@ public static class AllTopicsOrchestrator
             return new List<string> { "Please provide a valid plant" };
         }
 
-        var allTopics = GetAllTopicsAsEnumerable();
+        IEnumerable<string> allTopics = TopicHelper.GetAllTopicsAsEnumerable();
 
-        var tasksAndParams = allTopics.Select(topic =>
+        IEnumerable<(string statusInput, Task<string>)> tasksAndParams = allTopics.Select(topic =>
         {
             var statusInput = $"{plantInput}({topic})";
             return (statusInput, context.CallActivityAsync<string>(nameof(TopicActivity), new QueryParameters(plantInput, topic)));
         });
 
-        var allTaskResults = await CustomStatusExtension.WhenAllWithStatusUpdate(context, tasksAndParams.ToList());
+        List<string> allTaskResults = await CustomStatusExtension.WhenAllWithStatusUpdate(context, tasksAndParams.ToList());
         return allTaskResults;
-    }
-
-    private static IEnumerable<string> GetAllTopicsAsEnumerable()
-    {
-        return Enum.GetValues(typeof(PcsTopic)).Cast<PcsTopic>()
-            .Where(t => t != PcsTopic.WorkOrderCutoff && t != PcsTopic.Document)
-            .Select(t => t.ToString());
     }
 
     private static async Task<List<string>> RunMultiPlantOrchestration(IDurableOrchestrationContext context, IEnumerable<string> validMultiPlants)
     {
-        var tasksAndCustomStatusInput = validMultiPlants.SelectMany(plant => GetAllTopicsAsEnumerable().Select(topic =>
+        IEnumerable<(string statusInput, Task<string>)> tasksAndCustomStatusInput = validMultiPlants.SelectMany(plant => TopicHelper.GetAllTopicsAsEnumerable().Select(topic =>
         {
             var statusInput = $"{plant}({topic})";
             return (statusInput, context.CallActivityAsync<string>(nameof(TopicActivity), new QueryParameters(plant,topic)));
         }));
 
-        var allFinishedTasks = await CustomStatusExtension.WhenAllWithStatusUpdate(context, tasksAndCustomStatusInput.ToList());
+        List<string> allFinishedTasks = await CustomStatusExtension.WhenAllWithStatusUpdate(context, tasksAndCustomStatusInput.ToList());
         return allFinishedTasks;
     }
 }

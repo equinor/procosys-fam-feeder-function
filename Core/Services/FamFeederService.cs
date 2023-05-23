@@ -39,7 +39,7 @@ public class FamFeederService : IFamFeederService
     {
         _logger = logger;
         
-        if (queryParameters.PcsTopic == PcsTopic.WorkOrderCutoff.ToString())
+        if (queryParameters.PcsTopic == PcsTopicConstants.WorkOrderCutoff.ToString())
         {
             return "Cutoff Should have its own call, this should never happen :D";
         }
@@ -54,8 +54,7 @@ public class FamFeederService : IFamFeederService
 
         _logger.LogInformation(
             "Found {events} events for topic {topic} and plant {plant}",events.Count,queryParameters.PcsTopic,queryParameters.Plant);
-        _ = TryParse(queryParameters.PcsTopic, out PcsTopic topic);
-        var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, topic));
+        var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, queryParameters.PcsTopic));
         var mapper = CreateCommonLibMapper();
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m=> m.Objects.Any()).ToList();
 
@@ -84,7 +83,7 @@ public class FamFeederService : IFamFeederService
         _logger.LogInformation(
             "Found {events} events for WoCutoff for week {cutoffWeek} and plant {plant} ", events.Count, cutoffWeek, plant);
 
-        var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, PcsTopic.WorkOrderCutoff));
+        var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
         var mapper = CreateCommonLibMapper();
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
 
@@ -102,7 +101,7 @@ public class FamFeederService : IFamFeederService
         logger.LogInformation("Found {count} cutoffs for month {month} in {plant}",response.Count,month,plant);
 
         var messages = response.SelectMany(e =>
-            TieMapper.CreateTieMessage(e, PcsTopic.WorkOrderCutoff));
+            TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
 
         foreach (var batch in mappedMessages.Batch(250))
@@ -156,105 +155,105 @@ public class FamFeederService : IFamFeederService
         var plant = queryParameters.Plant;
         switch (queryParameters.PcsTopic)
         {
-            case nameof(PcsTopic.SWCRAttachment):
+            case PcsTopicConstants.SwcrAttachment:
                 events = await _repo.GetSwcrAttachments(plant);
                 break;
-            case nameof(PcsTopic.SWCRType):
+            case nameof(PcsTopicConstants.SwcrType):
                 events = await _repo.GetSwcrType(plant);
                 break;
-            case nameof(PcsTopic.SWCROtherReference):
+            case nameof(PcsTopicConstants.SwcrOtherReference):
                 events = await _repo.GetSwcrOtherReferences(plant);
                 break;
-            case nameof(PcsTopic.Action):
+            case nameof(PcsTopicConstants.Action):
                 events = await _repo.GetActions(plant);
                 break;
-            case nameof(PcsTopic.CommPkgTask):
+            case nameof(PcsTopicConstants.CommPkgTask):
                 events = await _repo.GetCommPkgTasks(plant);
                 break;
-            case nameof(PcsTopic.Task):
+            case nameof(PcsTopicConstants.Task):
                 events = await _repo.GetTasks(plant);
                 break;
-            case nameof(PcsTopic.CommPkg):
+            case nameof(PcsTopicConstants.CommPkg):
                 events = await _repo.GetCommPackages(plant);
                 break;
-            case nameof(PcsTopic.Ipo):
+            case nameof(PcsTopicConstants.Ipo):
                 break;
-            case nameof(PcsTopic.McPkg):
+            case nameof(PcsTopicConstants.McPkg):
                 events = await _repo.GetMcPackages(plant);
                 break;
-            case nameof(PcsTopic.Project):
+            case nameof(PcsTopicConstants.Project):
                 events = await _repo.GetProjects(plant);
                 break;
-            case nameof(PcsTopic.Responsible):
+            case nameof(PcsTopicConstants.Responsible):
                 events = await _repo.GetResponsible(plant);
                 break;
-            case nameof(PcsTopic.Tag):
+            case nameof(PcsTopicConstants.Tag):
                 events = await _repo.GetTags(plant);
                 break;
-            case nameof(PcsTopic.PunchListItem):
+            case nameof(PcsTopicConstants.PunchListItem):
                 events = await _repo.GetPunchItems(plant);
                 break;
-            case nameof(PcsTopic.Library):
+            case nameof(PcsTopicConstants.Library):
                 events = await _repo.GetLibrary(plant);
                 break;
-            case nameof(PcsTopic.WorkOrder):
+            case nameof(PcsTopicConstants.WorkOrder):
                 events = await _repo.GetWorkOrders(plant);
                 break;
-            case nameof(PcsTopic.Checklist):
+            case nameof(PcsTopicConstants.Checklist):
                 events = await _repo.GetCheckLists(plant);
                 break;
-            case nameof(PcsTopic.Milestone):
-                events = await _repo.GetMilestones(plant);
+            case nameof(PcsTopicConstants.Milestone):
+                events = await _repo.GetMcPkgMilestones(plant);
                 break;
-            case nameof(PcsTopic.WoChecklist):
+            case nameof(PcsTopicConstants.WoChecklist):
                 events = await _repo.GetWoChecklists(plant);
                 break;
-            case nameof(PcsTopic.SWCR):
+            case nameof(PcsTopicConstants.SWCR):
                 events = await _repo.GetSwcr(plant);
                 break;
-            case nameof(PcsTopic.SWCRSignature):
+            case nameof(PcsTopicConstants.SWCRSignature):
                 events = await _repo.GetSwcrSignature(plant);
                 break;
-            case nameof(PcsTopic.PipingRevision):
+            case nameof(PcsTopicConstants.PipingRevision):
                 events = await _repo.GetPipingRevision(plant);
                 break;
-            case nameof(PcsTopic.PipingSpool):
+            case nameof(PcsTopicConstants.PipingSpool):
                 events = await _repo.GetPipingSpool(plant);
                 break;
-            case nameof(PcsTopic.WoMaterial):
+            case nameof(PcsTopicConstants.WoMaterial):
                 events = await _repo.GetWoMaterials(plant);
                 break;
-            case nameof(PcsTopic.Stock):
+            case nameof(PcsTopicConstants.Stock):
                 events = await _repo.GetStock(plant);
                 break;
-            case nameof(PcsTopic.WoMilestone):
+            case nameof(PcsTopicConstants.WoMilestone):
                 events = await _repo.GetWoMilestones(plant);
                 break;
-            case nameof(PcsTopic.CommPkgOperation):
+            case nameof(PcsTopicConstants.CommPkgOperation):
                 events = await _repo.GetCommPkgOperations(plant);
                 break;
-            case nameof(PcsTopic.Document):
+            case nameof(PcsTopicConstants.Document):
                 events = await _repo.GetDocument(plant);
                 break;
-            case nameof(PcsTopic.LoopContent):
+            case nameof(PcsTopicConstants.LoopContent):
                 events = await _repo.GetLoopContent(plant);
                 break;
-            case nameof(PcsTopic.Query):
+            case nameof(PcsTopicConstants.Query):
                 events = await _repo.GetQuery(plant);
                 break;
-            case nameof(PcsTopic.QuerySignature):
+            case nameof(PcsTopicConstants.QuerySignature):
                 events = await _repo.GetQuerySignature(plant);
                 break;
-            case nameof(PcsTopic.CallOff):
+            case nameof(PcsTopicConstants.CallOff):
                 events = await _repo.GetCallOff(plant);
                 break;
-            case nameof(PcsTopic.CommPkgQuery):
+            case nameof(PcsTopicConstants.CommPkgQuery):
                 events = await _repo.GetCommPkgQuery(plant);
                 break;
-            case nameof(PcsTopic.HeatTrace):
+            case nameof(PcsTopicConstants.HeatTrace):
                 events = await _repo.GetHeatTrace(plant);
                 break;
-            case nameof(PcsTopic.LibraryField):
+            case nameof(PcsTopicConstants.LibraryField):
                 events = await  _repo.GetLibraryField(plant);
                 break;
 

@@ -1,5 +1,7 @@
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using Core.Misc;
 using Core.Models;
 using Equinor.ProCoSys.PcsServiceBus;
 using Microsoft.AspNetCore.Mvc;
@@ -30,7 +32,7 @@ public class TopicHttpTrigger
             return new BadRequestObjectResult("Please provide both plant and topic");
         }
 
-        if (!TryParse(topicString, out PcsTopic _))
+        if (!TopicHelper.GetAllTopicsAsEnumerable().Contains(topicString))
         {
             return new BadRequestObjectResult("Please provide valid topic");
         }

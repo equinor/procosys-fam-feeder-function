@@ -20,7 +20,7 @@ public class TopicActivity
     public async Task<string> RunFeeder([ActivityTrigger] IDurableActivityContext context, ILogger logger)
     {
         var runFeeder = await _famFeederService.RunFeeder(context.GetInput<QueryParameters>(), logger);
-        logger.LogInformation($"RunFeeder returned {runFeeder}");
+        logger.LogInformation("RunFeeder returned {RunFeeder}", runFeeder);
         return runFeeder;
     }
 }
