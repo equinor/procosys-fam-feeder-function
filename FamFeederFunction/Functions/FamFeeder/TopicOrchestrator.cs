@@ -18,6 +18,11 @@ public static class TopicOrchestrator
 
         if (MultiPlantConstants.TryGetByMultiPlant(param.Plant,out var validMultiPlants))
         {
+            if(param.PcsTopic == PcsTopic.WorkOrderCutoff.ToString())
+            {
+                return await RunMultiPlantWoCutoffOrchestration(context, validMultiPlants, param);
+            }
+
             return await RunMultiPlantOrchestration(context, validMultiPlants, param);
         }
       
@@ -44,6 +49,18 @@ public static class TopicOrchestrator
             .ToList();
         var finishedTasks = await Task.WhenAll(results);
         return finishedTasks.ToList();
+    }
+    
+    private static async Task<List<string>> RunMultiPlantWoCutoffOrchestration(IDurableOrchestrationContext context, IEnumerable<string> validMultiPlants,
+        QueryParameters param)
+    {
+        var months = new List<string> { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" };
+        List<(string, Task<string>)> results = months
+            .SelectMany(month => validMultiPlants.Select(plant => (plant,month)))
+            .Select(cutoffInput => ($"{cutoffInput.plant}({cutoffInput.month})", context.CallActivityAsync<string>(
+                nameof(CutoffForMonthActivity), cutoffInput))).ToList();
+        List<string> allFinishedTasks = await CustomStatusExtension.WhenAllWithStatusUpdate(context,results);
+        return allFinishedTasks.ToList();
     }
 
     private static async Task<List<string>> RunWoCutoffOrchestration(IDurableOrchestrationContext context, QueryParameters param)
