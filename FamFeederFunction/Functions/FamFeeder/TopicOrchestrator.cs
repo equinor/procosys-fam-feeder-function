@@ -16,9 +16,9 @@ public static class TopicOrchestrator
     {
         var param = context.GetInput<QueryParameters>();
 
-        if (MultiPlantConstants.TryGetByMultiPlant(param.Plant,out var validMultiPlants))
+        if (MultiPlantConstants.TryGetByMultiPlant(param.Plant,out List<string> validMultiPlants))
         {
-            if(param.PcsTopic == PcsTopic.WorkOrderCutoff.ToString())
+            if(param.PcsTopic == PcsTopicConstants.WorkOrderCutoff)
             {
                 return await RunMultiPlantWoCutoffOrchestration(context, validMultiPlants, param);
             }
