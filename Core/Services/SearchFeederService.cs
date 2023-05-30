@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using MoreLinq;
 using Azure.Search.Documents;
 using Azure.Search.Documents.Models;
+using Task = System.Threading.Tasks.Task;
 
 namespace Core.Services;
 

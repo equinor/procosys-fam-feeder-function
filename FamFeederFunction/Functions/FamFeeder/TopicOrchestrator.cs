@@ -5,6 +5,7 @@ using Core.Models;
 using Equinor.ProCoSys.PcsServiceBus;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using Task = System.Threading.Tasks.Task;
 
 namespace FamFeederFunction.Functions.FamFeeder;
 

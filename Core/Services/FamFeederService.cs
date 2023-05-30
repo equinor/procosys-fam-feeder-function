@@ -10,7 +10,7 @@ using Fam.Models.Exceptions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoreLinq;
-using static System.Enum;
+using Task = System.Threading.Tasks.Task;
 
 namespace Core.Services;
 
@@ -39,7 +39,7 @@ public class FamFeederService : IFamFeederService
     {
         _logger = logger;
         
-        if (queryParameters.PcsTopic == PcsTopicConstants.WorkOrderCutoff.ToString())
+        if (queryParameters.PcsTopic == PcsTopicConstants.WorkOrderCutoff)
         {
             return "Cutoff Should have its own call, this should never happen :D";
         }
@@ -53,7 +53,7 @@ public class FamFeederService : IFamFeederService
         }
 
         _logger.LogInformation(
-            "Found {events} events for topic {topic} and plant {plant}",events.Count,queryParameters.PcsTopic,queryParameters.Plant);
+            "Found {Events} events for topic {Topic} and plant {Plant}",events.Count,queryParameters.PcsTopic,queryParameters.Plant);
         var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, queryParameters.PcsTopic));
         var mapper = CreateCommonLibMapper();
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m=> m.Objects.Any()).ToList();
@@ -81,7 +81,7 @@ public class FamFeederService : IFamFeederService
         }
 
         _logger.LogInformation(
-            "Found {events} events for WoCutoff for week {cutoffWeek} and plant {plant} ", events.Count, cutoffWeek, plant);
+            "Found {Events} events for WoCutoff for week {CutoffWeek} and plant {Plant} ", events.Count, cutoffWeek, plant);
 
         var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
         var mapper = CreateCommonLibMapper();
