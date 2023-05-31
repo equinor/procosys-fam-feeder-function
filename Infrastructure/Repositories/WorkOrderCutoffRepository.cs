@@ -3,7 +3,9 @@ using Equinor.ProCoSys.PcsServiceBus.Queries;
 
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Text.Json;
 using Core.Interfaces;
+using Core.Models;
 using Dapper;
 
 namespace Infrastructure.Repositories;
@@ -27,27 +29,14 @@ public class WorkOrderCutoffRepository : IWorkOrderCutoffRepository
         }
         try
         {
-            
-            var events = dbConnection.Query<string>(query.queryString, query.parameters).ToList();
+            var events = dbConnection.Query<WorkOrderCutoff>(query.queryString, query.parameters).ToList();
             if (events.Count == 0)
             {
                 //  _logger.LogError("Object/Entity with id {ObjectId} did not return anything", objectId);
-                return default;
+                return new List<string>();
             }
-
-            return events;
-            
-            
-            //TODO give tord shit if this outcommented code survives until PR (or prod oO)
-            // await using var result = await command.ExecuteReaderAsync();
-            // var entities = new List<string>();
-            //
-            // while (await result.ReadAsync())
-            // {
-            //     entities.Add((string)result[0]);
-            // }
-
-            // return entities;
+            var serializedWoCutoffs = events.Select(e => JsonSerializer.Serialize(e)).ToList();
+            return serializedWoCutoffs;
         }
         finally
         {

@@ -1,5 +1,4 @@
 ﻿using Core.Models;
-using Equinor.TI.CommonLibrary.Mapper.Core;
 using Microsoft.Extensions.Logging;
 
 namespace Core.Interfaces;

@@ -1,5 +1,4 @@
 ﻿using Dapper;
-using Infrastructure.Configuration;
 using Infrastructure.Handlers;
 using Microsoft.EntityFrameworkCore;
 

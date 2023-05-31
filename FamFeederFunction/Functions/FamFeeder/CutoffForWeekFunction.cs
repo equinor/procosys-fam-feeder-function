@@ -1,15 +1,12 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
-using Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace FamFeederFunction.Functions.FamFeeder;
@@ -37,7 +34,7 @@ public class CutoffForWeekFunction
             return new BadRequestObjectResult("Please provide plant");
         }
 
-        MultiPlantConstants.TryGetByMultiPlant("ALL_ACCEPTED", out List<string> enabledPlants);
+        MultiPlantConstants.TryGetByMultiPlant("ALL_ACCEPTED", out var enabledPlants);
         
         if (enabledPlants == null || !enabledPlants.Contains(plant))
         {
@@ -54,7 +51,7 @@ public class CutoffForWeekFunction
     {
         var (cutoffWeek, plant) = context.GetInput<(string, string)>();
 
-        var allValidPlants = await context.CallActivityAsync<List<string>>(nameof(ValidatePlantActivity), context);
+        var allValidPlants = await context.CallActivityAsync<List<string>>(nameof(GetValidPlantsActivity), null);
 
         if (!allValidPlants.Contains(plant))
         {

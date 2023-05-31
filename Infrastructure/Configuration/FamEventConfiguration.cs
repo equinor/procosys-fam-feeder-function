@@ -1,8 +1,4 @@
-﻿using Core.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-namespace Infrastructure.Configuration;
+﻿namespace Infrastructure.Configuration;
 
 // public class stringConfiguration : IEntityTypeConfiguration<string>
 // {

@@ -1,7 +1,6 @@
 ﻿using Core.Interfaces;
 using Core.Models.Search;
 using Equinor.ProCoSys.PcsServiceBus.Topics;
-using Equinor.TI.Common.Messaging;
 using Infrastructure.Data;
 using Infrastructure.Repositories.SearchQueries;
 using Microsoft.EntityFrameworkCore;

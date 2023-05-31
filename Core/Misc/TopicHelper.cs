@@ -9,9 +9,9 @@ public static class TopicHelper
     {
         return typeof(PcsTopicConstants)
             .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
-            .Where(fi => fi.IsLiteral && !fi.IsInitOnly)
+            .Where(fi => fi is { IsLiteral: true, IsInitOnly: false })
             .Select(x => x.GetRawConstantValue()?.ToString())
             .Where(t => t != PcsTopicConstants.WorkOrderCutoff && t != PcsTopicConstants.Document)
-            .Select(t => t.ToString());
+            .Select(t => t!.ToString());
     }
 }

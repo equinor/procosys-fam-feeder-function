@@ -4,9 +4,7 @@ using Equinor.ProCoSys.PcsServiceBus.Queries;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
-using System.Reflection.Metadata;
 using System.Text.Json;
-using Core.Models.Search;
 using Dapper;
 using Equinor.ProCoSys.PcsServiceBus.Interfaces;
 using Action = Core.Models.Action;
@@ -70,15 +68,13 @@ public class FamEventRepository : IFamEventRepository
 
         try
         {
-            List<T> events = connection.Query<T>(query.queryString, query.parameters).ToList();
+            var events = connection.Query<T>(query.queryString, query.parameters).ToList();
             if (events.Count == 0)
             {
-              //  _logger.LogError("Object/Entity with id {ObjectId} did not return anything", objectId);
                 return new List<string>();
             }
 
-
-            List<string> list = events.Select(e => JsonSerializer.Serialize(e)).ToList();
+            var list = events.Select(e => JsonSerializer.Serialize(e)).ToList();
             return list;
         }
         finally
@@ -90,46 +86,4 @@ public class FamEventRepository : IFamEventRepository
             }
         }
     }
-    
-    
-    private async Task<List<string>> ExecuteQuery(string query)
-    {
-        var dbConnection = _context.Database.GetDbConnection();
-        var connectionWasClosed = dbConnection.State != ConnectionState.Open;
-        if (connectionWasClosed)
-        {
-            await _context.Database.OpenConnectionAsync();
-        }
-        try
-        {
-            await using var command = dbConnection.CreateCommand();
-            command.CommandText = query;
-            await using var result = await command.ExecuteReaderAsync();
-            var entities = new List<string>();
-
-            while (await result.ReadAsync())
-            {
-                //Last row
-                if (!result.HasRows)
-                {
-                    continue;
-                }
-
-                var s = (string)result[0];
-
-                //For local debugging
-                entities.Add(s.Replace("\"WoNo\" : \"���\"", "\"WoNo\" : \"ÆØÅ\""));
-            }
-
-            return entities;
-        }
-        finally
-        {
-            //If we open it, we have to close it.
-            if (connectionWasClosed)
-            {
-                await _context.Database.CloseConnectionAsync();
-            }
-        }
-    }    
 }
