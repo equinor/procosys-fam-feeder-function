@@ -11,7 +11,7 @@ public static class TopicHelper
             .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
             .Where(fi => fi is { IsLiteral: true, IsInitOnly: false })
             .Select(x => x.GetRawConstantValue()?.ToString())
-            .Where(t => t != PcsTopicConstants.WorkOrderCutoff && t != PcsTopicConstants.Document)
+            .Where(t => t is not PcsTopicConstants.WorkOrderCutoff and not PcsTopicConstants.Document and not PcsTopicConstants.Milestone)
             .Select(t => t!.ToString());
     }
 }

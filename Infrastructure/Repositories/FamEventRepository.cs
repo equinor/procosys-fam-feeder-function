@@ -7,6 +7,7 @@ using System.Data;
 using System.Text.Json;
 using Dapper;
 using Equinor.ProCoSys.PcsServiceBus.Interfaces;
+using Infrastructure.Handlers;
 using Action = Core.Models.Action;
 using CommPkg = Core.Models.CommPkg;
 using CommPkgQuery = Core.Models.CommPkgQuery;
@@ -34,7 +35,7 @@ public class FamEventRepository : IFamEventRepository
     public async Task<List<string>> GetWorkOrders(string plant) => await Query<WorkOrder>(WorkOrderQuery.GetQuery(null, plant));
     public async Task<List<string>> GetCheckLists(string plant) => await Query<Checklist>(ChecklistQuery.GetQuery(null,plant));
     public async Task<List<string>> GetTags(string plant) => await Query<Tag>(TagQuery.GetQuery(null,plant));
-    public async Task<List<string>> GetMcPkgMilestones(string plant) => await Query<IMcPkgMilestoneEventV1>(McPkgMilestoneQuery.GetQuery(null,plant));
+    public async Task<List<string>> GetMcPkgMilestones(string plant) => await Query<McPkgMilestone>(McPkgMilestoneQuery.GetQuery(null,plant));
     public async Task<List<string>> GetProjects(string plant) => await Query<Project>(ProjectQuery.GetQuery(null, plant));
     public async Task<List<string>> GetSwcr(string plant) => await Query<Swcr>(SwcrQuery.GetQuery(null,plant));
     public async Task<List<string>> GetSwcrSignature(string plant) => await Query<SwcrSignature>(SwcrSignatureQuery.GetQuery(null, plant));
@@ -74,7 +75,7 @@ public class FamEventRepository : IFamEventRepository
                 return new List<string>();
             }
 
-            var list = events.Select(e => JsonSerializer.Serialize(e)).ToList();
+            var list = events.Select(e => JsonSerializer.Serialize(e, DefaultSerializerHelper.SerializerOptions)).ToList();
             return list;
         }
         finally

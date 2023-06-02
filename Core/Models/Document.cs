@@ -20,7 +20,7 @@ public class Document : IDocumentEventV1
     public string? DocumentCategory { get; init; }
     public string? HandoverStatus { get; init; }
     public string? RegisterType { get; init; }
-    public int? RevisionNo { get; init; }
+    public string? RevisionNo { get; init; }
     public string? RevisionStatus { get; init; }
     public string? ResponsibleContractor { get; init; }
     public DateTime LastUpdated { get; init; }

@@ -57,13 +57,13 @@ public class FamFeederService : IFamFeederService
         var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, queryParameters.PcsTopic));
         var mapper = CreateCommonLibMapper();
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m=> m.Objects.Any()).ToList();
-
+        
         if (Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") != "Development")
         {
             await SendFamMessages(mappedMessages);
         }
 
-        _logger.LogInformation("Finished sending {topic} to fam",queryParameters.PcsTopic);
+        _logger.LogInformation("Finished sending {Topic} to fam",queryParameters.PcsTopic);
 
         return $"finished successfully sending {mappedMessages.Count} messages to fam for {queryParameters.PcsTopic} and plant {queryParameters.Plant}";
     }
