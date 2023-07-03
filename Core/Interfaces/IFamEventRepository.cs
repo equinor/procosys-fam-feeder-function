@@ -2,6 +2,7 @@
 
 public interface IFamEventRepository
 {
+    Task<List<string>> GetTagEquipments(string plant);
     Task<List<string>> GetSwcrAttachments(string plant);
     Task<List<string>> GetSwcrOtherReferences(string plant);
     Task<List<string>> GetSwcrType(string plant);
