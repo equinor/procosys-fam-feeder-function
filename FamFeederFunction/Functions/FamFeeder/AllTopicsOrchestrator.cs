@@ -30,7 +30,7 @@ public static class AllTopicsOrchestrator
             return new List<string> { "Please provide a valid plant" };
         }
 
-        var allTopics = TopicHelper.GetAllTopicsAsEnumerable();
+        var allTopics = TopicHelper.GetAllActiveTopicsAsEnumerable();
 
         var tasksAndParams = allTopics.Select(topic =>
         {
@@ -44,7 +44,7 @@ public static class AllTopicsOrchestrator
 
     private static async Task<List<string>> RunMultiPlantOrchestration(IDurableOrchestrationContext context, IEnumerable<string> validMultiPlants)
     {
-        var tasksAndCustomStatusInput = validMultiPlants.SelectMany(plant => TopicHelper.GetAllTopicsAsEnumerable().Select(topic =>
+        var tasksAndCustomStatusInput = validMultiPlants.SelectMany(plant => TopicHelper.GetAllActiveTopicsAsEnumerable().Select(topic =>
         {
             var statusInput = $"{plant}({topic})";
             return (statusInput, context.CallActivityAsync<string>(nameof(TopicActivity), new QueryParameters(plant,topic)));

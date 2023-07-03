@@ -14,7 +14,7 @@ public class GuidTypeHandler : SqlMapper.TypeHandler<Guid>
             ? guid
             : Guid.TryParse(ByteArrayToHexString((byte[])value), out var guid2)
                 ? guid2
-                :throw new Exception("Could not parse Guid");
+                : throw new Exception($"Could not parse Guid {value}");
         return result;
     }
 

@@ -32,7 +32,6 @@ public class WorkOrderCutoffRepository : IWorkOrderCutoffRepository
             var events = dbConnection.Query<WorkOrderCutoff>(query.queryString, query.parameters).ToList();
             if (events.Count == 0)
             {
-                //  _logger.LogError("Object/Entity with id {ObjectId} did not return anything", objectId);
                 return new List<string>();
             }
             var serializedWoCutoffs = events.Select(e => JsonSerializer.Serialize(e)).ToList();

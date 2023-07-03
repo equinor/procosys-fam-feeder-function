@@ -10,7 +10,7 @@ public class AppDbContext : DbContext
     {
         SqlMapper.AddTypeHandler(typeof(Guid), GuidTypeHandler.Default);
         SqlMapper.AddTypeHandler(typeof(DateTime), DateTimeUtcHandler.Default);
-        SqlMapper.AddTypeHandler(typeof(bool), BooleanHandler.Default);
+        SqlMapper.AddTypeHandler(typeof(bool), OracleBooleanHandler.Default);
         SqlMapper.AddTypeHandler(typeof(DateOnly), DateOnlyHandler.Default);
     }
 

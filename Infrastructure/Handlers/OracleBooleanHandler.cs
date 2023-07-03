@@ -3,9 +3,9 @@ using Dapper;
 
 namespace Infrastructure.Handlers;
 
-internal class BooleanHandler : SqlMapper.TypeHandler<bool>
+internal class OracleBooleanHandler : SqlMapper.TypeHandler<bool>
 {
-    public static readonly BooleanHandler Default = new();
+    public static readonly OracleBooleanHandler Default = new();
 
     public override bool Parse(object value) => value.ToString() == "Y";
 
