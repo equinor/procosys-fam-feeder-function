@@ -6,14 +6,14 @@ using Core.Interfaces;
 
 namespace FamFeederFunction.Functions.FamFeeder;
 
-public  class ValidatePlantActivity
+public  class GetValidPlantsActivity
 {
     private readonly IFamFeederService _famFeederService;
 
-    public ValidatePlantActivity(IFamFeederService famFeederService) 
+    public GetValidPlantsActivity(IFamFeederService famFeederService) 
         => _famFeederService = famFeederService;
 
-    [FunctionName(nameof(ValidatePlantActivity))]
+    [FunctionName(nameof(GetValidPlantsActivity))]
     public async Task<List<string>> RunFeeder([ActivityTrigger] IDurableActivityContext context)
         => await _famFeederService.GetAllPlants();
 }

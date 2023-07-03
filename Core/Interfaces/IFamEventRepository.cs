@@ -16,7 +16,7 @@ public interface IFamEventRepository
     Task<List<string>> GetWorkOrders(string plant);
     Task<List<string>> GetCheckLists(string plant);
     Task<List<string>> GetTags(string plant);
-    Task<List<string>> GetMilestones(string plant);
+    Task<List<string>> GetMcPkgMilestones(string plant);
     Task<List<string>> GetWoChecklists(string plant);
     Task<List<string>> GetSwcr(string plant);
     Task<List<string>> GetSwcrSignature(string plant);

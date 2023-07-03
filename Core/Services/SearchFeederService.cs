@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using MoreLinq;
 using Azure.Search.Documents;
 using Azure.Search.Documents.Models;
+using Task = System.Threading.Tasks.Task;
 
 namespace Core.Services;
 
@@ -94,21 +95,21 @@ public class SearchFeederService : ISearchFeederService
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (queryParameters.PcsTopic)
         {
-            case nameof(PcsTopic.CommPkg.ToString):
+            case PcsTopicConstants.CommPkg:
                 events = await _searchItemRepo.GetCommPackages(queryParameters.Plant);
                 break;
-            case nameof(PcsTopic.McPkg):
+            case PcsTopicConstants.McPkg:
                 events = await _searchItemRepo.GetMcPackages(queryParameters.Plant);
                 break;
-            case nameof(PcsTopic.Tag):
+            case PcsTopicConstants.Tag:
                 events = await _searchItemRepo.GetTags(queryParameters.Plant);
                 break;
-            case nameof(PcsTopic.PunchListItem):
+            case PcsTopicConstants.PunchListItem:
                 events = await _searchItemRepo.GetPunchItems(queryParameters.Plant);
                 break;
             default:
             {
-                _logger?.LogInformation("{topic} not included in switch statement",queryParameters.PcsTopic);
+                _logger?.LogInformation("{Topic} not included in switch statement",queryParameters.PcsTopic);
                 break;
             }
         }

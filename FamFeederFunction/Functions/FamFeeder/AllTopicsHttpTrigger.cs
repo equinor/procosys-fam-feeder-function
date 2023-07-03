@@ -32,7 +32,7 @@ public static class AllTopicsHttpTrigger
         dynamic data = JsonConvert.DeserializeObject(requestBody);
         plant ??= data?.Facility;
 
-        log.LogTrace($"Running feeder for all topics for plant {plant}");
+        log.LogTrace("Running feeder for all topics for plant {Plant}", plant);
 
         if (plant == null)
         {

@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Core.Interfaces;
 using Core.Models;
-using Equinor.ProCoSys.PcsServiceBus;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -12,7 +11,7 @@ using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using static System.Enum;
+
 namespace FamFeederFunction.Functions.SearchFeeder;
 
 public class SearchFeederFunction
@@ -39,11 +38,11 @@ public class SearchFeederFunction
             return new BadRequestObjectResult("Please provide both plant and topic");
         }
 
-        var parsed = TryParse(topicString, out PcsTopic _);
-        if (!parsed)
-        {
-            return new BadRequestObjectResult("Please provide valid topic");
-        }
+        // var parsed = TryParse(topicString, out PcsTopic _);
+        // if (!parsed)
+        // {
+        //     return new BadRequestObjectResult("Please provide valid topic");
+        // }
 
         var plants = await _searchFeederService.GetAllPlants();
         if (!plants.Contains(plant))

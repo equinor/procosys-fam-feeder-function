@@ -1,6 +1,4 @@
-﻿using Equinor.ProCoSys.PcsServiceBus;
-
-namespace Core.Models;
+﻿namespace Core.Models;
 
 public class QueryParameters
 {

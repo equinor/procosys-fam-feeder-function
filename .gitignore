@@ -368,3 +368,6 @@ FodyWeavers.xsd
 /__azurite_db_queue_extent__.json
 /__azurite_db_blob__.json
 /__azurite_db_blob_extent__.json
+
+# All files gennerated by rider
+.idea/*

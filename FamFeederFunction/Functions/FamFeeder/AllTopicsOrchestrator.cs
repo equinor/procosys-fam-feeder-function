@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Core.Misc;
 using Core.Models;
-using Equinor.ProCoSys.PcsServiceBus;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
-using Enum = System.Enum;
 
 namespace FamFeederFunction.Functions.FamFeeder;
 
@@ -25,13 +24,13 @@ public static class AllTopicsOrchestrator
             return await RunMultiPlantOrchestration(context, validSubPlants);
         }
 
-        var allValidPlants = await context.CallActivityAsync<List<string>>(nameof(ValidatePlantActivity),context);
+        var allValidPlants = await context.CallActivityAsync<List<string>>(nameof(GetValidPlantsActivity),null);
         if (!allValidPlants.Contains(plantInput))
         {
             return new List<string> { "Please provide a valid plant" };
         }
 
-        var allTopics = GetAllTopicsAsEnumerable();
+        var allTopics = TopicHelper.GetAllActiveTopicsAsEnumerable();
 
         var tasksAndParams = allTopics.Select(topic =>
         {
@@ -43,16 +42,9 @@ public static class AllTopicsOrchestrator
         return allTaskResults;
     }
 
-    private static IEnumerable<string> GetAllTopicsAsEnumerable()
-    {
-        return Enum.GetValues(typeof(PcsTopic)).Cast<PcsTopic>()
-            .Where(t => t != PcsTopic.WorkOrderCutoff && t != PcsTopic.Document)
-            .Select(t => t.ToString());
-    }
-
     private static async Task<List<string>> RunMultiPlantOrchestration(IDurableOrchestrationContext context, IEnumerable<string> validMultiPlants)
     {
-        var tasksAndCustomStatusInput = validMultiPlants.SelectMany(plant => GetAllTopicsAsEnumerable().Select(topic =>
+        var tasksAndCustomStatusInput = validMultiPlants.SelectMany(plant => TopicHelper.GetAllActiveTopicsAsEnumerable().Select(topic =>
         {
             var statusInput = $"{plant}({topic})";
             return (statusInput, context.CallActivityAsync<string>(nameof(TopicActivity), new QueryParameters(plant,topic)));

@@ -5,6 +5,7 @@ using Core.Models;
 using Equinor.ProCoSys.PcsServiceBus;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using Task = System.Threading.Tasks.Task;
 
 namespace FamFeederFunction.Functions.FamFeeder;
 
@@ -18,7 +19,7 @@ public static class TopicOrchestrator
 
         if (MultiPlantConstants.TryGetByMultiPlant(param.Plant,out var validMultiPlants))
         {
-            if(param.PcsTopic == PcsTopic.WorkOrderCutoff.ToString())
+            if(param.PcsTopic == PcsTopicConstants.WorkOrderCutoff)
             {
                 return await RunMultiPlantWoCutoffOrchestration(context, validMultiPlants, param);
             }
@@ -26,13 +27,13 @@ public static class TopicOrchestrator
             return await RunMultiPlantOrchestration(context, validMultiPlants, param);
         }
       
-        var plants = await context.CallActivityAsync<List<string>>(nameof(ValidatePlantActivity), param);
+        var plants = await context.CallActivityAsync<List<string>>(nameof(GetValidPlantsActivity),null);
         if (!plants.Contains(param.Plant))
         {
             return new List<string> { "Please provide a valid plant" };
         }
 
-        if (param.PcsTopic == PcsTopic.WorkOrderCutoff.ToString())
+        if (param.PcsTopic == PcsTopicConstants.WorkOrderCutoff)
         {
             return await RunWoCutoffOrchestration(context, param);
         }
@@ -43,7 +44,7 @@ public static class TopicOrchestrator
     private static async Task<List<string>> RunMultiPlantOrchestration(IDurableOrchestrationContext context, IEnumerable<string> validMultiPlants,
         QueryParameters param)
     {
-        List<Task<string>> results = validMultiPlants
+        var results = validMultiPlants
             .Select(plant => new QueryParameters(plant, param.PcsTopic))
             .Select(input => context.CallActivityAsync<string>(nameof(TopicActivity), input))
             .ToList();
@@ -55,11 +56,11 @@ public static class TopicOrchestrator
         QueryParameters param)
     {
         var months = new List<string> { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" };
-        List<(string, Task<string>)> results = months
+        var results = months
             .SelectMany(month => validMultiPlants.Select(plant => (plant,month)))
             .Select(cutoffInput => ($"{cutoffInput.plant}({cutoffInput.month})", context.CallActivityAsync<string>(
                 nameof(CutoffForMonthActivity), cutoffInput))).ToList();
-        List<string> allFinishedTasks = await CustomStatusExtension.WhenAllWithStatusUpdate(context,results);
+        var allFinishedTasks = await CustomStatusExtension.WhenAllWithStatusUpdate(context,results);
         return allFinishedTasks.ToList();
     }
 
