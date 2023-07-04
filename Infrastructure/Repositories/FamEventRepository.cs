@@ -1,10 +1,10 @@
 ﻿using Core.Interfaces;
-using Core.Models;
 using Equinor.ProCoSys.PcsServiceBus.Queries;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Text.Json;
+using Core.Models;
 using Dapper;
 using Equinor.ProCoSys.PcsServiceBus.Interfaces;
 using Infrastructure.Handlers;
@@ -22,6 +22,9 @@ public class FamEventRepository : IFamEventRepository
     private readonly AppDbContext _context;
     public FamEventRepository(AppDbContext context) 
         => _context = context;
+
+  
+
     public async Task<List<string>> GetSwcrAttachments(string plant) => await Query<SwcrAttachment>(SwcrAttachmentQuery.GetQuery(null, plant));
     public async Task<List<string>> GetSwcrOtherReferences(string plant) => await Query<SwcrOtherReference>(SwcrOtherReferenceQuery.GetQuery(null, plant));
     public async Task<List<string>> GetSwcrType(string plant) => await Query<SwcrType>(SwcrTypeQuery.GetQuery(null, plant));
@@ -35,6 +38,7 @@ public class FamEventRepository : IFamEventRepository
     public async Task<List<string>> GetWorkOrders(string plant) => await Query<WorkOrder>(WorkOrderQuery.GetQuery(null, plant));
     public async Task<List<string>> GetCheckLists(string plant) => await Query<Checklist>(ChecklistQuery.GetQuery(null,plant));
     public async Task<List<string>> GetTags(string plant) => await Query<Tag>(TagQuery.GetQuery(null,plant));
+    public async Task<List<string>> GetTagEquipments(string plant) => await Query<TagEquipment>(TagEquipmentQuery.GetQuery(null,plant));
     public async Task<List<string>> GetMcPkgMilestones(string plant) => await Query<McPkgMilestone>(McPkgMilestoneQuery.GetQuery(null,plant));
     public async Task<List<string>> GetProjects(string plant) => await Query<Project>(ProjectQuery.GetQuery(null, plant));
     public async Task<List<string>> GetSwcr(string plant) => await Query<Swcr>(SwcrQuery.GetQuery(null,plant));
@@ -66,7 +70,6 @@ public class FamEventRepository : IFamEventRepository
         {
             await _context.Database.OpenConnectionAsync();
         }
-
         try
         {
             var events = connection.Query<T>(query.queryString, query.parameters).ToList();
