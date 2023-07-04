@@ -179,6 +179,7 @@ public class FamFeederService : IFamFeederService
             PcsTopicConstants.Stock => await _repo.GetStock(plant),
             PcsTopicConstants.WoMilestone => await _repo.GetWoMilestones(plant),
             PcsTopicConstants.CommPkgOperation => await _repo.GetCommPkgOperations(plant),
+            PcsTopicConstants.CommPkgMilestone => await _repo.GetCommPkgMilestones(plant),
             PcsTopicConstants.Document => await _repo.GetDocument(plant),
             PcsTopicConstants.LoopContent => await _repo.GetLoopContent(plant),
             PcsTopicConstants.Query => await _repo.GetQuery(plant),

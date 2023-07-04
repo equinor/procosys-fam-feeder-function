@@ -56,6 +56,7 @@ public class FamEventRepository : IFamEventRepository
     public async Task<List<string>> GetWoCutoffsByWeekAndPlant(string cutoffWeek, string plant) => await Query<WorkOrderCutoff>(WorkOrderCutoffQuery.GetQuery(null, cutoffWeek, plant,null));
     public async Task<List<string>> GetHeatTrace(string plant) => await Query<HeatTrace>(HeatTraceQuery.GetQuery(null, plant));
     public async Task<List<string>> GetLibraryField(string plant) => await Query<LibraryField>(LibraryFieldQuery.GetQuery(null, plant));
+    public async Task<List<string>> GetCommPkgMilestones(string plant) => await Query<CommPkgMilestone>(CommPkgMilestoneQuery.GetQuery(null, plant));
 
 
     private async Task<List<string>> Query<T>((string queryString, DynamicParameters parameters) query) where T : IHasEventType
