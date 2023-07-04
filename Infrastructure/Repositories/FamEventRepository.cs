@@ -27,7 +27,7 @@ public class FamEventRepository : IFamEventRepository
 
     public async Task<List<string>> GetSwcrAttachments(string plant) => await Query<SwcrAttachment>(SwcrAttachmentQuery.GetQuery(null, plant));
     public async Task<List<string>> GetSwcrOtherReferences(string plant) => await Query<SwcrOtherReference>(SwcrOtherReferenceQuery.GetQuery(null, plant));
-    public async Task<List<string>> GetSwcrType(string plant) => await Query<SwcrType>(SwcrTypeQuery.GetQuery(null, plant));
+    public async Task<List<string>> GetSwcrTypes(string plant) => await Query<SwcrType>(SwcrTypeQuery.GetQuery(null, plant));
     public async Task<List<string>> GetActions(string plant) => await Query<Action>(ActionQuery.GetQuery(null, plant));
     public async Task<List<string>> GetCommPkgTasks(string plant) => await Query<CommPkgTask>(CommPkgTaskQuery.GetQuery(null, null, plant));
     public async Task<List<string>> GetTasks(string plant) => await Query<TaskEvent>(TaskQuery.GetQuery(null, plant));
@@ -41,25 +41,25 @@ public class FamEventRepository : IFamEventRepository
     public async Task<List<string>> GetTagEquipments(string plant) => await Query<TagEquipment>(TagEquipmentQuery.GetQuery(null,plant));
     public async Task<List<string>> GetMcPkgMilestones(string plant) => await Query<McPkgMilestone>(McPkgMilestoneQuery.GetQuery(null,plant));
     public async Task<List<string>> GetProjects(string plant) => await Query<Project>(ProjectQuery.GetQuery(null, plant));
-    public async Task<List<string>> GetSwcr(string plant) => await Query<Swcr>(SwcrQuery.GetQuery(null,plant));
-    public async Task<List<string>> GetSwcrSignature(string plant) => await Query<SwcrSignature>(SwcrSignatureQuery.GetQuery(null, plant));
+    public async Task<List<string>> GetSwcrs(string plant) => await Query<Swcr>(SwcrQuery.GetQuery(null,plant));
+    public async Task<List<string>> GetSwcrSignatures(string plant) => await Query<SwcrSignature>(SwcrSignatureQuery.GetQuery(null, plant));
     public async Task<List<string>> GetWoChecklists(string plant) => await Query<WorkOrderChecklist>(WorkOrderChecklistQuery.GetQuery(null,null, plant));
-    public async Task<List<string>> GetQuery(string plant) => await Query<Query>(QueryQuery.GetQuery(null,plant));
-    public async Task<List<string>> GetQuerySignature(string plant) => await Query<QuerySignature>(QuerySignatureQuery.GetQuery(null, plant));
-    public async Task<List<string>> GetPipingRevision(string plant) => await Query<PipingRevision>(PipingRevisionQuery.GetQuery(null,plant));
-    public async Task<List<string>> GetPipingSpool(string plant) => await Query<PipingSpool>(PipingSpoolQuery.GetQuery(null,plant));
+    public async Task<List<string>> GetQueries(string plant) => await Query<Query>(QueryQuery.GetQuery(null,plant));
+    public async Task<List<string>> GetQuerySignatures(string plant) => await Query<QuerySignature>(QuerySignatureQuery.GetQuery(null, plant));
+    public async Task<List<string>> GetPipingRevisions(string plant) => await Query<PipingRevision>(PipingRevisionQuery.GetQuery(null,plant));
+    public async Task<List<string>> GetPipingSpools(string plant) => await Query<PipingSpool>(PipingSpoolQuery.GetQuery(null,plant));
     public async Task<List<string>> GetWoMilestones(string plant) => await Query<WorkOrderMilestone>(WorkOrderMilestoneQuery.GetQuery(null,null,plant));
     public async Task<List<string>> GetWoMaterials(string plant) => await Query<WorkOrderMaterial>(WorkOrderMaterialQuery.GetQuery(null,plant));
-    public async Task<List<string>> GetStock(string plant) => await Query<Stock>(StockQuery.GetQuery(null,plant));
-    public async Task<List<string>> GetResponsible(string plant) => await Query<Responsible>(ResponsibleQuery.GetQuery(null, plant));
-    public async Task<List<string>> GetLibrary(string plant) => await Query<Library>(LibraryQuery.GetQuery(null, plant));
+    public async Task<List<string>> GetStocks(string plant) => await Query<Stock>(StockQuery.GetQuery(null,plant));
+    public async Task<List<string>> GetResponsibles(string plant) => await Query<Responsible>(ResponsibleQuery.GetQuery(null, plant));
+    public async Task<List<string>> GetLibraries(string plant) => await Query<Library>(LibraryQuery.GetQuery(null, plant));
     public async Task<List<string>> GetDocument(string plant) => await Query<Document>(DocumentQuery.GetQuery(null,plant));
-    public async Task<List<string>> GetLoopContent(string plant) => await Query<LoopContent>(LoopContentQuery.GetQuery(null, plant));
-    public async Task<List<string>> GetCallOff(string plant) => await Query<CallOff>(CallOffQuery.GetQuery(null,plant));
-    public async Task<List<string>> GetCommPkgQuery(string plant) => await Query<CommPkgQuery>(CommPkgQueryQuery.GetQuery(null, null, plant));
+    public async Task<List<string>> GetLoopContents(string plant) => await Query<LoopContent>(LoopContentQuery.GetQuery(null, plant));
+    public async Task<List<string>> GetCallOffs(string plant) => await Query<CallOff>(CallOffQuery.GetQuery(null,plant));
+    public async Task<List<string>> GetCommPkgQueries(string plant) => await Query<CommPkgQuery>(CommPkgQueryQuery.GetQuery(null, null, plant));
     public async Task<List<string>> GetWoCutoffsByWeekAndPlant(string cutoffWeek, string plant) => await Query<WorkOrderCutoff>(WorkOrderCutoffQuery.GetQuery(null, cutoffWeek, plant,null));
-    public async Task<List<string>> GetHeatTrace(string plant) => await Query<HeatTrace>(HeatTraceQuery.GetQuery(null, plant));
-    public async Task<List<string>> GetLibraryField(string plant) => await Query<LibraryField>(LibraryFieldQuery.GetQuery(null, plant));
+    public async Task<List<string>> GetHeatTraces(string plant) => await Query<HeatTrace>(HeatTraceQuery.GetQuery(null, plant));
+    public async Task<List<string>> GetLibraryFields(string plant) => await Query<LibraryField>(LibraryFieldQuery.GetQuery(null, plant));
     public async Task<List<string>> GetCommPkgMilestones(string plant) => await Query<CommPkgMilestone>(CommPkgMilestoneQuery.GetQuery(null, plant));
 
 
