@@ -154,10 +154,10 @@ public class FamFeederService : IFamFeederService
         var plant = queryParameters.Plant;
         return queryParameters.PcsTopic switch
         {
+            PcsTopicConstants.Action => await _repo.GetActions(plant),
             PcsTopicConstants.SwcrAttachment => await _repo.GetSwcrAttachments(plant),
             PcsTopicConstants.SwcrType => await _repo.GetSwcrType(plant),
             PcsTopicConstants.SwcrOtherReference => await _repo.GetSwcrOtherReferences(plant),
-            PcsTopicConstants.Action => await _repo.GetActions(plant),
             PcsTopicConstants.CommPkgTask => await _repo.GetCommPkgTasks(plant),
             PcsTopicConstants.Task => await _repo.GetTasks(plant),
             PcsTopicConstants.CommPkg => await _repo.GetCommPackages(plant),
@@ -165,6 +165,7 @@ public class FamFeederService : IFamFeederService
             PcsTopicConstants.Project => await _repo.GetProjects(plant),
             PcsTopicConstants.Responsible => await _repo.GetResponsible(plant),
             PcsTopicConstants.Tag => await _repo.GetTags(plant),
+            PcsTopicConstants.TagEquipment => await _repo.GetTagEquipments(plant),
             PcsTopicConstants.PunchListItem => await _repo.GetPunchItems(plant),
             PcsTopicConstants.Library => await _repo.GetLibrary(plant),
             PcsTopicConstants.WorkOrderCutoff => await _repo.GetWorkOrders(plant),
