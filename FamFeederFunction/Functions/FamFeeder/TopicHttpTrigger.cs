@@ -30,7 +30,7 @@ public class TopicHttpTrigger
             return new BadRequestObjectResult("Please provide both plant and topic");
         }
 
-        if (!TopicHelper.GetAllActiveTopicsAsEnumerable().Contains(topicString))
+        if (!TopicHelper.GetAllTopicsAsEnumerable().Contains(topicString))
         {
             return new BadRequestObjectResult("Please provide valid topic");
         }

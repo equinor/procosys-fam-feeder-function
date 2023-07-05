@@ -19,4 +19,13 @@ public static class TopicHelper
             .Where(t => t is not PcsTopicConstants.WorkOrderCutoff and not PcsTopicConstants.Document and not PcsTopicConstants.Milestone)
             .Select(t => t!);
     }
+    
+    public static IEnumerable<string> GetAllTopicsAsEnumerable()
+    {
+        return typeof(PcsTopicConstants)
+            .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+            .Where(fi => fi is { IsLiteral: true, IsInitOnly: false })
+            .Select(x => x.GetRawConstantValue()?.ToString())
+            .Select(t => t!);
+    }
 }
