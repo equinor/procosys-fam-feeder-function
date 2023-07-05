@@ -7,6 +7,7 @@ using System.Text.Json;
 using Core.Interfaces;
 using Core.Models;
 using Dapper;
+using Infrastructure.Handlers;
 
 namespace Infrastructure.Repositories;
 
@@ -34,7 +35,7 @@ public class WorkOrderCutoffRepository : IWorkOrderCutoffRepository
             {
                 return new List<string>();
             }
-            var serializedWoCutoffs = events.Select(e => JsonSerializer.Serialize(e)).ToList();
+            var serializedWoCutoffs = events.Select(e => JsonSerializer.Serialize(e,DefaultSerializerHelper.SerializerOptions)).ToList();
             return serializedWoCutoffs;
         }
         finally
