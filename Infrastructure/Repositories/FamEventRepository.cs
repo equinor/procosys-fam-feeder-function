@@ -61,6 +61,7 @@ public class FamEventRepository : IFamEventRepository
     public async Task<List<string>> GetHeatTraces(string plant) => await Query<HeatTrace>(HeatTraceQuery.GetQuery(null, plant));
     public async Task<List<string>> GetLibraryFields(string plant) => await Query<LibraryField>(LibraryFieldQuery.GetQuery(null, plant));
     public async Task<List<string>> GetCommPkgMilestones(string plant) => await Query<CommPkgMilestone>(CommPkgMilestoneQuery.GetQuery(null, plant));
+    public async Task<List<string>> GetHeatTracePipeTests(string plant) => await Query<HeatTracePipeTest>(HeatTracePipeTestQuery.GetQuery(null, plant));
 
 
     private async Task<List<string>> Query<T>((string queryString, DynamicParameters parameters) query) where T : IHasEventType

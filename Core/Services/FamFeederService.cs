@@ -164,6 +164,7 @@ public class FamFeederService : IFamFeederService
             PcsTopicConstants.CommPkgTask => await _repo.GetCommPkgTasks(plant),
             PcsTopicConstants.Document => await _repo.GetDocument(plant),
             PcsTopicConstants.HeatTrace => await _repo.GetHeatTraces(plant),
+            PcsTopicConstants.HeatTracePipeTest => await _repo.GetHeatTracePipeTests(plant),
             PcsTopicConstants.Library => await _repo.GetLibraries(plant),
             PcsTopicConstants.LibraryField => await _repo.GetLibraryFields(plant),
             PcsTopicConstants.LoopContent => await _repo.GetLoopContents(plant),

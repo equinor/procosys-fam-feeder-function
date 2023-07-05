@@ -38,4 +38,5 @@ public interface IFamEventRepository
     Task<List<string>> GetHeatTraces(string plant);
     Task<List<string>> GetLibraryFields(string plant);
     Task<List<string>> GetCommPkgMilestones(string plant);
+    Task<List<string>> GetHeatTracePipeTests(string plant);
 }
