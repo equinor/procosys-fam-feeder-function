@@ -109,9 +109,9 @@ public class FamFeederService : IFamFeederService
             await SendFamMessages(batch);
         }
 
-        logger.LogDebug("Sent WoCutoff to FAM");
+        logger.LogInformation("Sent {MappedMessagesCount} WoCutoff to FAM  for {Month} done", mappedMessages.Count, month);
         return $"Sent {mappedMessages.Count} WoCutoff to FAM  for {month} done";
-    }
+    }       
 
     private SchemaMapper CreateCommonLibMapper()
     {
