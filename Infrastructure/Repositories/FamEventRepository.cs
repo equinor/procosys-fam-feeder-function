@@ -23,8 +23,6 @@ public class FamEventRepository : IFamEventRepository
     public FamEventRepository(AppDbContext context) 
         => _context = context;
 
-  
-
     public async Task<List<string>> GetSwcrAttachments(string plant) => await Query<SwcrAttachment>(SwcrAttachmentQuery.GetQuery(null, plant));
     public async Task<List<string>> GetSwcrOtherReferences(string plant) => await Query<SwcrOtherReference>(SwcrOtherReferenceQuery.GetQuery(null, plant));
     public async Task<List<string>> GetSwcrTypes(string plant) => await Query<SwcrType>(SwcrTypeQuery.GetQuery(null, plant));

@@ -9,6 +9,7 @@ public class Swcr : ISwcrEventV1
     public Guid ProCoSysGuid { get; init; }
     public string? ProjectName { get; init; }
     public string SwcrNo { get; init; }
+    public string? Title { get; init; }
     public long SwcrId { get; init; }
     public Guid? CommPkgGuid { get; init; }
     public string? CommPkgNo { get; init; }
