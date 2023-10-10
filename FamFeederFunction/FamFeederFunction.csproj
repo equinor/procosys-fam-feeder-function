@@ -6,6 +6,7 @@
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 		<UserSecretsId>1ed0e7db-56ed-40ac-a4bd-9ca3fbe5d466</UserSecretsId>
 		<Platforms>AnyCPU;x64</Platforms>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 	  <Optimize>True</Optimize>

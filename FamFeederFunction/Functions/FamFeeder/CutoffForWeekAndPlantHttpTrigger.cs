@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 
 namespace FamFeederFunction.Functions.FamFeeder;
 
-public class CutoffForWeekFunction
+public class CutoffForWeekAndPlantHttpTrigger
 {
     
     [FunctionName("RunCutoffForWeek")]
@@ -62,13 +62,13 @@ public class CutoffForWeekFunction
         return await context.CallActivityAsync<string>(nameof(CutoffForWeekActivity), (cutoffWeek, plant));
     }
 
-    private static async Task<(string topicString, string plant)> DeserializeCutoffWeekAndPlant(HttpRequest req)
+    private static async Task<(string? topicString, string? plant)> DeserializeCutoffWeekAndPlant(HttpRequest req)
     {
-        string cutoffWeek = req.Query["CutoffWeek"];
-        string plant = req.Query["Plant"];
+        string? cutoffWeek = req.Query["CutoffWeek"];
+        string? plant = req.Query["Plant"];
 
         var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-        dynamic data = JsonConvert.DeserializeObject(requestBody);
+        dynamic? data = JsonConvert.DeserializeObject(requestBody);
         cutoffWeek ??= data?.CutoffWeek;
         plant ??= data?.Facility;
         return (cutoffWeek, plant);
