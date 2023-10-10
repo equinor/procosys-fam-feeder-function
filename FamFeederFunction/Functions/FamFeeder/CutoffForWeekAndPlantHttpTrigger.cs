@@ -13,7 +13,6 @@ namespace FamFeederFunction.Functions.FamFeeder;
 
 public class CutoffForWeekAndPlantHttpTrigger
 {
-    
     [FunctionName("RunCutoffForWeek")]
     public async Task<IActionResult> RunCutoffForWeek(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
@@ -29,14 +28,14 @@ public class CutoffForWeekAndPlantHttpTrigger
             return new BadRequestObjectResult("Please specify CutoffWeek");
         }
 
-        if (plant == null)
+        if (plant is null)
         {
             return new BadRequestObjectResult("Please provide plant");
         }
 
         MultiPlantConstants.TryGetByMultiPlant("ALL_ACCEPTED", out var enabledPlants);
         
-        if (enabledPlants == null || !enabledPlants.Contains(plant))
+        if (!enabledPlants.Contains(plant))
         {
             return new OkObjectResult($"{plant} not enabled in fff");
         }

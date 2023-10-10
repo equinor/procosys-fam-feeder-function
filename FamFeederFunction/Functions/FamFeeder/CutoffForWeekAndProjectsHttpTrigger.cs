@@ -28,11 +28,11 @@ public class CutoffForWeekAndProjectsHttpTrigger
             return new BadRequestObjectResult("Please specify CutoffWeek");
         }
 
-        if (plant == null)
+        if (plant is null)
         {
             return new BadRequestObjectResult("Please provide plant");
         }
-        if (projectIds == null)
+        if (projectIds is null)
         {
             return new BadRequestObjectResult("Please provide projectIds");
         }
@@ -41,7 +41,7 @@ public class CutoffForWeekAndProjectsHttpTrigger
         
         if (!enabledPlants.Contains(plant))
         {
-            return new OkObjectResult($"{plant} not enabled in fff");
+            return new OkObjectResult($"{plant} not enabled");
         }
 
         var instanceId = await orchestrationClient.StartNewAsync(nameof(CutoffForWeekAndProjectIdsOrchestration), null, (cutoffWeek, plant));

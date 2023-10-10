@@ -34,7 +34,7 @@ public static class AllTopicsHttpTrigger
 
         log.LogTrace("Running feeder for all topics for plant {Plant}", plant);
 
-        if (plant == null)
+        if (plant is null)
         {
             return new BadRequestObjectResult("Please provide both plant and topic");
         }
