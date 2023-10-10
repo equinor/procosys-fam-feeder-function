@@ -27,14 +27,14 @@ public static class AllTopicsHttpTrigger
         HttpRequest req,
         [DurableClient] IDurableOrchestrationClient orchestrationClient, ILogger log)
     {
-        string plant = req.Query["Plant"];
+        string? plant = req.Query["Plant"];
         var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-        dynamic data = JsonConvert.DeserializeObject(requestBody);
+        dynamic? data = JsonConvert.DeserializeObject(requestBody);
         plant ??= data?.Facility;
 
         log.LogTrace("Running feeder for all topics for plant {Plant}", plant);
 
-        if (plant == null)
+        if (plant is null)
         {
             return new BadRequestObjectResult("Please provide both plant and topic");
         }

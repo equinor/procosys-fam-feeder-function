@@ -11,9 +11,8 @@ using Newtonsoft.Json;
 
 namespace FamFeederFunction.Functions.FamFeeder;
 
-public class CutoffForWeekFunction
+public class CutoffForWeekAndPlantHttpTrigger
 {
-    
     [FunctionName("RunCutoffForWeek")]
     public async Task<IActionResult> RunCutoffForWeek(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
@@ -29,14 +28,14 @@ public class CutoffForWeekFunction
             return new BadRequestObjectResult("Please specify CutoffWeek");
         }
 
-        if (plant == null)
+        if (plant is null)
         {
             return new BadRequestObjectResult("Please provide plant");
         }
 
         MultiPlantConstants.TryGetByMultiPlant("ALL_ACCEPTED", out var enabledPlants);
         
-        if (enabledPlants == null || !enabledPlants.Contains(plant))
+        if (!enabledPlants.Contains(plant))
         {
             return new OkObjectResult($"{plant} not enabled in fff");
         }
@@ -62,13 +61,13 @@ public class CutoffForWeekFunction
         return await context.CallActivityAsync<string>(nameof(CutoffForWeekActivity), (cutoffWeek, plant));
     }
 
-    private static async Task<(string topicString, string plant)> DeserializeCutoffWeekAndPlant(HttpRequest req)
+    private static async Task<(string? topicString, string? plant)> DeserializeCutoffWeekAndPlant(HttpRequest req)
     {
-        string cutoffWeek = req.Query["CutoffWeek"];
-        string plant = req.Query["Plant"];
+        string? cutoffWeek = req.Query["CutoffWeek"];
+        string? plant = req.Query["Plant"];
 
         var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-        dynamic data = JsonConvert.DeserializeObject(requestBody);
+        dynamic? data = JsonConvert.DeserializeObject(requestBody);
         cutoffWeek ??= data?.CutoffWeek;
         plant ??= data?.Facility;
         return (cutoffWeek, plant);

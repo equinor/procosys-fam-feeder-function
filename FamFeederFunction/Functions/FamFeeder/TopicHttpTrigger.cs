@@ -40,13 +40,13 @@ public class TopicHttpTrigger
         return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
     }
 
-    private static async Task<(string topicString, string plant)> DeserializeTopicAndPlant(HttpRequest req)
+    private static async Task<(string? topicString, string? plant)> DeserializeTopicAndPlant(HttpRequest req)
     {
-        string topicString = req.Query["PcsTopic"];
-        string plant = req.Query["Plant"];
+        string? topicString = req.Query["PcsTopic"];
+        string? plant = req.Query["Plant"];
 
         var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-        dynamic data = JsonConvert.DeserializeObject(requestBody);
+        dynamic? data = JsonConvert.DeserializeObject(requestBody);
         topicString ??= data?.PcsTopic;
         plant ??= data?.Facility;
         return (topicString, plant);
