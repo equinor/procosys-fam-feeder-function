@@ -35,6 +35,7 @@ public interface IFamEventRepository
     Task<List<string>> GetCallOffs(string plant);
     Task<List<string>> GetCommPkgQueries(string plant);
     Task<List<string>> GetWoCutoffsByWeekAndPlant(string cutoffWeek, string plant);
+    Task<List<string>> GetWoCutoffsByWeekAndProjectIds(string cutoffWeek, string plant, IEnumerable<long> projectIds);
     Task<List<string>> GetHeatTraces(string plant);
     Task<List<string>> GetLibraryFields(string plant);
     Task<List<string>> GetCommPkgMilestones(string plant);

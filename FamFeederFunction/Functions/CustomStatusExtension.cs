@@ -70,11 +70,11 @@ public static class CustomStatusExtension
             }
         }
 
-        var failedTasks = tasks.Select(t => t.task).Where(t => t.Exception != null).ToList();
+        var failedTasks = tasks.Where(t => t.task.Exception != null).Select(t => t.task.Exception!).ToList();
         if (failedTasks.Count > 0)
         {
             throw new AggregateException(
-                "One or more operations failed", failedTasks.Select(t => t.Exception));
+                "One or more operations failed", failedTasks);
         }
         var allFinishedTasks = await Task.WhenAll(tasks.Select(t => t.task));
         return allFinishedTasks.ToList();

@@ -74,14 +74,29 @@ public class FamFeederService : IFamFeederService
 
         var events = await _repo.GetWoCutoffsByWeekAndPlant(cutoffWeek, plant);
 
+        return await MapAndSendCutoffToFam(cutoffWeek, events, plant);
+    }
+    
+    public async Task<string> RunForCutoffWeek(string cutoffWeek, IEnumerable<long> projectIds, string plant, ILogger logger)
+    {
+        _logger = logger;
+
+        var events = await _repo.GetWoCutoffsByWeekAndProjectIds(cutoffWeek, plant,projectIds);
+
+        return await MapAndSendCutoffToFam(cutoffWeek, events, plant);
+    }
+
+    private async Task<string> MapAndSendCutoffToFam(string cutoffWeek, IReadOnlyCollection<string> events, string plant)
+    {
         if (events.Count == 0)
         {
-            _logger.LogInformation("found no events, or field is null");
+            _logger?.LogInformation("found no events, or field is null");
             return "found no events, or field is null";
         }
 
-        _logger.LogInformation(
-            "Found {EventCount} events for WoCutoff for week {CutoffWeek} and plant {Plant} ", events.Count, cutoffWeek, plant);
+        _logger?.LogInformation(
+            "Found {EventCount} events for WoCutoff for week {CutoffWeek} and plant {Plant} ", events.Count, cutoffWeek,
+            plant);
 
         var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
         var mapper = CreateCommonLibMapper();
@@ -91,6 +106,9 @@ public class FamFeederService : IFamFeederService
 
         return $"finished successfully sending {mappedMessages.Count} messages to fam for WoCutoff for week {cutoffWeek}";
     }
+
+ 
+
 
     public Task<List<string>> GetAllPlants() => _plantRepository.GetAllPlants();
 
