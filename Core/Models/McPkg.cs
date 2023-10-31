@@ -20,6 +20,7 @@ public class McPkg : IMcPkgEventV1
     public string? AreaCode { get; init; }
     public string? AreaDescription { get; init; }
     public string Discipline { get; init; }
+    public string DisciplineCode { get; init; }
     public string McStatus { get; init; }
     public string? Phase { get; init; }
     public bool IsVoided { get; init; }
