@@ -55,7 +55,7 @@ public class FamEventRepository : IFamEventRepository
     public async Task<List<string>> GetLoopContents(string plant) => await Query<LoopContent>(LoopContentQuery.GetQuery(null, plant));
     public async Task<List<string>> GetCallOffs(string plant) => await Query<CallOff>(CallOffQuery.GetQuery(null,plant));
     public async Task<List<string>> GetCommPkgQueries(string plant) => await Query<CommPkgQuery>(CommPkgQueryQuery.GetQuery(null, null, plant));
-    public async Task<List<string>> GetWoCutoffsByWeekAndPlant(string cutoffWeek, string plant) => await Query<WorkOrderCutoff>(WorkOrderCutoffQuery.GetQuery(null, cutoffWeek, plant,null));
+    public async Task<List<string>> GetWoCutoffsByWeekAndPlant(string cutoffWeek, string plant) => await Query<WorkOrderCutoff>(WorkOrderCutoffQuery.GetQuery(null, cutoffWeek, plant));
     public async Task<List<string>> GetWoCutoffsByWeekAndProjectIds(string cutoffWeek, string plant,IEnumerable<long> projectIds) => await Query<WorkOrderCutoff>(WorkOrderCutoffQuery.GetQuery(null, cutoffWeek, plant,null,projectIds));
     public async Task<List<string>> GetHeatTraces(string plant) => await Query<HeatTrace>(HeatTraceQuery.GetQuery(null, plant));
     public async Task<List<string>> GetLibraryFields(string plant) => await Query<LibraryField>(LibraryFieldQuery.GetQuery(null, plant));
