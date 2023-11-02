@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Configuration;
+using System.IO;
 using System.Reflection;
 using Core;
 using Core.Interfaces;
@@ -37,7 +39,9 @@ public class Startup : FunctionsStartup
         services.AddLogging();
         AddWalletToDirectory(config);
 
-        services.AddDbContext(config.GetSection("FamFeederOptions")["ProCoSysConnectionString"]);
+        var connectionString = config.GetSection("FamFeederOptions")["ProCoSysConnectionString"] 
+                               ?? throw new ConfigurationErrorsException("Missing ConnectionString for PCS Database");
+        services.AddDbContext(connectionString);
         services.AddScoped<IFamEventRepository, FamEventRepository>();
         services.AddScoped<IFamFeederService, FamFeederService>();
         services.AddScoped<ISearchItemRepository, SearchItemRepository>();
@@ -54,14 +58,19 @@ public class Startup : FunctionsStartup
 
     private static void AddWalletToDirectory(IConfiguration config)
     {
-        if (config["BlobStorage:ConnectionString"] == null)
+        var connectionString = config["BlobStorage:ConnectionString"];
+        var pathAndFileName = config["BlobStorage:WalletFileName"];
+        var containerName = config["BlobStorage:ContainerName"];
+        if (connectionString == null || pathAndFileName == null || containerName == null)
         {
+            //Not all setups require wallet, so its normal to return here, if its needed, we will get error later
             return;
         }
 
-        var rep = new BlobRepository(config["BlobStorage:ConnectionString"], config["BlobStorage:ContainerName"]);
+        var rep = new BlobRepository(connectionString,  containerName);
         const string walletPath = "/home/site/wwwroot/wallet";
         Directory.CreateDirectory(walletPath);
-        rep.Download(config["BlobStorage:WalletFileName"], walletPath + "/cwallet.sso");
+        
+        rep.Download(pathAndFileName, walletPath + "/cwallet.sso");
     }
 }
