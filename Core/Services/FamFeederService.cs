@@ -127,7 +127,7 @@ public class FamFeederService : IFamFeederService
             await SendFamMessages(batch);
         }
 
-        logger.LogInformation("Sent {MappedMessagesCount} WoCutoff to FAM  for {WeekNumber} done", mappedMessages.Count, weekNumber);
+        logger.LogInformation("Sent {MappedMessagesCount} WoCutoff to FAM  for {WeekNumber} done in {Plant}", mappedMessages.Count, weekNumber, plant);
         return $"Sent {mappedMessages.Count} WoCutoff to FAM  for {weekNumber} done";
     }       
 
