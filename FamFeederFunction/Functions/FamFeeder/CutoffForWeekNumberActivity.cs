@@ -6,18 +6,18 @@ using Microsoft.Extensions.Logging;
 
 namespace FamFeederFunction.Functions.FamFeeder;
 
-public class CutoffForMonthActivity
+public class CutoffForWeekNumberActivity
 {
     private readonly IFamFeederService _famFeederService;
 
-    public CutoffForMonthActivity(IFamFeederService famFeederService) 
+    public CutoffForWeekNumberActivity(IFamFeederService famFeederService) 
         => _famFeederService = famFeederService;
 
-    [FunctionName(nameof(CutoffForMonthActivity))]
+    [FunctionName(nameof(CutoffForWeekNumberActivity))]
     public async Task<string> RunWoCutoffActivity([ActivityTrigger] IDurableActivityContext context, ILogger logger)
     {
-        var (plant, month) = context.GetInput<(string, string)>();
-        var result = await _famFeederService.WoCutoff(plant, month, logger);
+        var (plant, weekNumber) = context.GetInput<(string, string)>();
+        var result = await _famFeederService.WoCutoff(plant, weekNumber, logger);
         logger.LogDebug($"RunFeeder returned {result}");
         return result;
     }
