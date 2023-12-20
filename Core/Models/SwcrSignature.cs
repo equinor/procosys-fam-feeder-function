@@ -18,5 +18,6 @@ public class SwcrSignature : ISwcrSignatureEventV1
     public string? FunctionalRoleCode { get; init; }
     public string? FunctionalRoleDescription { get; init; }
     public DateTime? SignedDate { get; init; }
+    public string? StatusCode { get; init; }
     public DateTime LastUpdated { get; init; }
 }
