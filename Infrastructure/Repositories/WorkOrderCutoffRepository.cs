@@ -17,12 +17,10 @@ public class WorkOrderCutoffRepository : IWorkOrderCutoffRepository
 
     public WorkOrderCutoffRepository(AppDbContext context) => _context = context;
 
-    public async Task<List<string>> GetWoCutoffs(string month, string plant)
+    public async Task<List<string>> GetWoCutoffs(string weekNumber, string plant)
     {
         var dbConnection = _context.Database.GetDbConnection();
-        await using var command = dbConnection.CreateCommand();
-        var query = WorkOrderCutoffQuery.GetQuery(null, null, plant, month);
-        command.CommandText = query.queryString;
+        var query = WorkOrderCutoffQuery.GetQuery(null, null, plant, weekNumber);
         var connectionWasClosed = dbConnection.State != ConnectionState.Open;
         if (connectionWasClosed)
         {

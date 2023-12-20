@@ -2,5 +2,5 @@
 
 public interface IWorkOrderCutoffRepository
 {
-    Task<List<string>> GetWoCutoffs(string month, string plant);
+    Task<List<string>> GetWoCutoffs(string weekNumber, string plant);
 }

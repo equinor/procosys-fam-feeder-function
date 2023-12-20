@@ -112,11 +112,11 @@ public class FamFeederService : IFamFeederService
 
     public Task<List<string>> GetAllPlants() => _plantRepository.GetAllPlants();
 
-    public async Task<string> WoCutoff(string plant, string month, ILogger logger)
+    public async Task<string> WoCutoff(string plant, string weekNumber, ILogger logger)
     {
         var mapper = CreateCommonLibMapper();
-        var response = await _cutoffRepository.GetWoCutoffs(month, plant);
-        logger.LogInformation("Found {EventCount} cutoffs for month {Month} in {Plant}",response.Count,month,plant);
+        var response = await _cutoffRepository.GetWoCutoffs(weekNumber, plant);
+        logger.LogInformation("Found {EventCount} cutoffs for week number {WeekNumber} in {Plant}",response.Count,weekNumber,plant);
 
         var messages = response.SelectMany(e =>
             TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
@@ -127,8 +127,8 @@ public class FamFeederService : IFamFeederService
             await SendFamMessages(batch);
         }
 
-        logger.LogInformation("Sent {MappedMessagesCount} WoCutoff to FAM  for {Month} done", mappedMessages.Count, month);
-        return $"Sent {mappedMessages.Count} WoCutoff to FAM  for {month} done";
+        logger.LogInformation("Sent {MappedMessagesCount} WoCutoff to FAM  for {WeekNumber} done", mappedMessages.Count, weekNumber);
+        return $"Sent {mappedMessages.Count} WoCutoff to FAM  for {weekNumber} done";
     }       
 
     private SchemaMapper CreateCommonLibMapper()
