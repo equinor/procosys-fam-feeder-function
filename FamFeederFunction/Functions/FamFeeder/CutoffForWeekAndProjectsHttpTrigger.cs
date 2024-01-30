@@ -1,18 +1,27 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace FamFeederFunction.Functions.FamFeeder;
 
 public class CutoffForWeekAndProjectsHttpTrigger
 {
+    private readonly FamFeederOptions _famFeederOptions;
+
+    public CutoffForWeekAndProjectsHttpTrigger(IOptions<FamFeederOptions> famFeederOptions)
+    {
+        _famFeederOptions = famFeederOptions.Value;
+    }
+
       [FunctionName("RunCutoffForWeekAndProjectIds")]
     public async Task<IActionResult> RunCutoffForWeekAndProjectIds(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
@@ -36,10 +45,7 @@ public class CutoffForWeekAndProjectsHttpTrigger
         {
             return new BadRequestObjectResult("Please provide projectIds");
         }
-
-        MultiPlantConstants.TryGetByMultiPlant("ALL_ACCEPTED", out var enabledPlants);
-        
-        if (!enabledPlants.Contains(plant))
+        if (!_famFeederOptions.FamFeederPlantFilterList.Contains(plant))
         {
             return new OkObjectResult($"{plant} not enabled");
         }
