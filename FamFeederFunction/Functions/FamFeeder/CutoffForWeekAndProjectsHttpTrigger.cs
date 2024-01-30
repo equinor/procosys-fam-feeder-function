@@ -44,11 +44,7 @@ public class CutoffForWeekAndProjectsHttpTrigger
         {
             return new BadRequestObjectResult("Please provide projectIds");
         }
-
-        MultiPlantConstants.TryGetByMultiPlant("ALL_ACCEPTED", out var allAccepted);
-        var enabledPlants = new List<string>(_famFeederOptions.PlantFilter?.Replace(" ", "").Split(",") ?? allAccepted.ToArray());
-
-        if (!enabledPlants.Contains(plant))
+        if (!_famFeederOptions.PlantFilterList.Contains(plant))
         {
             return new OkObjectResult($"{plant} not enabled");
         }
