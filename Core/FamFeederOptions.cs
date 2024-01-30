@@ -8,6 +8,5 @@ public class FamFeederOptions
     public string? SearchIndexBatchSize { get; set; }
     public string? SearchIndexBatchDelay { get; set; }
     public string? DbStatusAiCs { get; set; }
-    
-
+    public string? PlantFilter { get; set; }
 }

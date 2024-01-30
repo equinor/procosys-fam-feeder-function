@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -13,6 +14,13 @@ namespace FamFeederFunction.Functions.FamFeeder;
 
 public class CutoffForWeekAndProjectsHttpTrigger
 {
+    private readonly FamFeederOptions _famFeederOptions;
+
+    public CutoffForWeekAndProjectsHttpTrigger(FamFeederOptions famFeederOptions)
+    {
+        _famFeederOptions = famFeederOptions;
+    }
+
       [FunctionName("RunCutoffForWeekAndProjectIds")]
     public async Task<IActionResult> RunCutoffForWeekAndProjectIds(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
@@ -37,8 +45,9 @@ public class CutoffForWeekAndProjectsHttpTrigger
             return new BadRequestObjectResult("Please provide projectIds");
         }
 
-        MultiPlantConstants.TryGetByMultiPlant("ALL_ACCEPTED", out var enabledPlants);
-        
+        MultiPlantConstants.TryGetByMultiPlant("ALL_ACCEPTED", out var allAccepted);
+        var enabledPlants = new List<string>(_famFeederOptions.PlantFilter?.Replace(" ", "").Split(",") ?? allAccepted.ToArray());
+
         if (!enabledPlants.Contains(plant))
         {
             return new OkObjectResult($"{plant} not enabled");

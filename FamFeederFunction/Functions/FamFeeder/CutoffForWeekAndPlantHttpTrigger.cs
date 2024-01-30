@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -13,6 +15,13 @@ namespace FamFeederFunction.Functions.FamFeeder;
 
 public class CutoffForWeekAndPlantHttpTrigger
 {
+    private readonly FamFeederOptions _famFeederOptions;
+
+    public CutoffForWeekAndPlantHttpTrigger(FamFeederOptions famFeederOptions)
+    {
+        _famFeederOptions = famFeederOptions;
+    }
+
     [FunctionName("RunCutoffForWeek")]
     public async Task<IActionResult> RunCutoffForWeek(
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
@@ -33,7 +42,8 @@ public class CutoffForWeekAndPlantHttpTrigger
             return new BadRequestObjectResult("Please provide plant");
         }
 
-        MultiPlantConstants.TryGetByMultiPlant("ALL_ACCEPTED", out var enabledPlants);
+        MultiPlantConstants.TryGetByMultiPlant("ALL_ACCEPTED", out var allAccepted);
+        var enabledPlants = new List<string>(_famFeederOptions.PlantFilter?.Replace(" ", "").Split(",") ?? allAccepted.ToArray());
         
         if (!enabledPlants.Contains(plant))
         {
