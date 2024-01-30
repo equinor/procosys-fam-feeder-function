@@ -41,7 +41,7 @@ public class CutoffForWeekAndPlantHttpTrigger
         {
             return new BadRequestObjectResult("Please provide plant");
         }
-        if (!_famFeederOptions.PlantFilterList.Contains(plant))
+        if (!_famFeederOptions.FamFeederPlantFilterList.Contains(plant))
         {
             return new OkObjectResult($"{plant} not enabled in fff");
         }

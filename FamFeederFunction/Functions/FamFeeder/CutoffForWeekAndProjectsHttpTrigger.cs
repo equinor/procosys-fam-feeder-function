@@ -44,7 +44,7 @@ public class CutoffForWeekAndProjectsHttpTrigger
         {
             return new BadRequestObjectResult("Please provide projectIds");
         }
-        if (!_famFeederOptions.PlantFilterList.Contains(plant))
+        if (!_famFeederOptions.FamFeederPlantFilterList.Contains(plant))
         {
             return new OkObjectResult($"{plant} not enabled");
         }
