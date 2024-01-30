@@ -9,6 +9,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace FamFeederFunction.Functions.FamFeeder;
@@ -17,9 +18,9 @@ public class CutoffForWeekAndPlantHttpTrigger
 {
     private readonly FamFeederOptions _famFeederOptions;
 
-    public CutoffForWeekAndPlantHttpTrigger(FamFeederOptions famFeederOptions)
+    public CutoffForWeekAndPlantHttpTrigger(IOptions<FamFeederOptions> famFeederOptions)
     {
-        _famFeederOptions = famFeederOptions;
+        _famFeederOptions = famFeederOptions.Value;
     }
 
     [FunctionName("RunCutoffForWeek")]
