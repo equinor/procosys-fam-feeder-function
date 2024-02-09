@@ -1,8 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Core.Interfaces;
+using Core.Misc;
 using Core.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -29,28 +32,41 @@ public class SearchFeederFunction
         HttpRequest req,
         [DurableClient] IDurableOrchestrationClient orchestrationClient, ILogger log)
     {
-        var (topicString, plant) = await Deserialize(req);
+        var (topicsString, plantsString) = await Deserialize(req);
 
-        log.LogInformation($"Querying {plant} for {topicString}");
+        log.LogInformation($"Querying {plantsString} for {topicsString}");
 
-        if (topicString == null || plant == null)
+        if (topicsString == null || plantsString == null)
         {
             return new BadRequestObjectResult("Please provide both plant and topic");
         }
 
-        // var parsed = TryParse(topicString, out PcsTopic _);
-        // if (!parsed)
-        // {
-        //     return new BadRequestObjectResult("Please provide valid topic");
-        // }
+        var plantsQuery = plantsString.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        var topicsQuery = topicsString.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 
-        var plants = await _searchFeederService.GetAllPlants();
-        if (!plants.Contains(plant))
+        var allPlants = await _searchFeederService.GetAllPlants();
+        if (!plantsQuery.Any(s => allPlants.Contains(s, StringComparer.InvariantCultureIgnoreCase)))
         {
             return new BadRequestObjectResult("Please provide valid plant");
         }
 
-        var param = new QueryParameters(plant, topicString);
+        if (!topicsQuery.Any(s => TopicHelper.GetAllTopicsAsEnumerable().Contains(s, StringComparer.InvariantCultureIgnoreCase)))
+        {
+            return new BadRequestObjectResult("Please provide valid topic");
+        }
+
+        var newPlants = new List<string>();
+        newPlants.AddRange(plantsQuery);
+
+        foreach (var plant in plantsQuery)
+        {
+            if (MultiPlantConstants.TryGetByMultiPlant(plant, out var validMultiPlants))
+            {
+                newPlants.AddRange(validMultiPlants.Except(newPlants));
+            }
+        }
+
+        var param = new QueryParameters(newPlants, new List<string>(topicsQuery));
         var instanceId = await orchestrationClient.StartNewAsync("SearchFeederFunction", param);
         return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
     }
@@ -85,8 +101,8 @@ public class SearchFeederFunction
 
     private static async Task<(string? topicString, string? plant)> Deserialize(HttpRequest req)
     {
-        string? topicString = req.Query["PcsTopic"];
-        string? plant = req.Query["Plant"];
+        string? topicString = req.Query["PcsTopic"].ToString() ?? req.Query["PcsTopics"];
+        string? plant = req.Query["Plant"].ToString() ?? req.Query["Plants"];
 
         var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
         dynamic? data = JsonConvert.DeserializeObject(requestBody);
