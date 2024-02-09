@@ -40,18 +40,18 @@ public class SearchFeederService : ISearchFeederService
         }
 
         _logger.LogInformation(
-            "Found {events} events for topic {topic} and plant {plant}",items.Count,queryParameters.PcsTopic,queryParameters.Plant);
+            "Found {events} events for topic {topic} and plant {plant}",items.Count,queryParameters.PcsTopics,queryParameters.Plants);
 
         foreach (var batch in items.Batch(batchSize))
         {
             var batchList = batch.ToList();
-            _logger.LogInformation($"Sending {batchList.Count} items to Search Index {queryParameters.Plant} {queryParameters.PcsTopic}");
+            _logger.LogInformation($"Sending {batchList.Count} items to Search Index {queryParameters.Plants} {queryParameters.PcsTopics}");
             await SendIndexDocuments(batchList);
         }
 
-        _logger.LogInformation("Finished adding {topic} to Index",queryParameters.PcsTopic);
+        _logger.LogInformation("Finished adding {topic} to Index",queryParameters.PcsTopics);
 
-        return $"finished successfully sending {items.Count} documents to Search Index {queryParameters.Plant} {queryParameters.PcsTopic}";
+        return $"finished successfully sending {items.Count} documents to Search Index {queryParameters.Plants} {queryParameters.PcsTopics}";
     }
 
     public Task<List<string>> GetAllPlants() => _plantRepository.GetAllPlants();
@@ -93,24 +93,30 @@ public class SearchFeederService : ISearchFeederService
     {
         var events = new List<IndexDocument>();
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
-        switch (queryParameters.PcsTopic)
+        foreach (var plant in queryParameters.Plants)
         {
-            case PcsTopicConstants.CommPkg:
-                events = await _searchItemRepo.GetCommPackages(queryParameters.Plant);
-                break;
-            case PcsTopicConstants.McPkg:
-                events = await _searchItemRepo.GetMcPackages(queryParameters.Plant);
-                break;
-            case PcsTopicConstants.Tag:
-                events = await _searchItemRepo.GetTags(queryParameters.Plant);
-                break;
-            case PcsTopicConstants.PunchListItem:
-                events = await _searchItemRepo.GetPunchItems(queryParameters.Plant);
-                break;
-            default:
+            foreach (var topic in queryParameters.PcsTopics)
             {
-                _logger?.LogInformation("{Topic} not included in switch statement",queryParameters.PcsTopic);
-                break;
+                switch (topic)
+                {
+                    case PcsTopicConstants.CommPkg:
+                        events.AddRange(await _searchItemRepo.GetCommPackages(plant));
+                        break;
+                    case PcsTopicConstants.McPkg:
+                        events.AddRange(await _searchItemRepo.GetMcPackages(plant));
+                        break;
+                    case PcsTopicConstants.Tag:
+                        events.AddRange(await _searchItemRepo.GetTags(plant));
+                        break;
+                    case PcsTopicConstants.PunchListItem:
+                        events.AddRange(await _searchItemRepo.GetPunchItems(plant));
+                        break;
+                    default:
+                    {
+                        _logger?.LogInformation("{Topic} not included in switch statement",topic);
+                        break;
+                    }
+                }
             }
         }
         return events;

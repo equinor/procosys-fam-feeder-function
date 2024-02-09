@@ -2,13 +2,14 @@
 
 public class QueryParameters
 {
-    public QueryParameters(string plant, string pcsTopic)
+    public QueryParameters(string plants, string pcsTopics) : this(new List<string> { plants }, new List<string> { pcsTopics }) { }
+    public QueryParameters(List<string> plants, List<string> pcsTopics)
     {
-        Plant = plant;
-        PcsTopic = pcsTopic;
+        Plants = plants;
+        PcsTopics = pcsTopics;
     }
 
-    public string Plant { get; }
+    public List<string> Plants { get; }
 
-    public string PcsTopic { get; }
+    public List<string> PcsTopics { get; }
 }
