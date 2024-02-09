@@ -33,7 +33,7 @@ public class SearchFeederFunction
 
         log.LogInformation($"Querying {plant} for {topicString}");
 
-        if (topicString == null || plant == null)
+        if (topicString is null || plant is null)
         {
             return new BadRequestObjectResult("Please provide both plant and topic");
         }
@@ -47,7 +47,7 @@ public class SearchFeederFunction
         var plants = await _searchFeederService.GetAllPlants();
         if (!plants.Contains(plant))
         {
-            return new BadRequestObjectResult("Please provide valid plant");
+            return new BadRequestObjectResult("Please provide one or more valid plants");
         }
 
         var param = new QueryParameters(plant, topicString);

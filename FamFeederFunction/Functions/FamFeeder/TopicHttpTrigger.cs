@@ -26,7 +26,7 @@ public class TopicHttpTrigger
         var (topicsString, plants) = await DeserializeTopicAndPlant(req);
         log.LogInformation("Querying {Plant} for {TopicString}", plants, topicsString);
 
-        if (topicsString == null || plants == null)
+        if (topicsString is null || plants is null)
         {
             return new BadRequestObjectResult("Please provide both plant and topic");
         }
@@ -38,7 +38,7 @@ public class TopicHttpTrigger
 
         if (!topicsQuery.Any(s => TopicHelper.GetAllTopicsAsEnumerable().Contains(s, StringComparer.InvariantCultureIgnoreCase)))
         {
-            return new BadRequestObjectResult("Please provide valid topic");
+            return new BadRequestObjectResult("Please provide one or more valid topics");
         }
 
         var param = new QueryParameters(new List<string>(plantsQuery), new List<string>(topicsQuery));

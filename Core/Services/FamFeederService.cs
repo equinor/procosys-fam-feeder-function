@@ -54,7 +54,7 @@ public class FamFeederService : IFamFeederService
 
                 if (events.Count == 0)
                 {
-                    _logger.LogInformation("found no events, or field is null");
+                    _logger.LogInformation("found no events for topic {Topic} and plant {Plant}", topic, plant);
                     continue;
                 }
 
@@ -69,12 +69,12 @@ public class FamFeederService : IFamFeederService
                     await SendFamMessages(mappedMessages);
                 }
 
-                _logger.LogInformation("Finished sending {Topic} to fam",topic);
+                _logger.LogInformation("Finished sending {Topic} for plant {Plant} to fam", topic, plant);
                 mappedMessagesCount += mappedMessages.Count;
             }
         }
 
-        return $"finished successfully sending {mappedMessagesCount} messages to fam for {queryParameters.PcsTopics} and plants {queryParameters.Plants}";
+        return $"finished successfully sending {mappedMessagesCount} messages to fam for {string.Join(",", queryParameters.PcsTopics)} and plants {string.Join(",", queryParameters.Plants)}";
     }
 
     public async Task<string> RunForCutoffWeek(string cutoffWeek, string plant, ILogger logger)

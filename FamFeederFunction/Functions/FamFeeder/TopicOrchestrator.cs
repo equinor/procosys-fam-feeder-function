@@ -25,7 +25,7 @@ public static class TopicOrchestrator
 
         if (!param.Plants.Any(s => allPlants.Contains(s, StringComparer.InvariantCultureIgnoreCase)))
         {
-            return new List<string> { "Please provide a valid plant" };
+            return new List<string> { "Please provide one or more valid plants" };
         }
 
         if (param.PcsTopics.Contains(PcsTopicConstants.WorkOrderCutoff, StringComparer.InvariantCultureIgnoreCase))
@@ -43,21 +43,20 @@ public static class TopicOrchestrator
 
         foreach (var plant in param.Plants)
         {
+            var newParamList = param.PcsTopics
+                .Where(s => s != PcsTopicConstants.WorkOrderCutoff)
+                .Select(s =>
+                    new QueryParameters(plant, s)).ToList();
+
             if (MultiPlantConstants.TryGetByMultiPlant(plant, out var validMultiPlants))
             {
-                foreach (var newParam in param.PcsTopics
-                             .Where(s => s != PcsTopicConstants.WorkOrderCutoff)
-                             .Select(s =>
-                                 new QueryParameters(plant, s)))
+                foreach (var newParam in newParamList)
                 {
                     returnValue.AddRange(await RunMultiPlantOrchestration(context, validMultiPlants, newParam));
                 }
             }
 
-            foreach (var newParam in param.PcsTopics
-                         .Where(s => s != PcsTopicConstants.WorkOrderCutoff)
-                         .Select(s =>
-                             new QueryParameters(plant, s)))
+            foreach (var newParam in newParamList)
             {
                 returnValue.Add(await context.CallActivityAsync<string>(nameof(TopicActivity), newParam));
             }

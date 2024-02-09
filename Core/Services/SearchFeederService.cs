@@ -40,18 +40,18 @@ public class SearchFeederService : ISearchFeederService
         }
 
         _logger.LogInformation(
-            "Found {events} events for topic {topic} and plant {plant}",items.Count,queryParameters.PcsTopics,queryParameters.Plants);
+            "Found {events} events for topic {topic} and plant {plant}", items.Count, string.Join(",", queryParameters.PcsTopics), string.Join(",", queryParameters.Plants));
 
         foreach (var batch in items.Batch(batchSize))
         {
             var batchList = batch.ToList();
-            _logger.LogInformation($"Sending {batchList.Count} items to Search Index {queryParameters.Plants} {queryParameters.PcsTopics}");
+            _logger.LogInformation($"Sending {batchList.Count} items to Search Index {string.Join(",", queryParameters.Plants)} {string.Join(",", queryParameters.PcsTopics)}");
             await SendIndexDocuments(batchList);
         }
 
         _logger.LogInformation("Finished adding {topic} to Index",queryParameters.PcsTopics);
 
-        return $"finished successfully sending {items.Count} documents to Search Index {queryParameters.Plants} {queryParameters.PcsTopics}";
+        return $"finished successfully sending {items.Count} documents to Search Index {string.Join(",",queryParameters.Plants)} {string.Join(",",queryParameters.PcsTopics)}";
     }
 
     public Task<List<string>> GetAllPlants() => _plantRepository.GetAllPlants();
