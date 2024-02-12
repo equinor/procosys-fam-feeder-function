@@ -30,7 +30,7 @@ public class TopicHttpTriggerTests
     [TestMethod]
     public void Splits_List()
     {
-        var topics = "Action,Task,Tag";
+        var topics = " Action, Task ,Tag , ,";
         var splitList = TopicHttpTrigger.SplitList(topics);
 
         Assert.IsTrue(splitList.Contains("Action"));
