@@ -36,7 +36,7 @@ public class SearchFeederFunction
 
         log.LogInformation($"Querying {plantsString} for {topicsString}");
 
-        if (topicsString == null || plantsString == null)
+        if (topicsString is null || plantsString is null)
         {
             return new BadRequestObjectResult("Please provide both plant and topic");
         }
@@ -47,7 +47,7 @@ public class SearchFeederFunction
         var allPlants = await _searchFeederService.GetAllPlants();
         if (!plantsQuery.Any(s => allPlants.Contains(s, StringComparer.InvariantCultureIgnoreCase)))
         {
-            return new BadRequestObjectResult("Please provide valid plant");
+            return new BadRequestObjectResult("Please provide one or more valid plants");
         }
 
         if (!topicsQuery.Any(s => TopicHelper.GetAllTopicsAsEnumerable().Contains(s, StringComparer.InvariantCultureIgnoreCase)))

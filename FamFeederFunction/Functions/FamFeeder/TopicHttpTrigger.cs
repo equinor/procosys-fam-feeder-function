@@ -26,24 +26,31 @@ public class TopicHttpTrigger
         var (topicsString, plants) = await DeserializeTopicAndPlant(req);
         log.LogInformation("Querying {Plant} for {TopicString}", plants, topicsString);
 
-        if (topicsString == null || plants == null)
+        if (topicsString is null || plants is null)
         {
             return new BadRequestObjectResult("Please provide both plant and topic");
         }
 
-        var plantsQuery =
-            plants.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-        var topicsQuery =
-            topicsString.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-
-        if (!topicsQuery.Any(s => TopicHelper.GetAllTopicsAsEnumerable().Contains(s, StringComparer.InvariantCultureIgnoreCase)))
+        if (!HasValidTopic(topicsString))
         {
-            return new BadRequestObjectResult("Please provide valid topic");
+            return new BadRequestObjectResult("Please provide one or more valid topics");
         }
 
-        var param = new QueryParameters(new List<string>(plantsQuery), new List<string>(topicsQuery));
+        var param = new QueryParameters(SplitList(topicsString), SplitList(topicsString));
         var instanceId = await orchestrationClient.StartNewAsync(nameof(TopicOrchestrator), param);
         return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
+    }
+
+    public static List<string> SplitList(string input)
+    {
+        return new List<string>(input.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
+    }
+
+    public static bool HasValidTopic(string topics)
+    {
+        var topicsQuery = SplitList(topics);
+        return topicsQuery.Any(s =>
+            TopicHelper.GetAllTopicsAsEnumerable().Contains(s, StringComparer.InvariantCultureIgnoreCase));
     }
 
     private static async Task<(string? topicsString, string? plants)> DeserializeTopicAndPlant(HttpRequest req)

@@ -2,7 +2,7 @@
 
 public class QueryParameters
 {
-    public QueryParameters(string plants, string pcsTopics) : this(new List<string> { plants }, new List<string> { pcsTopics }) { }
+    public QueryParameters(string plant, string pcsTopic) : this(new List<string> { plant }, new List<string> { pcsTopic }) { }
     public QueryParameters(List<string> plants, List<string> pcsTopics)
     {
         Plants = plants;
