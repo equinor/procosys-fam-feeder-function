@@ -35,7 +35,7 @@ public class SearchFeederFunction
         var (topicsString, plantsString) = await Deserialize(req);
 
         log.LogInformation($"Querying {plantsString} for {topicsString}");
-
+        
         if (topicsString is null || plantsString is null)
         {
             return new BadRequestObjectResult("Please provide both plant and topic");

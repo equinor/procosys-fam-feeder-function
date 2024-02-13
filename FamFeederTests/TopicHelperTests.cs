@@ -14,4 +14,11 @@ public class TopicHelperTests
         var topics = TopicHelper.GetAllTopicsAsEnumerable();
         Assert.IsTrue(topics.Contains(PcsTopicConstants.Action));
     }
+
+    [TestMethod]
+    public void Has_Valid_Topic()
+    {
+        var topics = PcsTopicConstants.Ipo;
+        Assert.IsTrue(TopicHttpTrigger.HasValidTopic(topics));
+    }
 }

@@ -50,7 +50,7 @@ public class FamFeederService : IFamFeederService
         {
             foreach (var topic in queryParameters.PcsTopics)
             {
-                var events = await GetEventsBasedOnTopicAndPlant(new QueryParameters(plant, topic));
+                var events = await GetEventsBasedOnTopicAndPlant(plant, topic);
 
                 if (events.Count == 0)
                 {
@@ -176,6 +176,12 @@ public class FamFeederService : IFamFeederService
             throw new Exception("Error: Could not send message.", e);
         }
     }
+
+    private async Task<List<string>> GetEventsBasedOnTopicAndPlant(string plant, string topic)
+    {
+        return await GetEventsBasedOnTopicAndPlant(new QueryParameters(plant, topic));
+    }
+
     private async Task<List<string>> GetEventsBasedOnTopicAndPlant(QueryParameters queryParameters)
     {
         var returnEvents = new List<string>();

@@ -18,12 +18,9 @@ public static class TopicOrchestrator
         [OrchestrationTrigger] IDurableOrchestrationContext context)
     {
         var param = context.GetInput<QueryParameters>();
-
         var returnValue = new List<string>();
 
-        var allPlants = await context.CallActivityAsync<List<string>>(nameof(GetValidPlantsActivity), null);
-
-        if (!param.Plants.Any(s => allPlants.Contains(s, StringComparer.InvariantCultureIgnoreCase)))
+        if (!await HasAnyValidPlant(context))
         {
             return new List<string> { "Please provide one or more valid plants" };
         }
@@ -63,6 +60,15 @@ public static class TopicOrchestrator
         }
 
         return returnValue;
+    }
+
+    //Check if there is one or more matching plants
+    private static async Task<bool> HasAnyValidPlant(IDurableOrchestrationContext context)
+    {
+        var param = context.GetInput<QueryParameters>();
+        var allPlants = await context.CallActivityAsync<List<string>>(nameof(GetValidPlantsActivity), null);
+
+        return param.Plants.Any(s => allPlants.Contains(s, StringComparer.InvariantCultureIgnoreCase));
     }
 
     private static async Task<List<string>> RunMultiPlantOrchestration(IDurableOrchestrationContext context, IEnumerable<string> validMultiPlants,
