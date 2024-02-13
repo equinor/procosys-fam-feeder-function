@@ -36,7 +36,7 @@ public class TopicHttpTrigger
             return new BadRequestObjectResult("Please provide one or more valid topics");
         }
 
-        var param = new QueryParameters(SplitList(topicsString), SplitList(topicsString));
+        var param = new QueryParameters(SplitList(plants), SplitList(topicsString));
         var instanceId = await orchestrationClient.StartNewAsync(nameof(TopicOrchestrator), param);
         return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
     }
