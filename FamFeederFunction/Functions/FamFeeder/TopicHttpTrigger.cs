@@ -55,8 +55,8 @@ public class TopicHttpTrigger
 
     private static async Task<(string? topicsString, string? plants)> DeserializeTopicAndPlant(HttpRequest req)
     {
-        string? topicString = req.Query["PcsTopic"].ToString() ?? req.Query["PcsTopics"];
-        string? plant = req.Query["Plant"].ToString() ?? req.Query["Plants"];
+        string? topicString = req.Query["PcsTopic"];
+        string? plant = req.Query["Plant"];
 
         var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
         dynamic? data = JsonConvert.DeserializeObject(requestBody);
