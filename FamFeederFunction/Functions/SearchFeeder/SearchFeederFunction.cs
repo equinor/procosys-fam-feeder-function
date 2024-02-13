@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Core.Interfaces;
 using Core.Misc;
 using Core.Models;
+using FamFeederFunction.Functions.FamFeeder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -41,6 +42,11 @@ public class SearchFeederFunction
             return new BadRequestObjectResult("Please provide both plant and topic");
         }
 
+        if (!TopicHttpTrigger.HasValidTopic(topicsString))
+        {
+            return new BadRequestObjectResult("Please provide one or more valid topics");
+        }
+
         var plantsQuery = plantsString.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         var topicsQuery = topicsString.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 
@@ -48,11 +54,6 @@ public class SearchFeederFunction
         if (!plantsQuery.Any(s => allPlants.Contains(s, StringComparer.InvariantCultureIgnoreCase)))
         {
             return new BadRequestObjectResult("Please provide one or more valid plants");
-        }
-
-        if (!topicsQuery.Any(s => TopicHelper.GetAllTopicsAsEnumerable().Contains(s, StringComparer.InvariantCultureIgnoreCase)))
-        {
-            return new BadRequestObjectResult("Please provide valid topic");
         }
 
         var newPlants = new List<string>();
