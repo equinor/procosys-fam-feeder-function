@@ -67,11 +67,6 @@ public class Startup : FunctionsStartup
             return;
         }
 
-        var message = "Connection String: " + connectionString.Substring(0, connectionString.Length / 2)
-                                            + ", WalletFile: " + pathAndFileName.Substring(pathAndFileName.Length/2)
-                                            + ", ContainerName: " + containerName;
-        throw new Exception(message);
-
         var rep = new BlobRepository(connectionString,  containerName);
         const string walletPath = "/home/site/wwwroot/wallet";
         Directory.CreateDirectory(walletPath);
