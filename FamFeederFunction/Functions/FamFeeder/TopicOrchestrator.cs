@@ -68,7 +68,7 @@ public static class TopicOrchestrator
         var param = context.GetInput<QueryParameters>();
         var allPlants = await context.CallActivityAsync<List<string>>(nameof(GetValidPlantsActivity), null);
 
-        return !param.Plants.Any(s => allPlants.Contains(s, StringComparer.InvariantCultureIgnoreCase));
+        return param.Plants.Any(s => allPlants.Contains(s, StringComparer.InvariantCultureIgnoreCase));
     }
 
     private static async Task<List<string>> RunMultiPlantOrchestration(IDurableOrchestrationContext context, IEnumerable<string> validMultiPlants,
