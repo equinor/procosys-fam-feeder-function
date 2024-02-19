@@ -1,13 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Core.Interfaces;
-using Core.Misc;
 using Core.Models;
-using FamFeederFunction.Functions.FamFeeder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -33,41 +29,28 @@ public class SearchFeederFunction
         HttpRequest req,
         [DurableClient] IDurableOrchestrationClient orchestrationClient, ILogger log)
     {
-        var (topicsString, plantsString) = await Deserialize(req);
+        var (topicString, plant) = await Deserialize(req);
 
-        log.LogInformation($"Querying {plantsString} for {topicsString}");
+        log.LogInformation($"Querying {plant} for {topicString}");
 
-        if (topicsString is null || plantsString is null)
+        if (topicString is null || plant is null)
         {
             return new BadRequestObjectResult("Please provide both plant and topic");
         }
 
-        if (!TopicHttpTrigger.HasValidTopic(topicsString))
-        {
-            return new BadRequestObjectResult("Please provide one or more valid topics");
-        }
+        // var parsed = TryParse(topicString, out PcsTopic _);
+        // if (!parsed)
+        // {
+        //     return new BadRequestObjectResult("Please provide valid topic");
+        // }
 
-        var plantsQuery = plantsString.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-        var topicsQuery = topicsString.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-
-        var allPlants = await _searchFeederService.GetAllPlants();
-        if (!plantsQuery.Any(s => allPlants.Contains(s, StringComparer.InvariantCultureIgnoreCase)))
+        var plants = await _searchFeederService.GetAllPlants();
+        if (!plants.Contains(plant))
         {
             return new BadRequestObjectResult("Please provide one or more valid plants");
         }
 
-        var newPlants = new List<string>();
-        newPlants.AddRange(plantsQuery);
-
-        foreach (var plant in plantsQuery)
-        {
-            if (MultiPlantConstants.TryGetByMultiPlant(plant, out var validMultiPlants))
-            {
-                newPlants.AddRange(validMultiPlants.Except(newPlants));
-            }
-        }
-
-        var param = new QueryParameters(newPlants, new List<string>(topicsQuery));
+        var param = new QueryParameters(plant, topicString);
         var instanceId = await orchestrationClient.StartNewAsync("SearchFeederFunction", param);
         return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
     }
