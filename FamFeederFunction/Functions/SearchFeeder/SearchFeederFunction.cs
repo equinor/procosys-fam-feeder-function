@@ -50,12 +50,6 @@ public class SearchFeederFunction
         var plantsQuery = plantsString.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         var topicsQuery = topicsString.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 
-        var allPlants = await _searchFeederService.GetAllPlants();
-        if (!plantsQuery.Any(s => allPlants.Contains(s, StringComparer.InvariantCultureIgnoreCase)))
-        {
-            return new BadRequestObjectResult("Please provide one or more valid plants");
-        }
-
         var newPlants = new List<string>();
         newPlants.AddRange(plantsQuery);
 
@@ -65,6 +59,12 @@ public class SearchFeederFunction
             {
                 newPlants.AddRange(validMultiPlants.Except(newPlants));
             }
+        }
+
+        var allPlants = await _searchFeederService.GetAllPlants();
+        if (!newPlants.Any(s => allPlants.Contains(s, StringComparer.InvariantCultureIgnoreCase)))
+        {
+            return new BadRequestObjectResult("Please provide one or more valid plants");
         }
 
         var param = new QueryParameters(newPlants, new List<string>(topicsQuery));
