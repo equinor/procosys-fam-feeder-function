@@ -36,12 +36,23 @@ public class SearchFeederService : ISearchFeederService
         {
             foreach (var topic in queryParameters.PcsTopics)
             {
-                var items = await GetItemsBasedOnTopicAndPlant(new QueryParameters(plant, topic));
+                var items = new List<IndexDocument>();
+
+                try
+                {
+                    items.AddRange(await GetItemsBasedOnTopicAndPlant(new QueryParameters(plant, topic)));
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError("there was an error getting items from plant {plant} and topic {topic}", plant, topic);
+                    _logger.LogError(e.StackTrace);
+                    continue;
+                }
 
                 if (items.Count == 0)
                 {
                     _logger.LogInformation("found no items for topic {topic} and plant {plant}", topic, plant);
-                    break;
+                    continue;
                 }
 
                 _logger.LogInformation("Found {events} events for topic {topic} and plant {plant}", items.Count, topic, plant);
