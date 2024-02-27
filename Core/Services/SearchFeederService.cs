@@ -31,27 +31,35 @@ public class SearchFeederService : ISearchFeederService
     {
         _logger = logger;
         var batchSize = int.Parse(_famFeederOptions.SearchIndexBatchSize ?? "20");
-        var items = await GetItemsBasedOnTopicAndPlant(queryParameters);
-
-        if (items.Count == 0)
+        var itemCount = 0;
+        foreach (var plant in queryParameters.Plants)
         {
-            _logger.LogInformation("found no items");
-            return "found no items";
+            foreach (var topic in queryParameters.PcsTopics)
+            {
+                var items = await GetItemsBasedOnTopicAndPlant(new QueryParameters(plant, topic));
+
+                if (items.Count == 0)
+                {
+                    _logger.LogInformation("found no items for topic {topic} and plant {plant}", topic, plant);
+                    break;
+                }
+
+                _logger.LogInformation("Found {events} events for topic {topic} and plant {plant}", items.Count, topic, plant);
+
+                foreach (var batch in items.Batch(batchSize))
+                {
+                    var batchList = batch.ToList();
+                    _logger.LogInformation(
+                        $"Sending {batchList.Count} items to Search Index {plant} {topic}");
+                    await SendIndexDocuments(batchList);
+                }
+
+                _logger.LogInformation("Finished adding {topic} for plant {plant} to Index", topic, plant);
+                itemCount += items.Count;
+            }
         }
 
-        _logger.LogInformation(
-            "Found {events} events for topic {topic} and plant {plant}", items.Count, string.Join(",", queryParameters.PcsTopics), string.Join(",", queryParameters.Plants));
-
-        foreach (var batch in items.Batch(batchSize))
-        {
-            var batchList = batch.ToList();
-            _logger.LogInformation($"Sending {batchList.Count} items to Search Index {string.Join(",", queryParameters.Plants)} {string.Join(",", queryParameters.PcsTopics)}");
-            await SendIndexDocuments(batchList);
-        }
-
-        _logger.LogInformation("Finished adding {topic} to Index",queryParameters.PcsTopics);
-
-        return $"finished successfully sending {items.Count} documents to Search Index {string.Join(",",queryParameters.Plants)} {string.Join(",",queryParameters.PcsTopics)}";
+        return $"finished successfully sending {itemCount} documents to Search Index {string.Join(",",queryParameters.Plants)} {string.Join(",",queryParameters.PcsTopics)}";
     }
 
     public Task<List<string>> GetAllPlants() => _plantRepository.GetAllPlants();

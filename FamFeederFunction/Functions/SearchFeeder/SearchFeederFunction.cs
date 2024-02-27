@@ -57,6 +57,7 @@ public class SearchFeederFunction
         {
             if (MultiPlantConstants.TryGetByMultiPlant(plant, out var validMultiPlants))
             {
+                newPlants.Remove(plant);
                 newPlants.AddRange(validMultiPlants.Except(newPlants));
             }
         }
