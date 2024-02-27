@@ -57,6 +57,7 @@ public class SearchFeederFunction
         {
             if (MultiPlantConstants.TryGetByMultiPlant(plant, out var validMultiPlants))
             {
+                newPlants.Remove(plant);
                 newPlants.AddRange(validMultiPlants.Except(newPlants));
             }
         }
@@ -87,8 +88,16 @@ public class SearchFeederFunction
         [OrchestrationTrigger] IDurableOrchestrationContext context)
     {
         var param = context.GetInput<QueryParameters>();
-        var results = new List<string>
-            { await context.CallActivityAsync<string>("RunSearchFeeder", param) };
+        var results = new List<string>();
+
+        foreach (var plant in param.Plants)
+        {
+            foreach (var topic in param.PcsTopics)
+            {
+                results.Add(await context.CallActivityAsync<string>("RunSearchFeeder", new QueryParameters(plant, topic)));
+            }
+        }
+
         return results;
     }
 
