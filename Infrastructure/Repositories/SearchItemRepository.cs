@@ -228,6 +228,7 @@ public class SearchItemRepository : ISearchItemRepository
         busEventMessage = busEventMessage.Replace("\n", "");
         busEventMessage = busEventMessage.Replace("\t", "");
         busEventMessage = busEventMessage.Replace("\f", "");
+        busEventMessage = Regex.Replace(busEventMessage, @"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]", string.Empty);
         busEventMessage = rx.Replace(busEventMessage, m => Regex.Escape(m.Value));
 
         busEventMessage = busEventMessage.Replace((char)31, ' ');
