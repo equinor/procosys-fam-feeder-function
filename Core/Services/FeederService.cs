@@ -14,17 +14,17 @@ using Task = System.Threading.Tasks.Task;
 
 namespace Core.Services;
 
-public class FamFeederService : IFamFeederService
+public class FeederService : IFeederService
 {
     private readonly CommonLibConfig _commonLibConfig;
     private readonly IEventHubProducerService _eventHubProducerService;
     private ILogger? _logger;
     private readonly IPlantRepository _plantRepository;
-    private readonly IFamEventRepository _repo;
+    private readonly IEventRepository _repo;
     private readonly IWorkOrderCutoffRepository _cutoffRepository;
 
-    public FamFeederService(IEventHubProducerService eventHubProducerService,
-        IFamEventRepository repo,
+    public FeederService(IEventHubProducerService eventHubProducerService,
+        IEventRepository repo,
         IOptions<CommonLibConfig> commonLibConfig,
         IPlantRepository plantRepository, IWorkOrderCutoffRepository cutoffRepository)
     {

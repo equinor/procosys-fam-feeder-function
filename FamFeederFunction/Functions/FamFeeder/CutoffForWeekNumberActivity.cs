@@ -8,16 +8,16 @@ namespace FamFeederFunction.Functions.FamFeeder;
 
 public class CutoffForWeekNumberActivity
 {
-    private readonly IFamFeederService _famFeederService;
+    private readonly IFeederService _feederService;
 
-    public CutoffForWeekNumberActivity(IFamFeederService famFeederService) 
-        => _famFeederService = famFeederService;
+    public CutoffForWeekNumberActivity(IFeederService feederService) 
+        => _feederService = feederService;
 
     [FunctionName(nameof(CutoffForWeekNumberActivity))]
     public async Task<string> RunWoCutoffActivity([ActivityTrigger] IDurableActivityContext context, ILogger logger)
     {
         var (plant, weekNumber) = context.GetInput<(string, string)>();
-        var result = await _famFeederService.WoCutoff(plant, weekNumber, logger);
+        var result = await _feederService.WoCutoff(plant, weekNumber, logger);
         logger.LogDebug($"RunFeeder returned {result}");
         return result;
     }

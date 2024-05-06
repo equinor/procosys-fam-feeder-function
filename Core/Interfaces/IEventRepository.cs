@@ -1,6 +1,6 @@
 ﻿namespace Core.Interfaces;
 
-public interface IFamEventRepository
+public interface IEventRepository
 {
     Task<List<string>> GetTagEquipments(string plant);
     Task<List<string>> GetSwcrAttachments(string plant);

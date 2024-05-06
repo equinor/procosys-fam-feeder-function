@@ -9,10 +9,10 @@ namespace FamFeederFunction.Functions.FamFeeder;
 
 public class CutoffForWeekAndProjectsActivity
 {
-    private readonly IFamFeederService _famFeederService;
+    private readonly IFeederService _feederService;
 
-    public CutoffForWeekAndProjectsActivity(IFamFeederService famFeederService) 
-        => _famFeederService = famFeederService;
+    public CutoffForWeekAndProjectsActivity(IFeederService feederService) 
+        => _feederService = feederService;
 
     [FunctionName(nameof(CutoffForWeekAndProjectsActivity))]
     public async Task<string> RunCutoffForWeekAndProjectsActivity(
@@ -20,7 +20,7 @@ public class CutoffForWeekAndProjectsActivity
         ILogger logger)
     {
         var (cutoffWeek, plant,projectIds) = context.GetInput<(string, string, IEnumerable<long>)>();
-        var result = await _famFeederService.RunForCutoffWeek(cutoffWeek, projectIds, plant,logger);
+        var result = await _feederService.RunForCutoffWeek(cutoffWeek, projectIds, plant,logger);
         logger.LogDebug("RunCutoffForWeekActivity returned {Result}", result);
         return result;
     }

@@ -17,10 +17,10 @@ using Tag = Core.Models.Tag;
 
 namespace Infrastructure.Repositories;
 
-public class FamEventRepository : IFamEventRepository
+public class EventRepository : IEventRepository
 {
     private readonly AppDbContext _context;
-    public FamEventRepository(AppDbContext context) 
+    public EventRepository(AppDbContext context) 
         => _context = context;
 
     public async Task<List<string>> GetSwcrAttachments(string plant) => await Query<SwcrAttachment>(SwcrAttachmentQuery.GetQuery(null, plant));

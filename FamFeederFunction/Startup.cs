@@ -42,8 +42,8 @@ public class Startup : FunctionsStartup
         var connectionString = config.GetSection("FamFeederOptions")["ProCoSysConnectionString"] 
                                ?? throw new ConfigurationErrorsException("Missing ConnectionString for PCS Database");
         services.AddDbContext(connectionString);
-        services.AddScoped<IFamEventRepository, FamEventRepository>();
-        services.AddScoped<IFamFeederService, FamFeederService>();
+        services.AddScoped<Core.Interfaces.IEventRepository, EventRepository>();
+        services.AddScoped<IFeederService, FeederService>();
         services.AddScoped<ISearchItemRepository, SearchItemRepository>();
         services.AddScoped<ISearchFeederService, SearchFeederService>();
         services.AddScoped<IDbStatusRepository, DbStatusRepository>();
