@@ -131,9 +131,12 @@ public class FamFeederService : IFamFeederService
             TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
         var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
 
-        foreach (var batch in mappedMessages.Batch(250))
+        if (Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") != "Development")
         {
-            await SendFamMessages(batch);
+            foreach (var batch in mappedMessages.Batch(250))
+            {
+                await SendFamMessages(batch);
+            }
         }
 
         logger.LogInformation("Sent {MappedMessagesCount} WoCutoff to FAM  for {WeekNumber} done in {Plant}", mappedMessages.Count, weekNumber, plant);
