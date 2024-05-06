@@ -115,10 +115,7 @@ public class FamFeederService : IFamFeederService
 
         return $"finished successfully sending {mappedMessages.Count} messages to fam for WoCutoff for week {cutoffWeek}";
     }
-
-
-
-
+    
     public Task<List<string>> GetAllPlants() => _plantRepository.GetAllPlants();
 
     public async Task<string> WoCutoff(string plant, string weekNumber, ILogger logger)
