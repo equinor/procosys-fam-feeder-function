@@ -107,8 +107,8 @@ public class FamFeederService : IFamFeederService
     {
         if (events.Count == 0)
         {
-            _logger?.LogInformation("found no events, or field is null");
-            return "found no events, or field is null";
+            _logger?.LogInformation($"WoCutoff found no events, or field is null for week {cutoffWeek} plant {plant}");
+            return $"WoCutoff found no events, or field is null for week {cutoffWeek} plant {plant}";
         }
 
         _logger?.LogInformation(
