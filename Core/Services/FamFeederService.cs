@@ -50,27 +50,35 @@ public class FamFeederService : IFamFeederService
         {
             foreach (var topic in queryParameters.PcsTopics)
             {
-                var events = await GetEventsBasedOnTopicAndPlant(plant, topic);
-
-                if (events.Count == 0)
+                try
                 {
-                    _logger.LogInformation("found no events for topic {Topic} and plant {Plant}", topic, plant);
-                    continue;
+                    var events = await GetEventsBasedOnTopicAndPlant(plant, topic);
+
+                    if (events.Count == 0)
+                    {
+                        _logger.LogInformation("found no events for topic {Topic} and plant {Plant}", topic, plant);
+                        continue;
+                    }
+
+                    _logger.LogInformation(
+                        "Found {EventCount} events for topic {Topic} and plant {Plant}", events.Count, topic, plant);
+                    var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, topic));
+                    var mapper = CreateCommonLibMapper();
+                    var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
+
+                    if (Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") != "Development")
+                    {
+                        await SendFamMessages(mappedMessages);
+                    }
+
+                    _logger.LogInformation("Finished sending {Topic} for plant {Plant} to fam", topic, plant);
+                    mappedMessagesCount += mappedMessages.Count;
                 }
-
-                _logger.LogInformation(
-                    "Found {EventCount} events for topic {Topic} and plant {Plant}",events.Count,topic,plant);
-                var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, topic));
-                var mapper = CreateCommonLibMapper();
-                var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m=> m.Objects.Any()).ToList();
-
-                if (Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") != "Development")
+                catch (Exception ex)
                 {
-                    await SendFamMessages(mappedMessages);
+                    _logger.LogError($"Failed sending to FAM for plant {plant} topic {topic} with message {ex.Message}");
+                    throw;
                 }
-
-                _logger.LogInformation("Finished sending {Topic} for plant {Plant} to fam", topic, plant);
-                mappedMessagesCount += mappedMessages.Count;
             }
         }
 
@@ -107,13 +115,21 @@ public class FamFeederService : IFamFeederService
             "Found {EventCount} events for WoCutoff for week {CutoffWeek} and plant {Plant} ", events.Count, cutoffWeek,
             plant);
 
-        var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
-        var mapper = CreateCommonLibMapper();
-        var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
+        try
+        {
+            var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
+            var mapper = CreateCommonLibMapper();
+            var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
 
-        await SendFamMessages(mappedMessages);
+            await SendFamMessages(mappedMessages);
 
-        return $"finished successfully sending {mappedMessages.Count} messages to fam for WoCutoff for week {cutoffWeek}";
+            return $"finished successfully sending {mappedMessages.Count} messages to fam for WoCutoff for week {cutoffWeek}";
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError($"Failed sending to FAM for plant {plant} topic WorkOrderCutoff week {cutoffWeek} with message {ex.Message}");
+            throw;
+        }
     }
 
 
@@ -123,21 +139,29 @@ public class FamFeederService : IFamFeederService
 
     public async Task<string> WoCutoff(string plant, string weekNumber, ILogger logger)
     {
-        var mapper = CreateCommonLibMapper();
-        var response = await _cutoffRepository.GetWoCutoffs(weekNumber, plant);
-        logger.LogInformation("Found {EventCount} cutoffs for week number {WeekNumber} in {Plant}",response.Count,weekNumber,plant);
-
-        var messages = response.SelectMany(e =>
-            TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
-        var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
-
-        foreach (var batch in mappedMessages.Batch(250))
+        try
         {
-            await SendFamMessages(batch);
-        }
+            var mapper = CreateCommonLibMapper();
+            var response = await _cutoffRepository.GetWoCutoffs(weekNumber, plant);
+            logger.LogInformation("Found {EventCount} cutoffs for week number {WeekNumber} in {Plant}", response.Count, weekNumber, plant);
 
-        logger.LogInformation("Sent {MappedMessagesCount} WoCutoff to FAM  for {WeekNumber} done in {Plant}", mappedMessages.Count, weekNumber, plant);
-        return $"Sent {mappedMessages.Count} WoCutoff to FAM  for {weekNumber} done";
+            var messages = response.SelectMany(e =>
+                TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
+            var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
+
+            foreach (var batch in mappedMessages.Batch(250))
+            {
+                await SendFamMessages(batch);
+            }
+
+            logger.LogInformation("Sent {MappedMessagesCount} WoCutoff to FAM  for {WeekNumber} done in {Plant}", mappedMessages.Count, weekNumber, plant);
+            return $"Sent {mappedMessages.Count} WoCutoff to FAM  for {weekNumber} done";
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError($"Failed sending to FAM for plant {plant} topic WorkOrderCutoff week {weekNumber} with message {ex.Message}");
+            throw;
+        }
     }
 
     private SchemaMapper CreateCommonLibMapper()
