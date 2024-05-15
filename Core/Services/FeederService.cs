@@ -22,16 +22,20 @@ public class FeederService : IFeederService
     private readonly IPlantRepository _plantRepository;
     private readonly IEventRepository _repo;
     private readonly IWorkOrderCutoffRepository _cutoffRepository;
+    private readonly IServiceBusService _serviceBusService;
 
     public FeederService(IEventHubProducerService eventHubProducerService,
         IEventRepository repo,
         IOptions<CommonLibConfig> commonLibConfig,
-        IPlantRepository plantRepository, IWorkOrderCutoffRepository cutoffRepository)
+        IPlantRepository plantRepository, 
+        IWorkOrderCutoffRepository cutoffRepository,
+        IServiceBusService serviceBusService)
     {
         _eventHubProducerService = eventHubProducerService;
         _repo = repo;
         _plantRepository = plantRepository;
         _cutoffRepository = cutoffRepository;
+        _serviceBusService = serviceBusService;
         _commonLibConfig = commonLibConfig.Value;
     }
 
@@ -44,13 +48,13 @@ public class FeederService : IFeederService
             return "Cutoff Should have its own call, this should never happen :D";
         }
 
-        var mappedMessagesCount = 0;
+        var messagesCount = 0;
 
         foreach (var plant in queryParameters.Plants)
         {
             foreach (var topic in queryParameters.PcsTopics)
             {
-                var events = await GetEventsBasedOnTopicAndPlant(plant, topic);
+                var events = await GetEventsBasedOnTopicAndPlant(plant, topic, queryParameters.ShouldAddToQueue);
 
                 if (events.Count == 0)
                 {
@@ -60,21 +64,29 @@ public class FeederService : IFeederService
 
                 _logger.LogInformation(
                     "Found {EventCount} events for topic {Topic} and plant {Plant}",events.Count,topic,plant);
-                var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, topic));
-                var mapper = CreateCommonLibMapper();
-                var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m=> m.Objects.Any()).ToList();
-
-                if (Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") != "Development")
+                
+                
+                if (queryParameters.ShouldAddToQueue) //Send to Completion
                 {
-                    await SendFamMessages(mappedMessages);
+                    messagesCount += events.Count;
+                    await _serviceBusService.SendDataAsync(events,topic);
                 }
-
-                _logger.LogInformation("Finished sending {Topic} for plant {Plant} to fam", topic, plant);
-                mappedMessagesCount += mappedMessages.Count;
+                else //Send to FAM
+                {
+                    var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, topic));
+                    var mapper = CreateCommonLibMapper();
+                    var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m=> m.Objects.Any()).ToList();
+                    if (Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") != "Development")
+                    {
+                        await SendFamMessages(mappedMessages);
+                    }
+                    _logger.LogInformation("Finished sending {Topic} for plant {Plant} to fam", topic, plant);
+                    messagesCount += mappedMessages.Count;
+                }
             }
         }
 
-        return $"finished successfully sending {mappedMessagesCount} messages to fam for {string.Join(",", queryParameters.PcsTopics)} and plants {string.Join(",", queryParameters.Plants)}";
+        return $"finished successfully sending {messagesCount} messages to fam for {string.Join(",", queryParameters.PcsTopics)} and plants {string.Join(",", queryParameters.Plants)}";
     }
 
     public async Task<string> RunForCutoffWeek(string cutoffWeek, string plant, ILogger logger)
@@ -177,9 +189,10 @@ public class FeederService : IFeederService
         }
     }
 
-    private async Task<List<string>> GetEventsBasedOnTopicAndPlant(string plant, string topic)
+    
+    private async Task<List<string>> GetEventsBasedOnTopicAndPlant(string plant, string topic, bool shouldAddToQueue = false)
     {
-        return await GetEventsBasedOnTopicAndPlant(new QueryParameters(plant, topic));
+        return await GetEventsBasedOnTopicAndPlant(new QueryParameters(plant, topic, shouldAddToQueue));
     }
 
     private async Task<List<string>> GetEventsBasedOnTopicAndPlant(QueryParameters queryParameters)
@@ -202,7 +215,7 @@ public class FeederService : IFeederService
                     PcsTopicConstants.Document => await _repo.GetDocument(plant),
                     PcsTopicConstants.HeatTrace => await _repo.GetHeatTraces(plant),
                     PcsTopicConstants.HeatTracePipeTest => await _repo.GetHeatTracePipeTests(plant),
-                    PcsTopicConstants.Library => await _repo.GetLibraries(plant),
+                    PcsTopicConstants.Library => queryParameters.ShouldAddToQueue ? await _repo.GetLibrariesForPunch(plant) : await _repo.GetLibraries(plant),
                     PcsTopicConstants.LibraryField => await _repo.GetLibraryFields(plant),
                     PcsTopicConstants.LoopContent => await _repo.GetLoopContents(plant),
                     PcsTopicConstants.McPkg => await _repo.GetMcPackages(plant),
