@@ -6,7 +6,6 @@ using Core.Models;
 using Equinor.ProCoSys.PcsServiceBus;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
-using MoreLinq;
 using Task = System.Threading.Tasks.Task;
 
 namespace FamFeederFunction.Functions.FamFeeder;
@@ -43,7 +42,7 @@ public static class TopicOrchestrator
             var newParamList = param.PcsTopics
                 .Where(s => s != PcsTopicConstants.WorkOrderCutoff)
                 .Select(s =>
-                    new QueryParameters(plant, s)).ToList();
+                    new QueryParameters(plant, s,param.ShouldAddToQueue)).ToList();
 
             if (MultiPlantConstants.TryGetByMultiPlant(plant, out var validMultiPlants))
             {

@@ -8,12 +8,12 @@ namespace FamFeederFunction.Functions.FamFeeder;
 
 public  class GetValidPlantsActivity
 {
-    private readonly IFamFeederService _famFeederService;
+    private readonly IFeederService _feederService;
 
-    public GetValidPlantsActivity(IFamFeederService famFeederService) 
-        => _famFeederService = famFeederService;
+    public GetValidPlantsActivity(IFeederService feederService) 
+        => _feederService = feederService;
 
     [FunctionName(nameof(GetValidPlantsActivity))]
     public async Task<List<string>> RunFeeder([ActivityTrigger] IDurableActivityContext context)
-        => await _famFeederService.GetAllPlants();
+        => await _feederService.GetAllPlants();
 }
