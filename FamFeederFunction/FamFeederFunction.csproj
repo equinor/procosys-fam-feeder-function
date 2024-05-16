@@ -36,7 +36,4 @@
 			<CopyToPublishDirectory>Never</CopyToPublishDirectory>
 		</None>
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Functions\CompletionFeeder\" />
-	</ItemGroup>
 </Project>

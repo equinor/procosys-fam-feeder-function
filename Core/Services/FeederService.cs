@@ -86,7 +86,7 @@ public class FeederService : IFeederService
             }
         }
 
-        return $"finished successfully sending {messagesCount} messages to fam for {string.Join(",", queryParameters.PcsTopics)} and plants {string.Join(",", queryParameters.Plants)}";
+        return $"finished successfully sending {messagesCount} messages to for {string.Join(",", queryParameters.PcsTopics)} and plants {string.Join(",", queryParameters.Plants)}";
     }
 
     public async Task<string> RunForCutoffWeek(string cutoffWeek, string plant, ILogger logger)
