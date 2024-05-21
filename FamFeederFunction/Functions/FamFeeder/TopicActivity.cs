@@ -9,17 +9,17 @@ namespace FamFeederFunction.Functions.FamFeeder;
 
 public class TopicActivity
 {
-    private readonly IFamFeederService _famFeederService;
+    private readonly IFeederService _feederService;
 
-    public TopicActivity(IFamFeederService famFeederService)
+    public TopicActivity(IFeederService feederService)
     {
-        _famFeederService = famFeederService;
+        _feederService = feederService;
     }
 
     [FunctionName(nameof(TopicActivity))]
     public async Task<string> RunFeeder([ActivityTrigger] IDurableActivityContext context, ILogger logger)
     {
-        var runFeeder = await _famFeederService.RunFeeder(context.GetInput<QueryParameters>(), logger);
+        var runFeeder = await _feederService.RunFeeder(context.GetInput<QueryParameters>(), logger);
         logger.LogInformation("RunFeeder returned {RunFeeder}", runFeeder);
         return runFeeder;
     }

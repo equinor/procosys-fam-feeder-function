@@ -1,5 +1,4 @@
-﻿using System;
-using System.Configuration;
+﻿using System.Configuration;
 using System.IO;
 using System.Reflection;
 using Core;
@@ -33,8 +32,10 @@ public class Startup : FunctionsStartup
 
         services.Configure<CommonLibConfig>(config.GetSection("CommonLibConfig"));
         services.Configure<FamFeederOptions>(config.GetSection("FamFeederOptions"));
+        services.Configure<ServiceBusOptions>(config.GetSection("ServiceBusOptions"));
         services.AddEventHubProducer(configBuilder
             => config.Bind("EventHubProducerConfig", configBuilder));
+        services.AddSingleton<IServiceBusService, ServiceBusService>();
 
         services.AddLogging();
         AddWalletToDirectory(config);
@@ -42,8 +43,8 @@ public class Startup : FunctionsStartup
         var connectionString = config.GetSection("FamFeederOptions")["ProCoSysConnectionString"] 
                                ?? throw new ConfigurationErrorsException("Missing ConnectionString for PCS Database");
         services.AddDbContext(connectionString);
-        services.AddScoped<IFamEventRepository, FamEventRepository>();
-        services.AddScoped<IFamFeederService, FamFeederService>();
+        services.AddScoped<IEventRepository, EventRepository>();
+        services.AddScoped<IFeederService, FeederService>();
         services.AddScoped<ISearchItemRepository, SearchItemRepository>();
         services.AddScoped<ISearchFeederService, SearchFeederService>();
         services.AddScoped<IDbStatusRepository, DbStatusRepository>();
@@ -53,7 +54,6 @@ public class Startup : FunctionsStartup
 
         //128mb (up from default 10) 
         OracleConfiguration.FetchSize = 128 * 1024 * 1024;
-       
     }
 
     private static void AddWalletToDirectory(IConfiguration config)

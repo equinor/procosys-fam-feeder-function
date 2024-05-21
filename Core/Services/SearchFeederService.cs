@@ -44,8 +44,7 @@ public class SearchFeederService : ISearchFeederService
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError("there was an error getting items from plant {plant} and topic {topic}", plant, topic);
-                    _logger.LogError(e.StackTrace);
+                    _logger.LogError(e,"there was an error getting items from plant {plant} and topic {topic}", plant, topic);
                     continue;
                 }
 

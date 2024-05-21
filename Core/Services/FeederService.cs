@@ -14,24 +14,28 @@ using Task = System.Threading.Tasks.Task;
 
 namespace Core.Services;
 
-public class FamFeederService : IFamFeederService
+public class FeederService : IFeederService
 {
     private readonly CommonLibConfig _commonLibConfig;
     private readonly IEventHubProducerService _eventHubProducerService;
     private ILogger? _logger;
     private readonly IPlantRepository _plantRepository;
-    private readonly IFamEventRepository _repo;
+    private readonly IEventRepository _repo;
     private readonly IWorkOrderCutoffRepository _cutoffRepository;
+    private readonly IServiceBusService _serviceBusService;
 
-    public FamFeederService(IEventHubProducerService eventHubProducerService,
-        IFamEventRepository repo,
+    public FeederService(IEventHubProducerService eventHubProducerService,
+        IEventRepository repo,
         IOptions<CommonLibConfig> commonLibConfig,
-        IPlantRepository plantRepository, IWorkOrderCutoffRepository cutoffRepository)
+        IPlantRepository plantRepository, 
+        IWorkOrderCutoffRepository cutoffRepository,
+        IServiceBusService serviceBusService)
     {
         _eventHubProducerService = eventHubProducerService;
         _repo = repo;
         _plantRepository = plantRepository;
         _cutoffRepository = cutoffRepository;
+        _serviceBusService = serviceBusService;
         _commonLibConfig = commonLibConfig.Value;
     }
 
@@ -44,45 +48,45 @@ public class FamFeederService : IFamFeederService
             return "Cutoff Should have its own call, this should never happen :D";
         }
 
-        var mappedMessagesCount = 0;
+        var messagesCount = 0;
 
         foreach (var plant in queryParameters.Plants)
         {
             foreach (var topic in queryParameters.PcsTopics)
             {
-                try
+                var events = await GetEventsBasedOnTopicAndPlant(plant, topic, queryParameters.ShouldAddToQueue);
+
+                if (events.Count == 0)
                 {
-                    var events = await GetEventsBasedOnTopicAndPlant(plant, topic);
+                    _logger.LogInformation("found no events for topic {Topic} and plant {Plant}", topic, plant);
+                    continue;
+                }
 
-                    if (events.Count == 0)
-                    {
-                        _logger.LogInformation("found no events for topic {Topic} and plant {Plant}", topic, plant);
-                        continue;
-                    }
-
-                    _logger.LogInformation(
-                        "Found {EventCount} events for topic {Topic} and plant {Plant}", events.Count, topic, plant);
+                _logger.LogInformation(
+                    "Found {EventCount} events for topic {Topic} and plant {Plant}",events.Count,topic,plant);
+                
+                
+                if (queryParameters.ShouldAddToQueue) //Send to Completion
+                {
+                    messagesCount += events.Count;
+                    await _serviceBusService.SendDataAsync(events,topic);
+                }
+                else //Send to FAM
+                {
                     var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, topic));
                     var mapper = CreateCommonLibMapper();
-                    var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
-
+                    var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m=> m.Objects.Any()).ToList();
                     if (Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") != "Development")
                     {
                         await SendFamMessages(mappedMessages);
                     }
-
                     _logger.LogInformation("Finished sending {Topic} for plant {Plant} to fam", topic, plant);
-                    mappedMessagesCount += mappedMessages.Count;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"Failed sending to FAM for plant {plant} topic {topic} with message {ex.Message}");
-                    throw;
+                    messagesCount += mappedMessages.Count;
                 }
             }
         }
 
-        return $"finished successfully sending {mappedMessagesCount} messages to fam for {string.Join(",", queryParameters.PcsTopics)} and plants {string.Join(",", queryParameters.Plants)}";
+        return $"finished successfully sending {messagesCount} messages to for {string.Join(",", queryParameters.PcsTopics)} and plants {string.Join(",", queryParameters.Plants)}";
     }
 
     public async Task<string> RunForCutoffWeek(string cutoffWeek, string plant, ILogger logger)
@@ -107,61 +111,45 @@ public class FamFeederService : IFamFeederService
     {
         if (events.Count == 0)
         {
-            _logger?.LogInformation($"WoCutoff found no events, or field is null for week {cutoffWeek} plant {plant}");
-            return $"WoCutoff found no events, or field is null for week {cutoffWeek} plant {plant}";
+            _logger?.LogInformation("found no events, or field is null");
+            return "found no events, or field is null";
         }
 
         _logger?.LogInformation(
             "Found {EventCount} events for WoCutoff for week {CutoffWeek} and plant {Plant} ", events.Count, cutoffWeek,
             plant);
 
-        try
-        {
-            var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
-            var mapper = CreateCommonLibMapper();
-            var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
+        var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
+        var mapper = CreateCommonLibMapper();
+        var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
 
-            await SendFamMessages(mappedMessages);
+        await SendFamMessages(mappedMessages);
 
-            return $"finished successfully sending {mappedMessages.Count} messages to fam for WoCutoff for week {cutoffWeek}";
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError($"Failed sending to FAM for plant {plant} topic WorkOrderCutoff week {cutoffWeek} with message {ex.Message}");
-            throw;
-        }
+        return $"finished successfully sending {mappedMessages.Count} messages to fam for WoCutoff for week {cutoffWeek}";
     }
-
-
-
-
+    
     public Task<List<string>> GetAllPlants() => _plantRepository.GetAllPlants();
 
     public async Task<string> WoCutoff(string plant, string weekNumber, ILogger logger)
     {
-        try
+        var mapper = CreateCommonLibMapper();
+        var response = await _cutoffRepository.GetWoCutoffs(weekNumber, plant);
+        logger.LogInformation("Found {EventCount} cutoffs for week number {WeekNumber} in {Plant}",response.Count,weekNumber,plant);
+
+        var messages = response.SelectMany(e =>
+            TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
+        var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
+
+        if (Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") != "Development")
         {
-            var mapper = CreateCommonLibMapper();
-            var response = await _cutoffRepository.GetWoCutoffs(weekNumber, plant);
-            logger.LogInformation("Found {EventCount} cutoffs for week number {WeekNumber} in {Plant}", response.Count, weekNumber, plant);
-
-            var messages = response.SelectMany(e =>
-                TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
-            var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
-
             foreach (var batch in mappedMessages.Batch(250))
             {
                 await SendFamMessages(batch);
             }
+        }
 
-            logger.LogInformation("Sent {MappedMessagesCount} WoCutoff to FAM  for {WeekNumber} done in {Plant}", mappedMessages.Count, weekNumber, plant);
-            return $"Sent {mappedMessages.Count} WoCutoff to FAM  for {weekNumber} done";
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError($"Failed sending to FAM for plant {plant} topic WorkOrderCutoff week {weekNumber} with message {ex.Message}");
-            throw;
-        }
+        logger.LogInformation("Sent {MappedMessagesCount} WoCutoff to FAM  for {WeekNumber} done in {Plant}", mappedMessages.Count, weekNumber, plant);
+        return $"Sent {mappedMessages.Count} WoCutoff to FAM  for {weekNumber} done";
     }
 
     private SchemaMapper CreateCommonLibMapper()
@@ -201,9 +189,10 @@ public class FamFeederService : IFamFeederService
         }
     }
 
-    private async Task<List<string>> GetEventsBasedOnTopicAndPlant(string plant, string topic)
+    
+    private async Task<List<string>> GetEventsBasedOnTopicAndPlant(string plant, string topic, bool shouldAddToQueue = false)
     {
-        return await GetEventsBasedOnTopicAndPlant(new QueryParameters(plant, topic));
+        return await GetEventsBasedOnTopicAndPlant(new QueryParameters(plant, topic, shouldAddToQueue));
     }
 
     private async Task<List<string>> GetEventsBasedOnTopicAndPlant(QueryParameters queryParameters)
@@ -226,7 +215,7 @@ public class FamFeederService : IFamFeederService
                     PcsTopicConstants.Document => await _repo.GetDocument(plant),
                     PcsTopicConstants.HeatTrace => await _repo.GetHeatTraces(plant),
                     PcsTopicConstants.HeatTracePipeTest => await _repo.GetHeatTracePipeTests(plant),
-                    PcsTopicConstants.Library => await _repo.GetLibraries(plant),
+                    PcsTopicConstants.Library => queryParameters.ShouldAddToQueue ? await _repo.GetLibrariesForPunch(plant) : await _repo.GetLibraries(plant),
                     PcsTopicConstants.LibraryField => await _repo.GetLibraryFields(plant),
                     PcsTopicConstants.LoopContent => await _repo.GetLoopContents(plant),
                     PcsTopicConstants.McPkg => await _repo.GetMcPackages(plant),
