@@ -54,34 +54,42 @@ public class FeederService : IFeederService
         {
             foreach (var topic in queryParameters.PcsTopics)
             {
-                var events = await GetEventsBasedOnTopicAndPlant(plant, topic, queryParameters.ShouldAddToQueue);
+                try
+                {
+                    var events = await GetEventsBasedOnTopicAndPlant(plant, topic, queryParameters.ShouldAddToQueue);
 
-                if (events.Count == 0)
-                {
-                    _logger.LogInformation("found no events for topic {Topic} and plant {Plant}", topic, plant);
-                    continue;
-                }
-
-                _logger.LogInformation(
-                    "Found {EventCount} events for topic {Topic} and plant {Plant}",events.Count,topic,plant);
-                
-                
-                if (queryParameters.ShouldAddToQueue) //Send to Completion
-                {
-                    messagesCount += events.Count;
-                    await _serviceBusService.SendDataAsync(events,topic);
-                }
-                else //Send to FAM
-                {
-                    var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, topic));
-                    var mapper = CreateCommonLibMapper();
-                    var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m=> m.Objects.Any()).ToList();
-                    if (Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") != "Development")
+                    if (events.Count == 0)
                     {
-                        await SendFamMessages(mappedMessages);
+                        _logger.LogInformation("found no events for topic {Topic} and plant {Plant}", topic, plant);
+                        continue;
                     }
-                    _logger.LogInformation("Finished sending {Topic} for plant {Plant} to fam", topic, plant);
-                    messagesCount += mappedMessages.Count;
+
+                    _logger.LogInformation(
+                        "Found {EventCount} events for topic {Topic} and plant {Plant}", events.Count, topic, plant);
+
+
+                    if (queryParameters.ShouldAddToQueue) //Send to Completion
+                    {
+                        messagesCount += events.Count;
+                        await _serviceBusService.SendDataAsync(events, topic);
+                    }
+                    else //Send to FAM
+                    {
+                        var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, topic));
+                        var mapper = CreateCommonLibMapper();
+                        var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
+                        if (Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") != "Development")
+                        {
+                            await SendFamMessages(mappedMessages);
+                        }
+                        _logger.LogInformation("Finished sending {Topic} for plant {Plant} to fam", topic, plant);
+                        messagesCount += mappedMessages.Count;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Failed sending to FAM for plant {plant} topic {topic} with message {ex.Message}");
+                    throw;
                 }
             }
         }
