@@ -8,6 +8,7 @@ using Core.Models;
 using Dapper;
 using Equinor.ProCoSys.PcsServiceBus.Interfaces;
 using Infrastructure.Handlers;
+using Infrastructure.PunchQueries;
 using Action = Core.Models.Action;
 using CommPkg = Core.Models.CommPkg;
 using CommPkgQuery = Core.Models.CommPkgQuery;
@@ -17,10 +18,10 @@ using Tag = Core.Models.Tag;
 
 namespace Infrastructure.Repositories;
 
-public class FamEventRepository : IFamEventRepository
+public class EventRepository : IEventRepository
 {
     private readonly AppDbContext _context;
-    public FamEventRepository(AppDbContext context) 
+    public EventRepository(AppDbContext context) 
         => _context = context;
 
     public async Task<List<string>> GetSwcrAttachments(string plant) => await Query<SwcrAttachment>(SwcrAttachmentQuery.GetQuery(null, plant));
@@ -61,6 +62,7 @@ public class FamEventRepository : IFamEventRepository
     public async Task<List<string>> GetLibraryFields(string plant) => await Query<LibraryField>(LibraryFieldQuery.GetQuery(null, plant));
     public async Task<List<string>> GetCommPkgMilestones(string plant) => await Query<CommPkgMilestone>(CommPkgMilestoneQuery.GetQuery(null, plant));
     public async Task<List<string>> GetHeatTracePipeTests(string plant) => await Query<HeatTracePipeTest>(HeatTracePipeTestQuery.GetQuery(null, plant));
+    public async Task<IEnumerable<string>> GetLibrariesForPunch(string plant) => await Query<Library>(LibraryForPunchQuery.GetQuery(null, plant));
 
 
     private async Task<List<string>> Query<T>((string queryString, DynamicParameters parameters) query) where T : IHasEventType

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Core.Interfaces;
 
-public interface IFamFeederService
+public interface IFeederService
 {
     Task<string> RunFeeder(QueryParameters queryParams, ILogger logger);
     Task<List<string>> GetAllPlants();

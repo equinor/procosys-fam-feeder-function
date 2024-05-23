@@ -40,6 +40,30 @@ public class TopicHttpTrigger
         var instanceId = await orchestrationClient.StartNewAsync(nameof(TopicOrchestrator), param);
         return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
     }
+    
+    [FunctionName("CompletionTopicHttpTrigger")]
+    public async Task<IActionResult> CompletionStart(
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]
+        HttpRequest req,
+        [DurableClient] IDurableOrchestrationClient orchestrationClient, ILogger log)
+    {
+        var (topicsString, plants) = await DeserializeTopicAndPlant(req);
+        log.LogInformation("Querying {Plant} for {TopicString}", plants, topicsString);
+
+        if (topicsString is null || plants is null)
+        {
+            return new BadRequestObjectResult("Please provide both plant and topic");
+        }
+
+        if (!HasValidTopic(topicsString))
+        {
+            return new BadRequestObjectResult("Please provide one or more valid topics");
+        }
+
+        var param = new QueryParameters(SplitList(plants), SplitList(topicsString),true);
+        var instanceId = await orchestrationClient.StartNewAsync(nameof(TopicOrchestrator), param);
+        return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
+    }
 
     public static List<string> SplitList(string input)
     {
