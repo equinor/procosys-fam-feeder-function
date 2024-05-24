@@ -28,7 +28,7 @@ public class ServiceBusService : IServiceBusService
         
         if(!_senders.TryGetValue(topic, out _))
         {
-            _senders.Add(topic,_serviceBusClient.CreateSender(GetQueueName(topic)));
+            _senders.TryAdd(topic,_serviceBusClient.CreateSender(GetQueueName(topic)));
         }
         var serviceBusSender = _senders[topic];
 
