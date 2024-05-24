@@ -36,7 +36,7 @@ public static class TopicOrchestrator
                 }
             }
         }
-
+        
         foreach (var plant in param.Plants)
         {
             var newParamList = param.PcsTopics
@@ -65,16 +65,21 @@ public static class TopicOrchestrator
     private static async Task<bool> HasAnyValidPlant(IDurableOrchestrationContext context)
     {
         var param = context.GetInput<QueryParameters>();
+        if (MultiPlantConstants.TryGetByMultiPlant(param.Plants.First(), out _))
+        {
+            return true;
+        }
+        
         var allPlants = await context.CallActivityAsync<List<string>>(nameof(GetValidPlantsActivity), null);
 
-        return param.Plants.Any(s => allPlants.Contains(s, StringComparer.InvariantCultureIgnoreCase));
+        return param.Plants.All(s => allPlants.Contains(s, StringComparer.InvariantCultureIgnoreCase));
     }
 
     private static async Task<List<string>> RunMultiPlantOrchestration(IDurableOrchestrationContext context, IEnumerable<string> validMultiPlants,
         QueryParameters param)
     {
         var results = validMultiPlants
-            .Select(plant => new QueryParameters(new List<string> {plant}, param.PcsTopics))
+            .Select(plant => new QueryParameters(new List<string> {plant}, param.PcsTopics, param.ShouldAddToQueue))
             .Select(input => context.CallActivityAsync<string>(nameof(TopicActivity), input))
             .ToList();
         var finishedTasks = await Task.WhenAll(results);
