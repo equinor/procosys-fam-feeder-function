@@ -25,4 +25,5 @@ public class Document : IDocumentEventV1
     public string? ResponsibleContractor { get; init; }
     public DateTime LastUpdated { get; init; }
     public DateOnly? RevisionDate { get; init; }
+    public bool IsVoided { get; init; }
 }
