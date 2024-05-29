@@ -11,7 +11,8 @@ public class PersonQueryForPunch
                         p.username as UserName, 
                         p.emailaddress as Email,
                         p.super as SuperUser, 
-                        p.last_updated as LastUpdated
+                        p.last_updated as LastUpdated,
+                        'CreateForPunch' as EventType
                         FROM Person p
                         WHERE p.azure_oid is not null
                         AND (EXISTS (

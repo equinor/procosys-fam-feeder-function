@@ -11,5 +11,5 @@ public class Person : IPersonEventV1
     public string Email { get; init; }
     public bool SuperUser { get; init; }
     public DateTime LastUpdated { get; init; }
-    public string EventType { get; }
+    public string EventType { get; init; }
 }
