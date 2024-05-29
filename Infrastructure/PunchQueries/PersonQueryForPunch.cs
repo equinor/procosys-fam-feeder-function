@@ -1,7 +1,4 @@
-﻿using Dapper;
-using Equinor.ProCoSys.PcsServiceBus.Queries;
-
-namespace Infrastructure.PunchQueries;
+﻿namespace Infrastructure.PunchQueries;
 
 public class PersonQueryForPunch
 {
