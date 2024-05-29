@@ -248,6 +248,8 @@ public class FeederService : IFeederService
                     PcsTopicConstants.WoChecklist => await _repo.GetWoChecklists(plant),
                     PcsTopicConstants.WoMaterial => await _repo.GetWoMaterials(plant),
                     PcsTopicConstants.WoMilestone => await _repo.GetWoMilestones(plant),
+                    PcsTopicConstants.Person => queryParameters.ShouldAddToQueue ? await _repo.GetPersonsForPunch() 
+                        : throw new Exception("Only applicable for 'addToQueue'"),
                     var defaultTopic => Default(defaultTopic)
                 };
 

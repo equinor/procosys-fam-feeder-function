@@ -63,7 +63,7 @@ public class EventRepository : IEventRepository
     public async Task<List<string>> GetCommPkgMilestones(string plant) => await Query<CommPkgMilestone>(CommPkgMilestoneQuery.GetQuery(null, plant));
     public async Task<List<string>> GetHeatTracePipeTests(string plant) => await Query<HeatTracePipeTest>(HeatTracePipeTestQuery.GetQuery(null, plant));
     public async Task<IEnumerable<string>> GetLibrariesForPunch(string plant) => await Query<Library>(LibraryForPunchQuery.GetQuery(null, plant));
-
+    public async Task<IEnumerable<string>> GetPersonsForPunch() => await Query<Person>((PersonQueryForPunch.GetQuery(), new DynamicParameters())); 
 
     private async Task<List<string>> Query<T>((string queryString, DynamicParameters parameters) query) where T : IHasEventType
     {

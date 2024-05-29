@@ -41,4 +41,5 @@ public interface IEventRepository
     Task<List<string>> GetCommPkgMilestones(string plant);
     Task<List<string>> GetHeatTracePipeTests(string plant);
     Task<IEnumerable<string>> GetLibrariesForPunch(string plant);
+    Task<IEnumerable<string>> GetPersonsForPunch();
 }
