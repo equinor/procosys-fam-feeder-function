@@ -225,7 +225,7 @@ public class FeederService : IFeederService
                     PcsTopicConstants.PipingRevision => await _repo.GetPipingRevisions(plant),
                     PcsTopicConstants.PipingSpool => await _repo.GetPipingSpools(plant),
                     PcsTopicConstants.Project => await _repo.GetProjects(plant),
-                    PcsTopicConstants.PunchListItem => await _repo.GetPunchItems(plant),
+                    PcsTopicConstants.PunchListItem => queryParameters.ShouldAddToQueue ? await _repo.GetPunchItemsForCompletion(plant) : await _repo.GetPunchItems(plant),
                     PcsTopicConstants.Query => await _repo.GetQueries(plant),
                     PcsTopicConstants.QuerySignature => await _repo.GetQuerySignatures(plant),
                     PcsTopicConstants.Responsible => await _repo.GetResponsibles(plant),
@@ -242,6 +242,7 @@ public class FeederService : IFeederService
                     PcsTopicConstants.WoChecklist => await _repo.GetWoChecklists(plant),
                     PcsTopicConstants.WoMaterial => await _repo.GetWoMaterials(plant),
                     PcsTopicConstants.WoMilestone => await _repo.GetWoMilestones(plant),
+                    //Person is does not have projectschema so we ignore plant input
                     PcsTopicConstants.Person => queryParameters.ShouldAddToQueue ? await _repo.GetPersonsForPunch() 
                         : throw new Exception("Only applicable for 'addToQueue'"),
                     var defaultTopic => Default(defaultTopic)
