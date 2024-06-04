@@ -1,11 +1,12 @@
-﻿namespace Infrastructure.PunchQueries;
+﻿namespace Infrastructure.CompletionQueries;
 
-public class PersonQueryForPunch
+public static class PersonQueryForPunch
 {
     public static string GetQuery()
     {
-        return @$"SELECT DISTINCT
-                        p.azure_oid as Guid, 
+        return @"SELECT DISTINCT
+                        p.person_id as ProCoSysGuid,
+                        p.azure_oid as AzureOid, 
                         p.firstname as FirstName, 
                         p.lastname as LastName, 
                         p.username as UserName, 
@@ -14,8 +15,7 @@ public class PersonQueryForPunch
                         p.last_updated as LastUpdated,
                         'CreateForPunch' as EventType
                         FROM Person p
-                        WHERE p.azure_oid is not null
-                        AND (EXISTS (
+                        WHERE (EXISTS (
                             SELECT 1 FROM PunchListItem pl_created WHERE p.person_id = pl_created.createdby_id
                         ) OR EXISTS (
                             SELECT 1 FROM PunchListItem pl_updated WHERE p.person_id = pl_updated.updatedby_id

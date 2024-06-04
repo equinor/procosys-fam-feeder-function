@@ -7,8 +7,8 @@ using System.Text.Json;
 using Core.Models;
 using Dapper;
 using Equinor.ProCoSys.PcsServiceBus.Interfaces;
+using Infrastructure.CompletionQueries;
 using Infrastructure.Handlers;
-using Infrastructure.PunchQueries;
 using Action = Core.Models.Action;
 using CommPkg = Core.Models.CommPkg;
 using CommPkgQuery = Core.Models.CommPkgQuery;
@@ -71,6 +71,8 @@ public class EventRepository : IEventRepository
     }
     public async Task<IEnumerable<string>> GetPersonsForPunch() => await Query<Person>((PersonQueryForPunch.GetQuery(), new DynamicParameters())); 
 
+    
+    
     private async Task<List<string>> Query<T>((string queryString, DynamicParameters parameters) query) where T : IHasEventType
     {
         var connection = _context.Database.GetDbConnection();

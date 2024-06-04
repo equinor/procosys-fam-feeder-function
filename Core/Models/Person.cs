@@ -4,7 +4,8 @@ namespace Core.Models;
 
 public class Person : IPersonEventV1
 {
-    public Guid Guid { get; init; }
+    public Guid ProCoSysGuid { get; init; }
+    public Guid? AzureOid { get; init; }
     public string FirstName { get; init; }
     public string LastName { get; init; }
     public string UserName { get; init; }
