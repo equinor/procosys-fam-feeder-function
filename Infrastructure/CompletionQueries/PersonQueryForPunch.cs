@@ -5,7 +5,7 @@ public static class PersonQueryForPunch
     public static string GetQuery()
     {
         return @"SELECT DISTINCT
-                        p.person_id as ProCoSysGuid,
+                        p.procosy_guid as ProCoSysGuid,
                         p.azure_oid as AzureOid, 
                         p.firstname as FirstName, 
                         p.lastname as LastName, 
