@@ -19,7 +19,7 @@ public static class PunchCommentsQuery
             pc.createdAt as CreatedAt,
             p.azure_oid as CreatedByGuid,
             pc.last_updated as LastUpdated
-        from punchlistcomment pc
+        from punchlistitemcomment pc
             join punchlistitem pli on pli.punchlistitem_id = pc.punchlistitem_id
             left join person p on p.person_id = pc.createdby_id
         {whereClause.clause}

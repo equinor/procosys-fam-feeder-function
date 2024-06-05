@@ -245,6 +245,10 @@ public class FeederService : IFeederService
                     //Person is does not have projectschema so we ignore plant input
                     PcsTopicConstants.Person => queryParameters.ShouldAddToQueue ? await _repo.GetPersonsForPunch() 
                         : throw new Exception("Only applicable for 'addToQueue'"),
+                    "PunchItemHistory" => queryParameters.ShouldAddToQueue ? await _repo.GetPunchItemHistory(plant) 
+                        : throw new Exception("Only applicable for 'addToQueue'"),    
+                    "PunchItemComments" => queryParameters.ShouldAddToQueue ? await _repo.GetPunchItemComments(plant) 
+                        : throw new Exception("Only applicable for 'addToQueue'"),
                     var defaultTopic => Default(defaultTopic)
                 };
 

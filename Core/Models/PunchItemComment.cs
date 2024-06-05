@@ -1,6 +1,8 @@
-﻿namespace Core.Models;
+﻿using Equinor.ProCoSys.PcsServiceBus.Interfaces;
 
-public class PunchItemComment
+namespace Core.Models;
+
+public class PunchItemComment : IHasEventType
 {
     public string Plant { get; init; }
     public Guid ProCoSysGuid { get; init; }
@@ -9,4 +11,5 @@ public class PunchItemComment
     public DateTime CreatedAt { get; init; }
     public DateTime LastUpdated { get; init; }
     public Guid? CreatedByGuid { get; init; }
+    public string EventType { get; } = "PunchItemComment";
 }

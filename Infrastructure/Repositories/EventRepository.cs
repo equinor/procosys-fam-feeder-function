@@ -69,6 +69,17 @@ public class EventRepository : IEventRepository
         const string extraClause = " and p.isVoided = 'N'";
         return await Query<PunchListItem>(PunchListItemQuery.GetQuery(null, plant, extraClause));
     }
+
+    public async Task<IEnumerable<string>> GetPunchItemHistory(string plant)
+    {
+        return await Query<PunchItemHistory>(PunchHistoryQuery.GetQuery(plant));
+    }
+
+    public async Task<IEnumerable<string>> GetPunchItemComments(string plant)
+    {
+        return await Query<PunchItemComment>(PunchCommentsQuery.GetQuery(plant));
+    }
+
     public async Task<IEnumerable<string>> GetPersonsForPunch() => await Query<Person>((PersonQueryForPunch.GetQuery(), new DynamicParameters())); 
 
     
