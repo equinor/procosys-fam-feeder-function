@@ -74,7 +74,11 @@ public class TopicHttpTrigger
 
     public static bool HasValidTopic(string topic)
     {
-          return  TopicHelper.GetAllTopicsAsEnumerable().Contains(topic, StringComparer.InvariantCultureIgnoreCase);
+        return topic switch
+        {
+            "PunchItemHistory" or "PunchItemComments" => true,
+            _ => TopicHelper.GetAllTopicsAsEnumerable().Contains(topic, StringComparer.InvariantCultureIgnoreCase)
+        };
     }
 
     private static async Task<(string? topicsString, string? plants)> DeserializeTopicAndPlant(HttpRequest req)
