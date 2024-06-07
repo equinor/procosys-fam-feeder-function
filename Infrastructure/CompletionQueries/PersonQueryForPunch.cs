@@ -28,7 +28,10 @@ public static class PersonQueryForPunch
                         ) OR EXISTS (
                             SELECT 1 FROM PunchListItem pl_action WHERE p.person_id = pl_action.actionbyperson_id
                         ) OR EXISTS (
-                            SELECT 1 FROM Attachment att WHERE p.person_id = att.createdby_id
+                                SELECT 1 FROM Attachment att 
+                                    JOIN attachmentLink al ON al.attachment_id = att.id
+                                WHERE p.person_id = att.createdby_id 
+                                    AND al.punchlistitem_id is not null
                         ))";
     }
 }

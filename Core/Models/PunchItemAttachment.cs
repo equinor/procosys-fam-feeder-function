@@ -14,6 +14,7 @@ public class PunchItemAttachment : IHasEventType
     public int? FileId { get; set; }
     public Guid CreatedByGuid { get; set; }
     public DateTime CreatedAt { get; set; }
+    public DateTime LastUpdated { get; init; }
     public string EventType { get; }
 }
 
