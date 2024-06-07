@@ -2,7 +2,7 @@
 
 namespace Core.Models;
 
-public class Person : IPersonEventV1
+public struct Person : IPersonEventV1
 {
     public Guid ProCoSysGuid { get; init; }
     public Guid? AzureOid { get; init; }

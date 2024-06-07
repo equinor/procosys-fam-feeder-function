@@ -9,7 +9,7 @@ public static class PunchHistoryQuery
     {
         QueryHelper.DetectFaultyPlantInput(plant);
         long? discard = null;
-        var whereClause = QueryHelper.CreateWhereClause(discard, plant, "pc", "irrelevant");
+        var whereClause = QueryHelper.CreateWhereClause(discard, plant, "plh", "irrelevant");
 
         var query = @$"select
             plh.projectschema as Plant,
@@ -24,6 +24,12 @@ public static class PunchHistoryQuery
             plh.changedby as ChangedBy
         from punchlistitem_changehistory plh
             join punchlistitem pl on pl.punchlistitem_id = plh.punchlistitem_id
+            join tagcheck tc on tc.tagcheck_id = pl.tagcheck_id
+            join TagFormularType tft ON tc.TagFormularType_Id = tft.TagFormularType_Id
+            join FormularType ft ON tft.FormularType_Id = ft.FormularType_Id
+            join Tag t on tft.Tag_Id = t.tag_id
+            join Project p on p.project_id = t.project_id and p.isvoided = 'N'
+            join projectschema ps on ps.projectschema = plh.projectschema and ps.isvoided = 'N'
         {whereClause.clause}
         ";
 

@@ -2,7 +2,7 @@
 
 namespace Core.Models;
 
-public class PunchItemHistory : IHasEventType
+public struct PunchItemHistory : IHasEventType
 {
     public Guid ProCoSysGuid { get; init; }
     public Guid PunchItemGuid { get; init; }
@@ -13,6 +13,6 @@ public class PunchItemHistory : IHasEventType
     public string? OldValueLong { get; init; }
     public string? NewValueLong { get; init; }
     public DateTime ChangedAt { get; init; }
-    public Guid ChangedByGuid { get; init; }
-    public string EventType { get; } = "PunchItemHistory";
+    public string ChangedBy { get; init; }
+    public string EventType { get; init; } 
 }

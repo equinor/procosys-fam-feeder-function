@@ -21,7 +21,13 @@ public static class PunchCommentsQuery
             pc.last_updated as LastUpdated
         from punchlistitemcomment pc
             join punchlistitem pli on pli.punchlistitem_id = pc.punchlistitem_id
-            left join person p on p.person_id = pc.createdby_id
+            join tagcheck tc on tc.tagcheck_id = pli.tagcheck_id
+            join TagFormularType tft ON tc.TagFormularType_Id = tft.TagFormularType_Id
+            join FormularType ft ON tft.FormularType_Id = ft.FormularType_Id
+            join Tag t on tft.Tag_Id = t.tag_id
+            join Project p on p.project_id = t.project_id and p.isvoided = 'N'
+            join projectschema ps on ps.projectschema = pc.projectschema and ps.isvoided = 'N'
+            join person p on p.person_id = pc.createdby_id
         {whereClause.clause}
         ";
 

@@ -37,7 +37,7 @@ public class EventRepository : IEventRepository
     public async Task<List<string>> GetWorkOrders(string plant) => await Query<WorkOrder>(WorkOrderQuery.GetQuery(null, plant));
     public async Task<List<string>> GetCheckLists(string plant) => await Query<Checklist>(ChecklistQuery.GetQuery(null,plant));
     public async Task<List<string>> GetTags(string plant) => await Query<Tag>(TagQuery.GetQuery(null,plant));
-    public async Task<List<string>> GetTagEquipments(string plant) => await Query<TagEquipment>(TagEquipmentQuery.GetQuery(null,plant));
+    public async Task<List<string>> GetTagEquipments(string plant) => await Query<TagEquipment>(TagEquipmentQuery.GetQuery(null!,plant));
     public async Task<List<string>> GetMcPkgMilestones(string plant) => await Query<McPkgMilestone>(McPkgMilestoneQuery.GetQuery(null,plant));
     public async Task<List<string>> GetProjects(string plant) => await Query<Project>(ProjectQuery.GetQuery(null, plant));
     public async Task<List<string>> GetSwcrs(string plant) => await Query<Swcr>(SwcrQuery.GetQuery(null,plant));
