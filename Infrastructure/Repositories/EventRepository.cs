@@ -62,24 +62,13 @@ public class EventRepository : IEventRepository
     public async Task<List<string>> GetLibraryFields(string plant) => await Query<LibraryField>(LibraryFieldQuery.GetQuery(null, plant));
     public async Task<List<string>> GetCommPkgMilestones(string plant) => await Query<CommPkgMilestone>(CommPkgMilestoneQuery.GetQuery(null, plant));
     public async Task<List<string>> GetHeatTracePipeTests(string plant) => await Query<HeatTracePipeTest>(HeatTracePipeTestQuery.GetQuery(null, plant));
+    
+    
+    // Punch/Completion related queries, these are used when seeding data into completion, and not used for FAM
     public async Task<IEnumerable<string>> GetLibrariesForPunch(string plant) => await Query<Library>(LibraryForPunchQuery.GetQuery(null, plant));
-
-    public async Task<IEnumerable<string>> GetPunchItemsForCompletion(string plant)
-    {
-        const string extraClause = " and p.isVoided = 'N'";
-        return await Query<PunchListItem>(PunchListItemQuery.GetQuery(null, plant, extraClause));
-    }
-
-    public async Task<IEnumerable<string>> GetPunchItemHistory(string plant)
-    {
-        return await Query<PunchItemHistory>(PunchHistoryQuery.GetQuery(plant));
-    }
-
-    public async Task<IEnumerable<string>> GetPunchItemComments(string plant)
-    {
-        return await Query<PunchItemComment>(PunchCommentsQuery.GetQuery(plant));
-    }
-
+    public async Task<IEnumerable<string>> GetPunchItemsForCompletion(string plant) => await Query<PunchListItem>(PunchListItemQuery.GetQuery(null, plant, " and p.isVoided = 'N'"));
+    public async Task<IEnumerable<string>> GetPunchItemHistory(string plant) => await Query<PunchItemHistory>(PunchHistoryQuery.GetQuery(plant));
+    public async Task<IEnumerable<string>> GetPunchItemComments(string plant) => await Query<PunchItemComment>(PunchCommentsQuery.GetQuery(plant));
     public async Task<IEnumerable<string>> GetPersonsForPunch() => await Query<Person>((PersonQueryForPunch.GetQuery(), new DynamicParameters())); 
 
     
