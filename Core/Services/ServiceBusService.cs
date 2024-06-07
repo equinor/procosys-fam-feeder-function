@@ -70,6 +70,8 @@ public class ServiceBusService : IServiceBusService
             PcsTopicConstants.WorkOrder => "workordercompletiontransferqueue",
             PcsTopicConstants.Project => "projectcompletiontransferqueue",
             PcsTopicConstants.Person => "personcompletiontransferqueue",
+            "PunchItemHistory" => "punchitemchangehistorycompletiontransferqueue",
+            "PunchItemComment" => "punchitemcommenttransferqueue",
             _ => throw new InvalidOperationException()
         };
     }

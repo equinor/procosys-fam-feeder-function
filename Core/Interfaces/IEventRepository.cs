@@ -43,4 +43,6 @@ public interface IEventRepository
     Task<IEnumerable<string>> GetLibrariesForPunch(string plant);
     Task<IEnumerable<string>> GetPersonsForPunch();
     Task<IEnumerable<string>> GetPunchItemsForCompletion(string plant);
+    Task<IEnumerable<string>> GetPunchItemHistory(string plant);
+    Task<IEnumerable<string>> GetPunchItemComments(string plant);
 }
