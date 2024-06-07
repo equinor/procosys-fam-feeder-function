@@ -2,7 +2,7 @@
 
 namespace Core.Models;
 
-public class Attachment : IHasEventType
+public class PunchItemAttachment : IHasEventType
 {
     public string Plant { get; set; }
     public Guid PunchItemGuid { get; set; }

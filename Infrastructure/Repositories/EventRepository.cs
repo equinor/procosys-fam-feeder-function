@@ -72,7 +72,7 @@ public class EventRepository : IEventRepository
     public async Task<IEnumerable<string>> GetPersonsForPunch() => await Query<Person>((PersonQueryForPunch.GetQuery(), new DynamicParameters()));
 
     public async Task<IEnumerable<string>> GetAttachmentsForCompletion(string plant) =>
-        await Query<Attachment>((PunchAttachmentQuery.GetQuery(plant)));
+        await Query<PunchItemAttachment>((PunchAttachmentQuery.GetQuery(plant)));
      
     
     private async Task<List<string>> Query<T>((string queryString, DynamicParameters parameters) query) where T : IHasEventType
