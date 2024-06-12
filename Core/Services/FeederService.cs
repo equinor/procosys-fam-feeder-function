@@ -89,7 +89,6 @@ public class FeederService : IFeederService
                 catch (Exception ex)
                 {
                     _logger.LogError($"Failed sending to FAM for plant {plant} topic {topic} with message {ex.Message}");
-                    throw;
                 }
             }
         }
