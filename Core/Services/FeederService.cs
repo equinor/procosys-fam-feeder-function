@@ -43,57 +43,53 @@ public class FeederService : IFeederService
     {
         _logger = logger;
 
-        if (queryParameters.PcsTopics.Contains(PcsTopicConstants.WorkOrderCutoff, StringComparer.InvariantCultureIgnoreCase))
+        if (queryParameters.PcsTopic == PcsTopicConstants.WorkOrderCutoff)
         {
             return "Cutoff Should have its own call, this should never happen :D";
         }
 
         var messagesCount = 0;
 
-        foreach (var plant in queryParameters.Plants)
+        var topic = queryParameters.PcsTopic;
+        var plant = queryParameters.Plants.Single();
+   
+        try
         {
-            foreach (var topic in queryParameters.PcsTopics)
+            var events = await GetEventsBasedOnTopicAndPlant(plant, topic, queryParameters.ShouldAddToQueue);
+
+            if (events.Count == 0)
             {
-                try
+                _logger.LogInformation("found no events for topic {Topic} and plant {Plant}", topic, plant);
+                return $"found no events for topic {topic} and plant {plant}";
+            }
+
+            _logger.LogInformation(
+                "Found {EventCount} events for topic {Topic} and plant {Plant}", events.Count, topic, plant);
+
+            if (queryParameters.ShouldAddToQueue) //Send to Completion
+            {
+                messagesCount += events.Count;
+                await _serviceBusService.SendDataAsync(events, topic);
+            }
+            else //Send to FAM
+            {
+                var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, topic));
+                var mapper = CreateCommonLibMapper();
+                var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
+                if (Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") != "Development")
                 {
-                    var events = await GetEventsBasedOnTopicAndPlant(plant, topic, queryParameters.ShouldAddToQueue);
-
-                    if (events.Count == 0)
-                    {
-                        _logger.LogInformation("found no events for topic {Topic} and plant {Plant}", topic, plant);
-                        continue;
-                    }
-
-                    _logger.LogInformation(
-                        "Found {EventCount} events for topic {Topic} and plant {Plant}", events.Count, topic, plant);
-
-
-                    if (queryParameters.ShouldAddToQueue) //Send to Completion
-                    {
-                        messagesCount += events.Count;
-                        await _serviceBusService.SendDataAsync(events, topic);
-                    }
-                    else //Send to FAM
-                    {
-                        var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, topic));
-                        var mapper = CreateCommonLibMapper();
-                        var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
-                        if (Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") != "Development")
-                        {
-                            await SendFamMessages(mappedMessages);
-                        }
-                        _logger.LogInformation("Finished sending {Topic} for plant {Plant} to fam", topic, plant);
-                        messagesCount += mappedMessages.Count;
-                    }
+                    await SendFamMessages(mappedMessages);
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError($"Failed sending to FAM for plant {plant} topic {topic} with message {ex.Message}");
-                }
+                _logger.LogInformation("Finished sending {Topic} for plant {Plant} to fam", topic, plant);
+                messagesCount += mappedMessages.Count;
             }
         }
-
-        return $"finished successfully sending {messagesCount} messages to for {string.Join(",", queryParameters.PcsTopics)} and plants {string.Join(",", queryParameters.Plants)}";
+        catch (Exception ex)
+        {
+            _logger.LogError($"Failed sending to FAM for plant {plant} topic {topic} with message {ex.Message}");
+        }
+        
+        return $"finished successfully sending {messagesCount} messages to for {topic} and plant {plant}";
     }
 
     public async Task<string> RunForCutoffWeek(string cutoffWeek, string plant, ILogger logger)
@@ -207,9 +203,7 @@ public class FeederService : IFeederService
         var returnEvents = new List<string>();
         foreach (var plant in queryParameters.Plants)
         {
-            foreach (var topic in queryParameters.PcsTopics)
-            {
-                var events = topic switch
+                var events = queryParameters.PcsTopic switch
                 {
                     PcsTopicConstants.Action => await _repo.GetActions(plant),
                     PcsTopicConstants.CallOff => await _repo.GetCallOffs(plant),
@@ -230,7 +224,7 @@ public class FeederService : IFeederService
                     PcsTopicConstants.PipingRevision => await _repo.GetPipingRevisions(plant),
                     PcsTopicConstants.PipingSpool => await _repo.GetPipingSpools(plant),
                     PcsTopicConstants.Project => await _repo.GetProjects(plant),
-                    PcsTopicConstants.PunchListItem => await _repo.GetPunchItems(plant),
+                    PcsTopicConstants.PunchListItem => queryParameters.ShouldAddToQueue ? await _repo.GetPunchItemsForCompletion(plant) : await _repo.GetPunchItems(plant),
                     PcsTopicConstants.Query => await _repo.GetQueries(plant),
                     PcsTopicConstants.QuerySignature => await _repo.GetQuerySignatures(plant),
                     PcsTopicConstants.Responsible => await _repo.GetResponsibles(plant),
@@ -247,11 +241,18 @@ public class FeederService : IFeederService
                     PcsTopicConstants.WoChecklist => await _repo.GetWoChecklists(plant),
                     PcsTopicConstants.WoMaterial => await _repo.GetWoMaterials(plant),
                     PcsTopicConstants.WoMilestone => await _repo.GetWoMilestones(plant),
+                    //Person is does not have projectschema so we ignore plant input
+                    PcsTopicConstants.Person => queryParameters.ShouldAddToQueue ? await _repo.GetPersonsForPunch() 
+                        : throw new Exception("Only applicable for 'addToQueue'"),
+                    "PunchItemHistory" => queryParameters.ShouldAddToQueue ? await _repo.GetPunchItemHistory(plant) 
+                        : throw new Exception("Only applicable for 'addToQueue'"),    
+                    "PunchItemComments" => queryParameters.ShouldAddToQueue ? await _repo.GetPunchItemComments(plant) 
+                        : throw new Exception("Only applicable for 'addToQueue'"),
+                    "PunchItemAttachment" => await _repo.GetAttachmentsForCompletion(plant),
                     var defaultTopic => Default(defaultTopic)
                 };
 
                 returnEvents.AddRange(events);
-            }
         }
 
         return returnEvents;

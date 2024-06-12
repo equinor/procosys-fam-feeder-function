@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Core.Interfaces;
-using Core.Misc;
 using Core.Models;
 using FamFeederFunction.Functions.FamFeeder;
 using Microsoft.AspNetCore.Http;
@@ -33,22 +32,21 @@ public class SearchFeederFunction
         HttpRequest req,
         [DurableClient] IDurableOrchestrationClient orchestrationClient, ILogger log)
     {
-        var (topicsString, plantsString) = await Deserialize(req);
+        var (topicString, plantsString) = await Deserialize(req);
 
-        log.LogInformation($"Querying {plantsString} for {topicsString}");
+        log.LogInformation($"Querying {plantsString} for {topicString}");
 
-        if (topicsString is null || plantsString is null)
+        if (topicString is null || plantsString is null)
         {
             return new BadRequestObjectResult("Please provide both plant and topic");
         }
 
-        if (!TopicHttpTrigger.HasValidTopic(topicsString))
+        if (!TopicHttpTrigger.HasValidTopic(topicString))
         {
             return new BadRequestObjectResult("Please provide one or more valid topics");
         }
 
         var plantsQuery = plantsString.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-        var topicsQuery = topicsString.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 
         var newPlants = new List<string>();
         newPlants.AddRange(plantsQuery);
@@ -68,7 +66,7 @@ public class SearchFeederFunction
             return new BadRequestObjectResult("Please provide one or more valid plants");
         }
 
-        var param = new QueryParameters(newPlants, new List<string>(topicsQuery));
+        var param = new QueryParameters(newPlants, topicString);
         var instanceId = await orchestrationClient.StartNewAsync("SearchFeederFunction", param);
         return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
     }
@@ -92,10 +90,8 @@ public class SearchFeederFunction
 
         foreach (var plant in param.Plants)
         {
-            foreach (var topic in param.PcsTopics)
-            {
-                results.Add(await context.CallActivityAsync<string>("RunSearchFeeder", new QueryParameters(plant, topic)));
-            }
+            results.Add(await context.CallActivityAsync<string>("RunSearchFeeder", new QueryParameters(plant, param.PcsTopic)));
+            
         }
 
         return results;

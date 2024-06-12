@@ -19,67 +19,59 @@ public static class TopicOrchestrator
         var param = context.GetInput<QueryParameters>();
         var returnValue = new List<string>();
 
-        if (!await HasAnyValidPlant(context))
+        if (!await HasValidPlants(context))
         {
             return new List<string> { "Please provide one or more valid plants" };
         }
 
-        if (param.PcsTopics.Contains(PcsTopicConstants.WorkOrderCutoff, StringComparer.InvariantCultureIgnoreCase))
+        if (param.PcsTopic == PcsTopicConstants.WorkOrderCutoff)
         {
-            returnValue.AddRange(await RunMultiPlantWoCutoffOrchestration(context, param.Plants));
-
-            foreach (var plant in param.Plants)
+            if (MultiPlantConstants.TryGetByMultiPlant(param.Plants.First(), out var validMultiPlants))
             {
-                if (MultiPlantConstants.TryGetByMultiPlant(plant, out var validMultiPlants))
-                {
-                    returnValue.AddRange(await RunMultiPlantWoCutoffOrchestration(context, validMultiPlants));
-                }
+                returnValue.AddRange(await RunMultiPlantWoCutoffOrchestration(context, validMultiPlants));
+            }
+            else
+            {
+                returnValue.AddRange(await RunMultiPlantWoCutoffOrchestration(context, param.Plants));
             }
         }
-        
-        foreach (var plant in param.Plants)
+        else //Not WorkOrderCutoff
         {
-            var newParamList = param.PcsTopics
-                .Where(s => s != PcsTopicConstants.WorkOrderCutoff)
-                .Select(s =>
-                    new QueryParameters(plant, s,param.ShouldAddToQueue)).ToList();
-
-            if (MultiPlantConstants.TryGetByMultiPlant(plant, out var validMultiPlants))
+            if (param.Plants.Count > 1)
             {
-                foreach (var newParam in newParamList)
-                {
-                    returnValue.AddRange(await RunMultiPlantOrchestration(context, validMultiPlants, newParam));
-                }
+                returnValue.AddRange(await RunMultiPlantOrchestration(context, param.Plants, param));
+            }else if (MultiPlantConstants.TryGetByMultiPlant(param.Plants.First(), out var multiPlants))
+            {
+                returnValue.AddRange(await RunMultiPlantOrchestration(context, multiPlants, param));
+            }
+            else
+            {
+                returnValue.Add(await context.CallActivityAsync<string>(nameof(TopicActivity), param));
             }
 
-            foreach (var newParam in newParamList)
-            {
-                returnValue.Add(await context.CallActivityAsync<string>(nameof(TopicActivity), newParam));
-            }
         }
-
         return returnValue;
     }
 
     //Check if there is one or more matching plants
-    private static async Task<bool> HasAnyValidPlant(IDurableOrchestrationContext context)
+    private static async Task<bool> HasValidPlants(IDurableOrchestrationContext context)
     {
         var param = context.GetInput<QueryParameters>();
-        if (MultiPlantConstants.TryGetByMultiPlant(param.Plants.First(), out _))
+        if (param.Plants.Count == 1 && MultiPlantConstants.TryGetByMultiPlant(param.Plants.First(), out _))
         {
             return true;
         }
         
-        var allPlants = await context.CallActivityAsync<List<string>>(nameof(GetValidPlantsActivity), null);
+        var allPlantsFromDb = await context.CallActivityAsync<List<string>>(nameof(GetValidPlantsActivity), null);
 
-        return param.Plants.All(s => allPlants.Contains(s, StringComparer.InvariantCultureIgnoreCase));
+        return param.Plants.All(plantFromInput => allPlantsFromDb.Contains(plantFromInput, StringComparer.InvariantCultureIgnoreCase));
     }
 
     private static async Task<List<string>> RunMultiPlantOrchestration(IDurableOrchestrationContext context, IEnumerable<string> validMultiPlants,
         QueryParameters param)
     {
         var results = validMultiPlants
-            .Select(plant => new QueryParameters(new List<string> {plant}, param.PcsTopics, param.ShouldAddToQueue))
+            .Select(plant => new QueryParameters(new List<string> {plant}, param.PcsTopic, param.ShouldAddToQueue))
             .Select(input => context.CallActivityAsync<string>(nameof(TopicActivity), input))
             .ToList();
         var finishedTasks = await Task.WhenAll(results);
