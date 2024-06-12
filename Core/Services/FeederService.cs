@@ -191,7 +191,6 @@ public class FeederService : IFeederService
             throw new Exception("Error: Could not send message.", e);
         }
     }
-
     
     private async Task<List<string>> GetEventsBasedOnTopicAndPlant(string plant, string topic, bool shouldAddToQueue = false)
     {
@@ -241,7 +240,7 @@ public class FeederService : IFeederService
                     PcsTopicConstants.WoChecklist => await _repo.GetWoChecklists(plant),
                     PcsTopicConstants.WoMaterial => await _repo.GetWoMaterials(plant),
                     PcsTopicConstants.WoMilestone => await _repo.GetWoMilestones(plant),
-                    //Person is does not have projectschema so we ignore plant input
+                    //Person table does not have projectschema, so we ignore plant input
                     PcsTopicConstants.Person => queryParameters.ShouldAddToQueue ? await _repo.GetPersonsForPunch() 
                         : throw new Exception("Only applicable for 'addToQueue'"),
                     "PunchItemHistory" => queryParameters.ShouldAddToQueue ? await _repo.GetPunchItemHistory(plant) 
