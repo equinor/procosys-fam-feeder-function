@@ -10,6 +10,6 @@ public struct PunchItemComment : IHasEventType
     public string Text { get; init; } 
     public DateTime CreatedAt { get; init; } 
     public DateTime LastUpdated { get; init; } 
-    public Guid? CreatedByGuid { get; init; }
+    public Guid CreatedByGuid { get; init; }
     public string EventType { get; init; }
 }
