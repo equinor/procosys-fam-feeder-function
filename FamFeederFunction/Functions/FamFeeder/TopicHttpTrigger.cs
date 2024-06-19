@@ -76,7 +76,7 @@ public class TopicHttpTrigger
     {
         return topic switch
         {
-            "PunchItemHistory" or "PunchItemComments" or "PunchItemAttachment" => true,
+            "PunchItemHistory" or "PunchItemComment" or "PunchItemAttachment" => true,
             _ => TopicHelper.GetAllTopicsAsEnumerable().Contains(topic, StringComparer.InvariantCultureIgnoreCase)
         };
     }
