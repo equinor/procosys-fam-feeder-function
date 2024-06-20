@@ -175,7 +175,7 @@ public class FeederService : IFeederService
             return $"Failed sending to FAM for plant {plant} topic WoCutoff week {weekNumber} with message {ex.Message}";
         }
 
-        logger.LogInformation("Sent {MappedMessagesCount} WoCutoff to FAM  for {WeekNumber} done in {Plant}", mappedMessages.Count, weekNumber, plant);
+        logger.LogInformation("Sent {MappedMessagesCount} WoCutoff to FAM  for {WeekNumber} done in {Plant}", messagesCount, weekNumber, plant);
         return $"Sent {messagesCount} WoCutoff to FAM  for {weekNumber} done";
     }
 
