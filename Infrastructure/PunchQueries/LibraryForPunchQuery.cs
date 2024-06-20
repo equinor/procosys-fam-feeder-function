@@ -1,9 +1,9 @@
 ﻿using Dapper;
 using Equinor.ProCoSys.PcsServiceBus.Queries;
 
-namespace Infrastructure.CompletionQueries;
+namespace Infrastructure.PunchQueries;
 
-public static class LibraryForPunchQuery
+public class LibraryForPunchQuery
 {
     public static (string query, DynamicParameters parameters) GetQuery(long? libraryId, string? plant = null)
     {

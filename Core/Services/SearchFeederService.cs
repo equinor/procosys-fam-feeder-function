@@ -32,10 +32,10 @@ public class SearchFeederService : ISearchFeederService
         _logger = logger;
         var batchSize = int.Parse(_famFeederOptions.SearchIndexBatchSize ?? "20");
         var itemCount = 0;
-        var topic = queryParameters.PcsTopic;
         foreach (var plant in queryParameters.Plants)
         {
-           
+            foreach (var topic in queryParameters.PcsTopics)
+            {
                 var items = new List<IndexDocument>();
 
                 try
@@ -66,10 +66,10 @@ public class SearchFeederService : ISearchFeederService
 
                 _logger.LogInformation("Finished adding {topic} for plant {plant} to Index", topic, plant);
                 itemCount += items.Count;
-            
+            }
         }
 
-        return $"finished successfully sending {itemCount} documents to Search Index {string.Join(",",queryParameters.Plants)} {queryParameters.PcsTopic}";
+        return $"finished successfully sending {itemCount} documents to Search Index {string.Join(",",queryParameters.Plants)} {string.Join(",",queryParameters.PcsTopics)}";
     }
 
     public Task<List<string>> GetAllPlants() => _plantRepository.GetAllPlants();
@@ -113,7 +113,9 @@ public class SearchFeederService : ISearchFeederService
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         foreach (var plant in queryParameters.Plants)
         {
-                switch (queryParameters.PcsTopic)
+            foreach (var topic in queryParameters.PcsTopics)
+            {
+                switch (topic)
                 {
                     case PcsTopicConstants.CommPkg:
                         events.AddRange(await _searchItemRepo.GetCommPackages(plant));
@@ -129,8 +131,9 @@ public class SearchFeederService : ISearchFeederService
                         break;
                     default:
                     {
-                        _logger?.LogInformation("{Topic} not included in switch statement",queryParameters.PcsTopic);
+                        _logger?.LogInformation("{Topic} not included in switch statement",topic);
                         break;
+                    }
                 }
             }
         }

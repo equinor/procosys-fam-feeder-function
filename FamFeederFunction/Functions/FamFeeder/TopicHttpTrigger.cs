@@ -36,7 +36,7 @@ public class TopicHttpTrigger
             return new BadRequestObjectResult("Please provide one or more valid topics");
         }
 
-        var param = new QueryParameters(SplitList(plants), topicsString);
+        var param = new QueryParameters(SplitList(plants), SplitList(topicsString));
         var instanceId = await orchestrationClient.StartNewAsync(nameof(TopicOrchestrator), param);
         return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
     }
@@ -47,22 +47,20 @@ public class TopicHttpTrigger
         HttpRequest req,
         [DurableClient] IDurableOrchestrationClient orchestrationClient, ILogger log)
     {
-        //We send this as a param to control the flow of the function later
-        const bool shouldSendToCompletion = true; 
-        var (topicString, plants) = await DeserializeTopicAndPlant(req);
-        log.LogInformation("Querying {Plant} for {TopicString}", plants, topicString);
+        var (topicsString, plants) = await DeserializeTopicAndPlant(req);
+        log.LogInformation("Querying {Plant} for {TopicString}", plants, topicsString);
 
-        if (topicString is null || plants is null)
+        if (topicsString is null || plants is null)
         {
             return new BadRequestObjectResult("Please provide both plant and topic");
         }
 
-        if (!HasValidTopic(topicString))
+        if (!HasValidTopic(topicsString))
         {
-            return new BadRequestObjectResult("Please provide valid topics");
+            return new BadRequestObjectResult("Please provide one or more valid topics");
         }
-        
-        var param = new QueryParameters(SplitList(plants), topicString,shouldSendToCompletion);
+
+        var param = new QueryParameters(SplitList(plants), SplitList(topicsString),true);
         var instanceId = await orchestrationClient.StartNewAsync(nameof(TopicOrchestrator), param);
         return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
     }
@@ -72,13 +70,11 @@ public class TopicHttpTrigger
         return new List<string>(input.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
     }
 
-    public static bool HasValidTopic(string topic)
+    public static bool HasValidTopic(string topics)
     {
-        return topic switch
-        {
-            "PunchItemHistory" or "PunchItemComments" or "PunchItemAttachment" => true,
-            _ => TopicHelper.GetAllTopicsAsEnumerable().Contains(topic, StringComparer.InvariantCultureIgnoreCase)
-        };
+        var topicsQuery = SplitList(topics);
+        return topicsQuery.Any(s =>
+            TopicHelper.GetAllTopicsAsEnumerable().Contains(s, StringComparer.InvariantCultureIgnoreCase));
     }
 
     private static async Task<(string? topicsString, string? plants)> DeserializeTopicAndPlant(HttpRequest req)

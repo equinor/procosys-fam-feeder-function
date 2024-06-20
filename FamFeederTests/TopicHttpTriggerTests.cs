@@ -21,10 +21,10 @@ public class TopicHttpTriggerTests
     }
 
     [TestMethod]
-    public void HasValidTopics_Fails_IfOneOfTheTopicsAreInvalid()
+    public void Has_Atleast_One_Valid_Topic()
     {
         var topics = "NOT_VALID,Action";
-        Assert.IsFalse(TopicHttpTrigger.HasValidTopic(topics));
+        Assert.IsTrue(TopicHttpTrigger.HasValidTopic(topics));
     }
 
     [TestMethod]

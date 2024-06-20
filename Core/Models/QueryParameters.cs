@@ -3,20 +3,19 @@
 public class QueryParameters
 {
     //Empty constructor for JSON parsing
-    public QueryParameters() : this( new List<string>(), ""){}
+    public QueryParameters() : this(new List<string>(), new List<string>()){}
 
-    public QueryParameters(string plant, string pcsTopic, bool shouldAddToQueue = false) : this(new List<string> { plant },pcsTopic, shouldAddToQueue) { }
-    public QueryParameters(List<string> plants, string topic, bool shouldAddToQueue = false)
+    public QueryParameters(string plant, string pcsTopic, bool shouldAddToQueue = false) : this(new List<string> { plant }, new List<string> { pcsTopic }, shouldAddToQueue) { }
+    public QueryParameters(List<string> plants, List<string> pcsTopics, bool shouldAddToQueue = false)
     {
         Plants = plants;
-        PcsTopic = topic;
+        PcsTopics = pcsTopics;
         ShouldAddToQueue = shouldAddToQueue;
     }
 
-    public string PcsTopic { get; set; }
-
     public List<string> Plants { get; }
-    
+
+    public List<string> PcsTopics { get; }
     
     public bool ShouldAddToQueue { get; set; }
   
