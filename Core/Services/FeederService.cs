@@ -136,6 +136,7 @@ public class FeederService : IFeederService
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Failed sending to FAM for plant {plant} topic {PcsTopicConstants.WorkOrderCutoff} with message {ex.Message}");
+            return $"Failed sending to FAM for plant {plant} topic WoCutoff week {cutoffWeek} with message {ex.Message}";
         }
 
 
