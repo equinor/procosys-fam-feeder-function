@@ -122,13 +122,24 @@ public class FeederService : IFeederService
             "Found {EventCount} events for WoCutoff for week {CutoffWeek} and plant {Plant} ", events.Count, cutoffWeek,
             plant);
 
-        var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
-        var mapper = CreateCommonLibMapper();
-        var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
+        var messagesCount = 0;
 
-        await SendFamMessages(mappedMessages);
+        try
+        {
+            var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
+            var mapper = CreateCommonLibMapper();
+            var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
 
-        return $"finished successfully sending {mappedMessages.Count} messages to fam for WoCutoff for week {cutoffWeek}";
+            await SendFamMessages(mappedMessages);
+            messagesCount += mappedMessages.Count;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Failed sending to FAM for plant {plant} topic {PcsTopicConstants.WorkOrderCutoff} with message {ex.Message}");
+        }
+
+
+        return $"finished successfully sending {messagesCount} messages to fam for WoCutoff for week {cutoffWeek}";
     }
     
     public Task<List<string>> GetAllPlants() => _plantRepository.GetAllPlants();
