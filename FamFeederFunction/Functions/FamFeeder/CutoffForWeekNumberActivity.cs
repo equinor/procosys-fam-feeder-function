@@ -17,6 +17,7 @@ public class CutoffForWeekNumberActivity
     public async Task<string> RunWoCutoffActivity([ActivityTrigger] IDurableActivityContext context, ILogger logger)
     {
         var (plant, weekNumber) = context.GetInput<(string, string)>();
+        logger.LogInformation("Running CutoffForWeekNumberActivity for plant {plant} and week number {week}", plant, weekNumber);
         var result = await _feederService.WoCutoff(plant, weekNumber, logger);
         logger.LogDebug($"RunFeeder returned {result}");
         return result;

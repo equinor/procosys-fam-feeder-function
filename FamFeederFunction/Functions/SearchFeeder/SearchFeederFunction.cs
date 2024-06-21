@@ -100,7 +100,9 @@ public class SearchFeederFunction
     [FunctionName("RunSearchFeeder")]
     public async Task<string> RunSearchFeeder([ActivityTrigger] IDurableActivityContext context, ILogger logger)
     {
-        var runFeeder = await _searchFeederService.RunFeeder(context.GetInput<QueryParameters>(), logger);
+        var input = context.GetInput<QueryParameters>();
+        logger.LogInformation("Running RunSearchFeeder for plants \"{plants}\" and topic {topic}", string.Join(", ", input.Plants), input.PcsTopic);
+        var runFeeder = await _searchFeederService.RunFeeder(input, logger);
         logger.LogInformation($"RunSearchFeeder returned {runFeeder}");
         return runFeeder;
     }
