@@ -22,7 +22,8 @@ public class PunchAttachmentQuery
                aa.title,
                per.azure_oid AS CreatedByGuid,
                aa.createdat,
-               aa.last_updated as LastUpdated
+               aa.last_updated as LastUpdated,
+               aa.last_updatedbyuser as LastUpdatedByUser
            FROM attachment aa
                JOIN attachmentLink al on al.attachment_id = aa.id
                JOIN punchListItem pi on pi.punchListItem_id = al.punchListItem_id

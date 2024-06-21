@@ -71,8 +71,8 @@ public class ServiceBusService : IServiceBusService
             PcsTopicConstants.Project => "projectcompletiontransferqueue",
             PcsTopicConstants.Person => "personcompletiontransferqueue",
             "PunchItemHistory" => "punchitemchangehistorycompletiontransferqueue",
-            "PunchItemComment" => "punchitemcommenttransferqueue",
-            "PunchItemAttachment" => "attachmentcompletiontransferqueue",
+            "PunchItemComment" => "punchitemcommentcompletiontransferqueue",
+            "PunchItemAttachment" => "punchitemattachmentcompletiontransferqueue",
             _ => throw new InvalidOperationException()
         };
     }
