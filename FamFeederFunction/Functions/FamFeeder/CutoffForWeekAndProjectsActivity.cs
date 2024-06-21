@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Core.Interfaces;
 using Microsoft.Azure.WebJobs;
@@ -20,6 +21,7 @@ public class CutoffForWeekAndProjectsActivity
         ILogger logger)
     {
         var (cutoffWeek, plant,projectIds) = context.GetInput<(string, string, IEnumerable<long>)>();
+        logger.LogInformation("Running CutoffForWeekAndProjectsActivity for plant {plant}, week {week} and projects \"{projects}\"", plant, cutoffWeek, string.Join(",", projectIds));
         var result = await _feederService.RunForCutoffWeek(cutoffWeek, projectIds, plant,logger);
         logger.LogDebug("RunCutoffForWeekActivity returned {Result}", result);
         return result;

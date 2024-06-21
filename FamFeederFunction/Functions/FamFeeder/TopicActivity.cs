@@ -19,7 +19,9 @@ public class TopicActivity
     [FunctionName(nameof(TopicActivity))]
     public async Task<string> RunFeeder([ActivityTrigger] IDurableActivityContext context, ILogger logger)
     {
-        var runFeeder = await _feederService.RunFeeder(context.GetInput<QueryParameters>(), logger);
+        var input = context.GetInput<QueryParameters>();
+        logger.LogInformation("Running TopicActivity for plants \"{plants}\" and topic {topic}", string.Join(", ", input.Plants), input.PcsTopic);
+        var runFeeder = await _feederService.RunFeeder(input, logger);
         logger.LogInformation("RunFeeder returned {RunFeeder}", runFeeder);
         return runFeeder;
     }
