@@ -271,7 +271,10 @@ public class FeederService : IFeederService
                         : throw new Exception("Only applicable for 'addToQueue'"),    
                     "PunchItemComment" => queryParameters.ShouldAddToQueue ? await _repo.GetPunchItemComments(plant) 
                         : throw new Exception("Only applicable for 'addToQueue'"),
-                    "PunchItemAttachment" => await _repo.GetAttachmentsForCompletion(plant),
+                    "PunchItemAttachment" =>  queryParameters.ShouldAddToQueue ? await _repo.GetAttachmentsForCompletion(plant)
+                        : throw new Exception("Only applicable for 'addToQueue'"),
+                    "PunchPriorityLibRelation" =>  queryParameters.ShouldAddToQueue ? await _repo.GetPunchPriorityLibRelations(plant)
+                        : throw new Exception("Only applicable for 'addToQueue'"),
                     var defaultTopic => Default(defaultTopic)
                 };
 

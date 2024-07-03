@@ -23,13 +23,9 @@ public static class LibraryForPunchQuery
             l.LAST_UPDATED as LastUpdated
         from library l
             left join library lp on l.parent_id = lp.library_id
-            left join libtolibrelation ll on ll.library_id = l.library_id
-            left join library l2 on l2.library_id = ll.relatedlibrary_id
         {whereClause.clause}
-          and (
-            (l.librarytype = 'COMM_PRIORITY' and l2.code = 'PUNCH_PRIORITY') 
-            or l.librarytype in ('COMPLETION_ORGANIZATION','PUNCHLIST_SORTING', 'PUNCHLIST_TYPE')
-          )";
+        and l.librarytype in ('COMPLETION_ORGANIZATION','PUNCHLIST_SORTING', 'PUNCHLIST_TYPE', 'COMM_PRIORITY')
+        ";
 
         return (query, whereClause.parameters);
         

@@ -46,4 +46,5 @@ public interface IEventRepository
     Task<IEnumerable<string>> GetPunchItemHistory(string plant);
     Task<IEnumerable<string>> GetPunchItemComments(string plant);
     Task<IEnumerable<string>> GetAttachmentsForCompletion(string plant);
+    Task<IEnumerable<string>> GetPunchPriorityLibRelations(string plant);
 }

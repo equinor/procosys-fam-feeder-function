@@ -1,13 +1,17 @@
 ﻿using Equinor.ProCoSys.PcsServiceBus.Interfaces;
+using JetBrains.Annotations;
 
 namespace Core.Models;
 #pragma warning disable CS8618
+
+[UsedImplicitly]
 public class CommPkg : ICommPkgEventV1
 {
     public string EventType { get; }
     public string Plant { get; init; }
     public Guid ProCoSysGuid { get; init; }
     public string PlantName { get; init; }
+    public Guid ProjectGuid { get; init; }
     public string ProjectName { get; init; }
     public string CommPkgNo { get; init; }
     public long CommPkgId { get; init; }

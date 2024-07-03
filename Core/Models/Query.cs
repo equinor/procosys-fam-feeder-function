@@ -1,7 +1,10 @@
 ﻿using Equinor.ProCoSys.PcsServiceBus.Interfaces;
+using JetBrains.Annotations;
 
 namespace Core.Models;
 #pragma warning disable CS8618
+
+[UsedImplicitly]
 public class Query : IQueryEventV1
 {
     public string EventType { get; }
