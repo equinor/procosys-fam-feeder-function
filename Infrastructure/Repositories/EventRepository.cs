@@ -75,7 +75,7 @@ public class EventRepository : IEventRepository
         await Query<PunchItemAttachment>(PunchAttachmentQuery.GetQuery(plant));
 
     public async Task<IEnumerable<string>> GetPunchPriorityLibRelations(string plant) => 
-        await Query<PunchPriorityLibRelation>(PunchPriorityLibraryRelationQuery.GetQuery(plant));
+        await Query<PunchPriorityLibRelation>(PunchPriorityLibraryRelationQuery.GetQuery(null,plant));
 
 
     private async Task<List<string>> Query<T>((string queryString, DynamicParameters parameters) query) where T : IHasEventType

@@ -73,6 +73,7 @@ public class ServiceBusService : IServiceBusService
             "PunchItemHistory" => "punchitemchangehistorycompletiontransferqueue",
             "PunchItemComment" => "punchitemcommentcompletiontransferqueue",
             "PunchItemAttachment" => "punchitemattachmentcompletiontransferqueue",
+            PcsTopicConstants.PunchPriorityLibraryRelation => "classificationcompletiontransferqueue",
             _ => throw new InvalidOperationException()
         };
     }
