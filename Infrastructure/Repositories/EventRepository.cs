@@ -72,9 +72,21 @@ public class EventRepository : IEventRepository
     public async Task<IEnumerable<string>> GetPersonsForPunch() => await Query<Person>((PersonQueryForPunch.GetQuery(), new DynamicParameters()));
 
     public async Task<IEnumerable<string>> GetAttachmentsForCompletion(string plant) =>
-        await Query<PunchItemAttachment>((PunchAttachmentQuery.GetQuery(plant)));
-     
-    
+        await Query<PunchItemAttachment>(PunchAttachmentQuery.GetQuery(plant));
+
+    public async Task<IEnumerable<string>> GetPunchPriorityLibRelations(string plant) => 
+        await Query<PunchPriorityLibRelation>(PunchPriorityLibraryRelationQuery.GetQuery(null,plant));
+
+    public async Task<IEnumerable<string>> GetNotifications(string plant) => await Query<Notification>(NotificationQuery.GetQuery(null, plant));
+    public async Task<IEnumerable<string>> GetNotificationWorkOrders(string plant) => await Query<NotificationWorkOrder>(NotificationWorkOrderQuery.GetQuery(null, plant));
+    public async Task<IEnumerable<string>> GetNotificationCommPkgs(string plant)
+    {
+        var boundaryCommPkg = await Query<NotificationCommPkg>(NotificationCommPkgBoundaryQuery.GetQuery(null, plant));
+        var otherCommPkg = await Query<NotificationCommPkg>(NotificationCommPkgOtherQuery.GetQuery(null, plant));
+        var combined = boundaryCommPkg.Concat(otherCommPkg);
+        return combined;
+    }
+
     private async Task<List<string>> Query<T>((string queryString, DynamicParameters parameters) query) where T : IHasEventType
     {
         var connection = _context.Database.GetDbConnection();

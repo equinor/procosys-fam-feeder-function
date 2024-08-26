@@ -1,4 +1,7 @@
-﻿namespace Core.Interfaces;
+﻿using Core.Models;
+using Equinor.ProCoSys.PcsServiceBus.Queries;
+
+namespace Core.Interfaces;
 
 public interface IEventRepository
 {
@@ -46,4 +49,8 @@ public interface IEventRepository
     Task<IEnumerable<string>> GetPunchItemHistory(string plant);
     Task<IEnumerable<string>> GetPunchItemComments(string plant);
     Task<IEnumerable<string>> GetAttachmentsForCompletion(string plant);
+    Task<IEnumerable<string>> GetPunchPriorityLibRelations(string plant);
+    Task<IEnumerable<string>> GetNotifications(string plant);
+    Task<IEnumerable<string>> GetNotificationWorkOrders(string plant);
+    Task<IEnumerable<string>> GetNotificationCommPkgs(string plant);
 }
