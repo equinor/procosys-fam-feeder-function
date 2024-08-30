@@ -53,4 +53,6 @@ public interface IEventRepository
     Task<IEnumerable<string>> GetNotifications(string plant);
     Task<IEnumerable<string>> GetNotificationWorkOrders(string plant);
     Task<IEnumerable<string>> GetNotificationCommPkgs(string plant);
+    Task<IEnumerable<string>> GetNotificationSignatures(string plant);
+
 }

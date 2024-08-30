@@ -1,7 +1,7 @@
 ﻿using Equinor.ProCoSys.PcsServiceBus.Interfaces;
 
 namespace Core.Models;
-
+#pragma warning disable CS8618
 public class Notification : INotificationEventV1
 {
     public string EventType { get; }

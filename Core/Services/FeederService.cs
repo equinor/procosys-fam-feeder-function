@@ -278,6 +278,7 @@ public class FeederService : IFeederService
                     PcsTopicConstants.Notification => await _repo.GetNotifications(plant),
                     PcsTopicConstants.NotificationCommPkg => await _repo.GetNotificationCommPkgs(plant),
                     PcsTopicConstants.NotificationWorkOrder => await _repo.GetNotificationWorkOrders(plant),
+                    PcsTopicConstants.NotificationSignature => await _repo.GetNotificationSignatures(plant),
 
                     var defaultTopic => Default(defaultTopic)
                 };
