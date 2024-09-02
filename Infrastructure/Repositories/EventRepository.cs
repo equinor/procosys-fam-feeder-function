@@ -86,6 +86,8 @@ public class EventRepository : IEventRepository
         var combined = boundaryCommPkg.Concat(otherCommPkg);
         return combined;
     }
+    public async Task<IEnumerable<string>> GetNotificationSignatures(string plant) => await Query<NotificationSignature>(NotificationSignatureQuery.GetQuery(null, plant));
+
 
     private async Task<List<string>> Query<T>((string queryString, DynamicParameters parameters) query) where T : IHasEventType
     {
