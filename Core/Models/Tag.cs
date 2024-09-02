@@ -29,6 +29,7 @@ public class Tag : ITagEventV1
     public string? PurchaseOrderNo { get; init; }
     public string? TagFunctionCode { get; init; }
     public string? EngineeringCode { get; init; }
+    public string? ContractorCode { get; init; }
     public int? MountedOn { get; init; }
     public Guid? MountedOnGuid { get; init; }
     public bool IsVoided { get; init; }
