@@ -71,7 +71,7 @@ public static class TopicOrchestrator
         QueryParameters param)
     {
         var results = validMultiPlants
-            .Select(plant => new QueryParameters(new List<string> {plant}, param.PcsTopic, param.ShouldAddToQueue))
+            .Select(plant => new QueryParameters(new List<string> {plant}, param))
             .Select(input => context.CallActivityAsync<string>(nameof(TopicActivity), input))
             .ToList();
         var finishedTasks = await Task.WhenAll(results);

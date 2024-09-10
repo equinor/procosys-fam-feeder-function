@@ -40,7 +40,7 @@ public class SearchFeederService : ISearchFeederService
 
                 try
                 {
-                    items.AddRange(await GetItemsBasedOnTopicAndPlant(new QueryParameters(plant, topic)));
+                    items.AddRange(await GetItemsBasedOnTopicAndPlant(new QueryParameters(plant, queryParameters)));
                 }
                 catch (Exception e)
                 {

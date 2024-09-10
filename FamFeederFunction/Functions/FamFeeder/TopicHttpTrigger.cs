@@ -23,7 +23,7 @@ public class TopicHttpTrigger
         HttpRequest req,
         [DurableClient] IDurableOrchestrationClient orchestrationClient, ILogger log)
     {
-        var (topicsString, plants) = await DeserializeTopicAndPlant(req);
+        var (topicsString, plants,_) = await DeserializeTopicAndPlant(req);
         log.LogInformation("Querying {Plant} for {TopicString}", plants, topicsString);
 
         if (topicsString is null || plants is null)
@@ -49,7 +49,7 @@ public class TopicHttpTrigger
     {
         //We send this as a param to control the flow of the function later
         const bool shouldSendToCompletion = true; 
-        var (topicString, plants) = await DeserializeTopicAndPlant(req);
+        var (topicString, plants,checkAfterDate) = await DeserializeTopicAndPlant(req);
         log.LogInformation("Querying {Plant} for {TopicString}", plants, topicString);
 
         if (topicString is null || plants is null)
@@ -62,7 +62,7 @@ public class TopicHttpTrigger
             return new BadRequestObjectResult("Please provide valid topics");
         }
         
-        var param = new QueryParameters(SplitList(plants), topicString,shouldSendToCompletion);
+        var param = new QueryParameters(SplitList(plants), topicString,shouldSendToCompletion, checkAfterDate);
         var instanceId = await orchestrationClient.StartNewAsync(nameof(TopicOrchestrator), param);
         return orchestrationClient.CreateCheckStatusResponse(req, instanceId);
     }
@@ -81,15 +81,18 @@ public class TopicHttpTrigger
         };
     }
 
-    private static async Task<(string? topicsString, string? plants)> DeserializeTopicAndPlant(HttpRequest req)
+    private static async Task<(string? topicsString, string? plants, DateTime? checkAfterDate)> DeserializeTopicAndPlant(HttpRequest req)
     {
         string? topicString = req.Query["PcsTopic"];
         string? plant = req.Query["Plant"];
+        string? checkAfterDateString = req.Query["CheckAfterDate"];
 
         var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
         dynamic? data = JsonConvert.DeserializeObject(requestBody);
         topicString ??= data?.PcsTopic;
         plant ??= data?.Facility;
-        return (topicString, plant);
+        checkAfterDateString ??= data?.CheckAfterDate;
+        DateTime? checkAfterDate = DateTime.TryParse(checkAfterDateString, out var date) ? date : null;
+        return (topicString, plant, checkAfterDate);
     }
 }
