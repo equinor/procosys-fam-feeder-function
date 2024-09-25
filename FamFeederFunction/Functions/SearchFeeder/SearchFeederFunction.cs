@@ -90,8 +90,7 @@ public class SearchFeederFunction
 
         foreach (var plant in param.Plants)
         {
-            results.Add(await context.CallActivityAsync<string>("RunSearchFeeder", new QueryParameters(plant, param.PcsTopic)));
-            
+            results.Add(await context.CallActivityAsync<string>("RunSearchFeeder", new QueryParameters(plant, param)));
         }
 
         return results;

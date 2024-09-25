@@ -1,7 +1,9 @@
 ﻿using Equinor.ProCoSys.PcsServiceBus.Interfaces;
+using JetBrains.Annotations;
 
 namespace Core.Models;
-
+#pragma warning disable CS8618
+[UsedImplicitly]
 public class PunchItemAttachment : IHasEventType
 {
     public string Plant { get; set; }
@@ -16,6 +18,6 @@ public class PunchItemAttachment : IHasEventType
     public DateTime CreatedAt { get; set; }
     public DateTime LastUpdated { get; init; }
     public string LastUpdatedByUser { get; set; }
-    public string EventType { get; }
+    public string EventType => "PunchItemAttachmentEvent";
 }
 

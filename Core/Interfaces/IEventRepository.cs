@@ -45,7 +45,7 @@ public interface IEventRepository
     Task<List<string>> GetHeatTracePipeTests(string plant);
     Task<IEnumerable<string>> GetLibrariesForPunch(string plant);
     Task<IEnumerable<string>> GetPersonsForPunch();
-    Task<IEnumerable<string>> GetPunchItemsForCompletion(string plant);
+    Task<IEnumerable<string>> GetPunchItemsForCompletion(string plant, DateTime? checkAfterDate );
     Task<IEnumerable<string>> GetPunchItemHistory(string plant);
     Task<IEnumerable<string>> GetPunchItemComments(string plant);
     Task<IEnumerable<string>> GetAttachmentsForCompletion(string plant);

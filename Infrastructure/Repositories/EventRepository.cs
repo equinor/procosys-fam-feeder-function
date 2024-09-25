@@ -66,7 +66,20 @@ public class EventRepository : IEventRepository
 
     // Punch/Completion related queries, these are used when seeding data into completion, and not used for FAM
     public async Task<IEnumerable<string>> GetLibrariesForPunch(string plant) => await Query<Library>(LibraryForPunchQuery.GetQuery(null, plant));
-    public async Task<IEnumerable<string>> GetPunchItemsForCompletion(string plant) => await Query<PunchListItem>(PunchListItemQuery.GetQuery(null, plant, " and p.isVoided = 'N'"));
+    public async Task<IEnumerable<string>> GetPunchItemsForCompletion(string plant, DateTime? checkAfterDate) => await Query<PunchListItem>(PunchListItemQuery.GetQuery(null, plant, CreateWhereClauseForCompletionPunch(checkAfterDate)));
+
+    private static string CreateWhereClauseForCompletionPunch(DateTime? checkAfterDate)
+    {
+        const string notVoided = " and p.isVoided = 'N'";
+        if (!checkAfterDate.HasValue)
+        {
+            return notVoided;
+        }
+
+        var checkBeforeQuery = $" and pl.LAST_UPDATED > TO_DATE('{checkAfterDate.Value:MM-dd-yyyy}', 'MM-DD-YYYY')";
+        return notVoided + checkBeforeQuery;
+    }
+
     public async Task<IEnumerable<string>> GetPunchItemHistory(string plant) => await Query<PunchItemHistory>(PunchHistoryQuery.GetQuery(plant));
     public async Task<IEnumerable<string>> GetPunchItemComments(string plant) => await Query<PunchItemComment>(PunchCommentsQuery.GetQuery(plant));
     public async Task<IEnumerable<string>> GetPersonsForPunch() => await Query<Person>((PersonQueryForPunch.GetQuery(), new DynamicParameters()));
