@@ -269,13 +269,13 @@ public class FeederService : IFeederService
                     ? await _repo.GetPersonsForPunch()
                     : throw new Exception("Only applicable for 'addToQueue'"),
                 "PunchItemHistory" => shouldAddToQueue
-                    ? await _repo.GetPunchItemHistory(plant)
+                    ? await _repo.GetPunchItemHistory(plant, checkAfterDate)
                     : throw new Exception("Only applicable for 'addToQueue'"),
                 "PunchItemComment" => shouldAddToQueue
-                    ? await _repo.GetPunchItemComments(plant)
+                    ? await _repo.GetPunchItemComments(plant, checkAfterDate)
                     : throw new Exception("Only applicable for 'addToQueue'"),
                 "PunchItemAttachment" => shouldAddToQueue
-                    ? await _repo.GetAttachmentsForCompletion(plant)
+                    ? await _repo.GetAttachmentsForCompletion(plant, checkAfterDate)
                     : throw new Exception("Only applicable for 'addToQueue'"),
                 PcsTopicConstants.PunchPriorityLibraryRelation => shouldAddToQueue
                     ? await _repo.GetPunchPriorityLibRelations(plant)

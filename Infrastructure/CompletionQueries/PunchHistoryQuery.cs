@@ -5,11 +5,16 @@ namespace Infrastructure.CompletionQueries;
 
 public static class PunchHistoryQuery
 {
-    public static (string queryString, DynamicParameters parameters) GetQuery(string plant)
+    public static (string queryString, DynamicParameters parameters) GetQuery(string plant, string? extraClause = null)
     {
         QueryHelper.DetectFaultyPlantInput(plant);
         long? discard = null;
         var whereClause = QueryHelper.CreateWhereClause(discard, plant, "plh", "irrelevant");
+
+        if (extraClause != null)
+        {
+            whereClause.clause += extraClause;
+        }
 
         var query = @$"select
             plh.projectschema as Plant,
