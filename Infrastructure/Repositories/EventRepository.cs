@@ -82,16 +82,16 @@ public class EventRepository : IEventRepository
 
     public async Task<IEnumerable<string>> GetPunchItemHistory(string plant, DateTime? checkAfterDate) => await Query<PunchItemHistory>(PunchHistoryQuery.GetQuery(plant, CreateWhereClauseForCompletionPunchHistory(checkAfterDate)));
     
-    private static string CreateWhereClauseForCompletionPunchHistory(DateTime? checkAfterDate)
+    private static string? CreateWhereClauseForCompletionPunchHistory(DateTime? checkAfterDate)
     {
-        return !checkAfterDate.HasValue ? string.Empty : $" and plh.CHANGEDAT > TO_DATE('{checkAfterDate.Value:MM-dd-yyyy}', 'MM-DD-YYYY')";
+        return !checkAfterDate.HasValue ? null : $" and plh.CHANGEDAT > TO_DATE('{checkAfterDate.Value:MM-dd-yyyy}', 'MM-DD-YYYY')";
     }
 
     public async Task<IEnumerable<string>> GetPunchItemComments(string plant, DateTime? checkAfterDate) => await Query<PunchItemComment>(PunchCommentsQuery.GetQuery(plant, CreateWhereClauseForCompletionPunchComment(checkAfterDate)));
    
-    private static string CreateWhereClauseForCompletionPunchComment(DateTime? checkAfterDate)
+    private static string? CreateWhereClauseForCompletionPunchComment(DateTime? checkAfterDate)
     {
-        return !checkAfterDate.HasValue ? string.Empty : $" and pc.LAST_UPDATED > TO_DATE('{checkAfterDate.Value:MM-dd-yyyy}', 'MM-DD-YYYY')";
+        return !checkAfterDate.HasValue ? null : $" and pc.LAST_UPDATED > TO_DATE('{checkAfterDate.Value:MM-dd-yyyy}', 'MM-DD-YYYY')";
     }
 
     public async Task<IEnumerable<string>> GetPersonsForPunch() => await Query<Person>((PersonQueryForPunch.GetQuery(), new DynamicParameters()));
@@ -99,9 +99,9 @@ public class EventRepository : IEventRepository
     public async Task<IEnumerable<string>> GetAttachmentsForCompletion(string plant, DateTime? checkAfterDate) =>
         await Query<PunchItemAttachment>(PunchAttachmentQuery.GetQuery(plant, CreateWhereClauseForCompletionPunchAttachment(checkAfterDate)));
 
-    private static string CreateWhereClauseForCompletionPunchAttachment(DateTime? checkAfterDate)
+    private static string? CreateWhereClauseForCompletionPunchAttachment(DateTime? checkAfterDate)
     {
-        return !checkAfterDate.HasValue ? string.Empty : $" and aa.LAST_UPDATED > TO_DATE('{checkAfterDate.Value:MM-dd-yyyy}', 'MM-DD-YYYY')";
+        return !checkAfterDate.HasValue ? null : $" and aa.LAST_UPDATED > TO_DATE('{checkAfterDate.Value:MM-dd-yyyy}', 'MM-DD-YYYY')";
     }
 
     public async Task<IEnumerable<string>> GetPunchPriorityLibRelations(string plant) => 
