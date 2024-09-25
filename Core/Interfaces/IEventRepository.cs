@@ -46,9 +46,9 @@ public interface IEventRepository
     Task<IEnumerable<string>> GetLibrariesForPunch(string plant);
     Task<IEnumerable<string>> GetPersonsForPunch();
     Task<IEnumerable<string>> GetPunchItemsForCompletion(string plant, DateTime? checkAfterDate );
-    Task<IEnumerable<string>> GetPunchItemHistory(string plant);
-    Task<IEnumerable<string>> GetPunchItemComments(string plant);
-    Task<IEnumerable<string>> GetAttachmentsForCompletion(string plant);
+    Task<IEnumerable<string>> GetPunchItemHistory(string plant, DateTime? checkAfterDate);
+    Task<IEnumerable<string>> GetPunchItemComments(string plant, DateTime? checkAfterDate);
+    Task<IEnumerable<string>> GetAttachmentsForCompletion(string plant, DateTime? checkAfterDate);
     Task<IEnumerable<string>> GetPunchPriorityLibRelations(string plant);
     Task<IEnumerable<string>> GetNotifications(string plant);
     Task<IEnumerable<string>> GetNotificationWorkOrders(string plant);

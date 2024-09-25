@@ -5,11 +5,16 @@ namespace Infrastructure.CompletionQueries;
 
 public class PunchAttachmentQuery
 {
-    public static (string query, DynamicParameters parameters) GetQuery(string? plant = null)
+    public static (string query, DynamicParameters parameters) GetQuery(string? plant = null, string? extraClause = null)
     {
         QueryHelper.DetectFaultyPlantInput(plant);
         long? discard = null;
         var whereClause = QueryHelper.CreateWhereClause(discard, plant, "aa", "irrelevant");
+
+        if (extraClause != null)
+        {
+            whereClause.clause += extraClause;
+        }
 
         var query = @$"SELECT 
                aa.projectSchema AS Plant, 

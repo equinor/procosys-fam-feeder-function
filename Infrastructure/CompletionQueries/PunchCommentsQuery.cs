@@ -5,11 +5,16 @@ namespace Infrastructure.CompletionQueries;
 
 public static class PunchCommentsQuery
 {
-    public static (string query, DynamicParameters parameters) GetQuery(string? plant = null)
+    public static (string query, DynamicParameters parameters) GetQuery(string? plant = null, string? extraClause = null)
     {
         QueryHelper.DetectFaultyPlantInput(plant);
         long? discard = null;
         var whereClause = QueryHelper.CreateWhereClause(discard, plant, "pc", "irrelevant");
+        
+        if (extraClause != null)
+        {
+            whereClause.clause += extraClause;
+        }
 
         var query = @$"select
             pc.projectschema as Plant,
