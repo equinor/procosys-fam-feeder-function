@@ -14,8 +14,8 @@
 	<ItemGroup>
 		<PackageReference Include="Azure.Storage.Blobs" Version="12.22.1" />
 		<PackageReference Include="Dapper" Version="2.1.35" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
-		<PackageReference Include="Oracle.EntityFrameworkCore" Version="8.23.50" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
+		<PackageReference Include="Oracle.EntityFrameworkCore" Version="8.23.60" />
 
 		<!-- This is added explicitly due to System.Text.Encodings.Web 4.7.1.
     Vulnerabily introduced in Azure.Storage.Blobs" Version="12.15.1"
