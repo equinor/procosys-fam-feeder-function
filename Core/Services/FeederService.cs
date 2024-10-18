@@ -171,8 +171,11 @@ public class FeederService : IFeederService
             var mappedMessages = messages.Select(m => mapper.Map(m).Message).ToList();
 
             if (Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") != "Development")
+            {
                 foreach (var batch in mappedMessages.Batch(250))
                     await SendFamMessages(batch);
+            }
+
             messagesCount += mappedMessages.Count;
         }
         catch (Exception ex)

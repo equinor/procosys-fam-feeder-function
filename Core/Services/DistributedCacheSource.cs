@@ -1,9 +1,9 @@
-﻿using System.Text.Json;
-using Equinor.TI.CommonLibrary.Mapper;
+﻿using Equinor.TI.CommonLibrary.Mapper;
 using Equinor.TI.CommonLibrary.Mapper.Core;
 using Equinor.TI.CommonLibrary.SchemaModel;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace Core.Services;
 /// <summary>
@@ -38,10 +38,11 @@ public class DistributedCacheSource : ISchemaSource
         {
             return _schemaDto;
         }
-        var key = CacheKey(schemaFrom, schemaTo);
+        var key = "CommonLib--FamFeederFunction";
 
         if (TryGetCacheItemFromCache(key, out var item))
         {
+            _schemaDto = item;
             return item!; 
         }
 
@@ -55,7 +56,7 @@ public class DistributedCacheSource : ISchemaSource
         try
         {
             var schema = _schemaSource.Get(schemaFrom, schemaTo);
-            _distributedCache.SetString(key, JsonSerializer.Serialize(schema), new DistributedCacheEntryOptions
+            _distributedCache.SetString(key, JsonConvert.SerializeObject(schema), new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = _maxCacheAge
             });
@@ -72,22 +73,27 @@ public class DistributedCacheSource : ISchemaSource
     private bool TryGetCacheItemFromCache(string key, out SchemaDTO? schema)
     {
         schema = new SchemaDTO();
-        var cacheString = _distributedCache.GetString(key);
-        if (string.IsNullOrWhiteSpace(cacheString))
+        try
         {
+            var cacheString = _distributedCache.GetString(key);
+            if (string.IsNullOrWhiteSpace(cacheString))
+            {
+                return false;
+            }
+            schema = JsonConvert.DeserializeObject<SchemaDTO>(cacheString);
+            if(schema == null)
+            {
+                _logger?.LogWarning("Failed to deserialize schema from cache. Key: {Key}", key);
+                return false;
+            }
+            return true;
+        }
+        catch (Exception e)
+        {
+            _logger?.LogWarning(e,"Failed to get schema from cache. Key: {Key}", key);
             return false;
         }
-        schema = JsonSerializer.Deserialize<SchemaDTO>(cacheString);
-        if(schema == null)
-        {
-            _logger?.LogWarning("Failed to deserialize schema from cache. Key: {Key}", key);
-            return false;
-        }
-        return true;
-    }
-
-    private static string CacheKey(string schemaFrom, string schemaTo)
-    {
-        return $"CommonLib--{schemaFrom}--{schemaTo}";
+        
+   
     }
 }
