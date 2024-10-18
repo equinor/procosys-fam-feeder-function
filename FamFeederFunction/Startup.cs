@@ -29,7 +29,7 @@ public class Startup : FunctionsStartup
             .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
             .AddEnvironmentVariables()
             .Build();
-
+        
         services.Configure<CommonLibConfig>(config.GetSection("CommonLibConfig"));
         services.Configure<FamFeederOptions>(config.GetSection("FamFeederOptions"));
         services.Configure<ServiceBusOptions>(config.GetSection("ServiceBusOptions"));
@@ -42,7 +42,16 @@ public class Startup : FunctionsStartup
 
         var connectionString = config.GetSection("FamFeederOptions")["ProCoSysConnectionString"] 
                                ?? throw new ConfigurationErrorsException("Missing ConnectionString for PCS Database");
+   
         services.AddDbContext(connectionString);
+        
+        var redisConnectionString = config.GetValue<string>("RedisConnectionString") 
+                                    ?? throw new ConfigurationErrorsException("Missing ConnectionString for Redis caching");
+        
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = redisConnectionString;
+        });
         services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<IFeederService, FeederService>();
         services.AddScoped<ISearchItemRepository, SearchItemRepository>();

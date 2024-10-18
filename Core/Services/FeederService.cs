@@ -7,6 +7,7 @@ using Equinor.TI.CommonLibrary.Mapper;
 using Equinor.TI.CommonLibrary.Mapper.Core;
 using Fam.Core.EventHubs.Contracts;
 using Fam.Models.Exceptions;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoreLinq;
@@ -23,13 +24,15 @@ public class FeederService : IFeederService
     private readonly IEventRepository _repo;
     private readonly IWorkOrderCutoffRepository _cutoffRepository;
     private readonly IServiceBusService _serviceBusService;
+    private readonly IDistributedCache _distributedCache;
 
     public FeederService(IEventHubProducerService eventHubProducerService,
         IEventRepository repo,
         IOptions<CommonLibConfig> commonLibConfig,
         IPlantRepository plantRepository,
         IWorkOrderCutoffRepository cutoffRepository,
-        IServiceBusService serviceBusService)
+        IServiceBusService serviceBusService,
+        IDistributedCache distributedCache)
     {
         _eventHubProducerService = eventHubProducerService;
         _repo = repo;
@@ -37,6 +40,7 @@ public class FeederService : IFeederService
         _cutoffRepository = cutoffRepository;
         _serviceBusService = serviceBusService;
         _commonLibConfig = commonLibConfig.Value;
+        _distributedCache = distributedCache;
     }
 
     public async Task<string> RunFeeder(QueryParameters queryParameters, ILogger logger)
@@ -126,8 +130,11 @@ public class FeederService : IFeederService
         try
         {
             var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
-            var mapper = CreateCommonLibMapper();
-            var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
+            var localScopeMapper = CreateCommonLibMapper();
+
+            
+            
+            var mappedMessages = messages.Select(m => localScopeMapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
 
             await SendFamMessages(mappedMessages);
             messagesCount += mappedMessages.Count;
@@ -183,25 +190,23 @@ public class FeederService : IFeederService
 
     private SchemaMapper CreateCommonLibMapper()
     {
-        ISchemaSource source = new ApiSource(new ApiSourceOptions
+        var source = new ApiSource(new ApiSourceOptions
         {
             TokenProviderConnectionString = "RunAs=App;" +
                                             $"AppId={_commonLibConfig.ClientId};" +
                                             $"TenantId={_commonLibConfig.TenantId};" +
                                             $"AppKey={_commonLibConfig.ClientSecret}"
         });
-
-        // Adds caching functionality
-        source = new CacheWrapper(
+        
+       var cacheSource = new DistributedCacheSource(
+            _distributedCache,
             source,
-            maxCacheAge: TimeSpan.FromDays(1), // Use TimeSpan.Zero for no recache based on age
-            checkForChangesFrequency: TimeSpan
-                .FromHours(1)); // Use TimeSpan.Zero when cache should never check for changes.
-
-        var mapper = new SchemaMapper("ProCoSys_Events", "FAM", source);
+            _logger); 
+       
+        var mapper = new SchemaMapper("ProCoSys_Events", "FAM",  cacheSource);
         return mapper;
     }
-
+    
     private async Task SendFamMessages(IEnumerable<Message> messages)
     {
         try
