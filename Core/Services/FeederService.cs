@@ -130,12 +130,8 @@ public class FeederService : IFeederService
         try
         {
             var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
-            var localScopeMapper = CreateCommonLibMapper();
-
-            
-            
-            var mappedMessages = messages.Select(m => localScopeMapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
-
+            var mapper = CreateCommonLibMapper();
+            var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
             await SendFamMessages(mappedMessages);
             messagesCount += mappedMessages.Count;
         }
