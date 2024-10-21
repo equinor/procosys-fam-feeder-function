@@ -55,7 +55,7 @@ public class DistributedCacheSource : ISchemaSource
         try
         {
             var schema = _schemaSource.Get(schemaFrom, schemaTo);
-            //Using json.net to Deserialize did not work.
+            //Using System.Text.Json to Deserialize did not work.
             //Got an error due to a dictionary with key,value <object,object> in the SchemaDto class.
             //However, it seems to work with newtonsoft.json, so not spending more time on it.
             _distributedCache.SetString(key, JsonConvert.SerializeObject(schema), new DistributedCacheEntryOptions
