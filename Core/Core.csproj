@@ -17,12 +17,19 @@
 
 		<PackageReference Include="Azure.Search.Documents" Version="11.4.0" />
 		<PackageReference Include="Equinor.ProCoSys.FamWebJob.Core" Version="1.6.4" />
-		<PackageReference Include="Equinor.ProCoSys.PcsServiceBus" Version="4.3.25" />
+		<PackageReference Include="Equinor.ProCoSys.PcsServiceBus" Version="4.3.26" />
 		<PackageReference Include="Equinor.TI.Common.Messaging" Version="1.0.4" />
 		<PackageReference Include="Equinor.TI.CommonLibrary.Mapper" Version="0.27.0" />
 		<PackageReference Include="Fam.Core" Version="1.3.1" />
+<<<<<<< HEAD
 		<PackageReference Include="Microsoft.ApplicationInsights" Version="2.21.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="6.0.0" />
+=======
+		<PackageReference Include="Microsoft.ApplicationInsights" Version="2.22.0" />
+>>>>>>> refs/heads/dev
+		<PackageReference Include="Equinor.ProCoSys.PcsServiceBus" Version="4.3.26" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="6.0.0" />
+		<PackageReference Include="Microsoft.ApplicationInsights" Version="2.22.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" />
 		<PackageReference Include="morelinq" Version="4.0.0" />
 		<PackageReference Include="MoreLinq.Source.MoreEnumerable.Batch" Version="1.0.2">
