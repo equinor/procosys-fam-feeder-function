@@ -207,6 +207,7 @@ public class FeederService : IFeederService
         try
         {
             await _eventHubProducerService.SendDataAsync(messages);
+            _logger?.LogInformation($"{messages.Count()} messages sent to FAM/Alpha.");
         }
         catch (FamConfigException e)
         {
