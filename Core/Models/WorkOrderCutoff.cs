@@ -23,7 +23,9 @@ public class WorkOrderCutoff : IWorkOrderCutoffEventV1
     public string? ResponsibleCode { get; init; }
     public DateTime LastUpdated { get; init; }
     public int CutoffWeek { get; init; }
+    public int? CutoffWeekTo { get; init; }
     public DateOnly CutoffDate { get; init; }
+    public DateOnly? CutoffDateTo { get; init; }
     public DateOnly? PlannedStartAtDate { get; init; }
     public DateOnly? PlannedFinishedAtDate { get; init; }
     public double? ExpendedManHours { get; init; }

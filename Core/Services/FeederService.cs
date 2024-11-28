@@ -183,7 +183,7 @@ public class FeederService : IFeederService
 
         logger.LogInformation("Sent {MappedMessagesCount} WoCutoff to FAM  for {WeekNumber} done in {Plant}",
             messagesCount, weekNumber, plant);
-        return $"Sent {messagesCount} WoCutoff to FAM  for {weekNumber} done";
+        return $"Sent {messagesCount} WoCutoff to FAM for {weekNumber} done";
     }
 
     private SchemaMapper CreateCommonLibMapper()
