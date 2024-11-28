@@ -68,7 +68,7 @@ stages:
        or
        ( 
          eq(variables['Build.SourceBranch'], 'refs/heads/master'),
-         eq(variables['Build.SourceBranch'], 'refs/heads/feature/GH00671-Provide-FAM-with-period-concept-test-data-for-wo-cutoff')
+         eq(variables['Build.SourceBranch'], 'refs/heads/dev')
        )
      )
    variables:
@@ -95,7 +95,7 @@ stages:
  - stage: test
    displayName: 'test'
    dependsOn: 'common'
-   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/feature/GH00671-Provide-FAM-with-period-concept-test-data-for-wo-cutoff'))
+   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/dev'))
    variables:
     envName: 'test'
     serviceConnection: '${{ variables.nonProdServiceConnection }}'

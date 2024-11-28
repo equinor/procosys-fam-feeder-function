@@ -7,7 +7,7 @@ using Core.Interfaces;
 using Core.Models;
 using Dapper;
 using Infrastructure.Handlers;
-using Infrastructure.Repositories.SearchQueries;
+using Equinor.ProCoSys.PcsServiceBus.Queries;
 
 namespace Infrastructure.Repositories;
 
