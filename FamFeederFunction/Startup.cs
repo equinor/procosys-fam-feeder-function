@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using System.IO;
 using System.Reflection;
 using Core;
@@ -45,13 +46,20 @@ public class Startup : FunctionsStartup
    
         services.AddDbContext(connectionString);
         
-        var redisConnectionString = config.GetValue<string>("RedisConnectionString") 
-                                    ?? throw new ConfigurationErrorsException("Missing ConnectionString for Redis caching");
-        
-        services.AddStackExchangeRedisCache(options =>
+        if(Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") == "Development")
         {
-            options.Configuration = redisConnectionString;
-        });
+            services.AddDistributedMemoryCache();
+        }
+        else
+        {
+            var redisConnectionString = config.GetValue<string>("RedisConnectionString") 
+                                        ?? throw new ConfigurationErrorsException("Missing ConnectionString for Redis caching");
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisConnectionString;
+            });
+        }
+
         services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<IFeederService, FeederService>();
         services.AddScoped<ISearchItemRepository, SearchItemRepository>();

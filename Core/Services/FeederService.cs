@@ -142,8 +142,7 @@ public class FeederService : IFeederService
             return
                 $"Failed sending to FAM for plant {plant} topic WoCutoff week {cutoffWeek} with message {ex.Message}";
         }
-
-
+        
         return $"finished successfully sending {messagesCount} messages to fam for WoCutoff for week {cutoffWeek}";
     }
 
