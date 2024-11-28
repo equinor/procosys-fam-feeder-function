@@ -18,9 +18,10 @@
 		<PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
 		<PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="2.13.7" />
 		<PackageReference Include="Microsoft.Azure.WebJobs.Extensions.OpenApi" Version="1.5.1" />
-		<PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Sql" Version="3.0.534" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="6.0.35" />
 		<PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.5.0" />
+		<PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Sql" Version="3.0.534" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
 	</ItemGroup>
 	<ItemGroup>
