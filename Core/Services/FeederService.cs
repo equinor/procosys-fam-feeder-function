@@ -184,7 +184,7 @@ public class FeederService : IFeederService
 
         logger.LogInformation("Sent {MappedMessagesCount} WoCutoff to FAM  for {WeekNumber} done in {Plant}",
             messagesCount, weekNumber, plant);
-        return $"Sent {messagesCount} WoCutoff to FAM done";
+        return $"Sent {messagesCount} WoCutoff to FAM for {weekNumber} done";
     }
 
     private SchemaMapper CreateCommonLibMapper()
@@ -212,7 +212,6 @@ public class FeederService : IFeederService
         try
         {
             await _eventHubProducerService.SendDataAsync(messages);
-            _logger?.LogInformation($"{messages.Count()} messages sent to FAM/Alpha.");
         }
         catch (FamConfigException e)
         {
