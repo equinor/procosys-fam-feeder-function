@@ -96,6 +96,7 @@ public class FeederService : IFeederService
     public async Task<string> RunForCutoffWeek(string cutoffWeek, string plant, ILogger logger)
     {
         _logger = logger;
+        logger.LogInformation("Retrieving events for cutoffWeek: {cutoffWeek} plant: {plant}", cutoffWeek, plant);
 
         var events = await _repo.GetWoCutoffsByWeekAndPlant(cutoffWeek, plant);
 
@@ -132,6 +133,7 @@ public class FeederService : IFeederService
             var messages = events.SelectMany(e => TieMapper.CreateTieMessage(e, PcsTopicConstants.WorkOrderCutoff));
             var mapper = CreateCommonLibMapper();
             var mappedMessages = messages.Select(m => mapper.Map(m).Message).Where(m => m.Objects.Any()).ToList();
+            _logger?.LogInformation("Sending {mappedMessagesCount} messages for cutoffWeek: {cutoffWeek} plant: {plant} to Alpha/Fam", mappedMessages.Count(), cutoffWeek, plant);
             await SendFamMessages(mappedMessages);
             messagesCount += mappedMessages.Count;
         }
