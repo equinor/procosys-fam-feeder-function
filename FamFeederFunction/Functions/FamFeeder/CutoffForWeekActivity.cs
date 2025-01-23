@@ -19,8 +19,9 @@ public  class CutoffForWeekActivity
         ILogger logger)
     {
         var (cutoffWeek, plant) = context.GetInput<(string, string)>();
+        logger.LogInformation("RunCutoffForWeekActivity starting for cutoffWeek: {cutoffWeek} plant: {plant}", cutoffWeek, plant);
         var result = await _feederService.RunForCutoffWeek(cutoffWeek, plant, logger);
-        logger.LogDebug("RunCutoffForWeekActivity returned {Result}", result);
+        logger.LogInformation("RunCutoffForWeekActivity returned {Result}", result);
         return result;
     }
 }

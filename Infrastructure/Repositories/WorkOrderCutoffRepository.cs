@@ -1,5 +1,4 @@
 ﻿using Infrastructure.Data;
-using Equinor.ProCoSys.PcsServiceBus.Queries;
 
 using Microsoft.EntityFrameworkCore;
 using System.Data;
@@ -8,6 +7,7 @@ using Core.Interfaces;
 using Core.Models;
 using Dapper;
 using Infrastructure.Handlers;
+using Equinor.ProCoSys.PcsServiceBus.Queries;
 
 namespace Infrastructure.Repositories;
 
