@@ -2,8 +2,7 @@ trigger:
   branches:
     include:
       - master
-      - dev
-
+      
 resources:
    repositories:
    - repository: self
@@ -65,11 +64,7 @@ stages:
      and
      (
        succeeded(),
-       or
-       ( 
-         eq(variables['Build.SourceBranch'], 'refs/heads/master'),
-         eq(variables['Build.SourceBranch'], 'refs/heads/dev')
-       )
+       or(eq(variables['Build.SourceBranch'], 'refs/heads/master'))
      )
    variables:
      envName: 'common'
@@ -95,7 +90,7 @@ stages:
  - stage: test
    displayName: 'test'
    dependsOn: 'common'
-   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/dev'))
+   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
    variables:
     envName: 'test'
     serviceConnection: '${{ variables.nonProdServiceConnection }}'
