@@ -17,6 +17,7 @@ public class WorkOrderMaterial : IWorkOrderMaterialEventV1
     public Guid? TagGuid { get; init; }
     public string TagRegisterCode { get; init; }
     public long? StockId { get; init; }
+    public Guid? StockGuid { get; init; }
     public double? Quantity { get; init; }
     public string? UnitName { get; init; }
     public string? UnitDescription { get; init; }
