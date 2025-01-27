@@ -27,34 +27,40 @@ stages:
     displayName: 'Build and Test'
     jobs:
       - job:
-          pool:
-            vmImage: $(vmImageName)
-          steps:
-            - task: NuGetToolInstaller@1
-            - task: UseDotNet@2
-              displayName: 'Use .NET 6 sdk'
-              inputs:
-                packageType: 'sdk'
-                version: '6.0.x'
-                includePreviewVersions: true
-            - task: NuGetCommand@2
-              inputs:
-                command: 'restore'
-                feedsToUse: 'config'
-                nugetConfigPath: 'nuget.config'
-            - script: dotnet build --configuration $(buildConfiguration)
-              displayName: 'dotnet build $(buildConfiguration)'
-            - task: DotNetCoreCLI@2
-              displayName: 'dotnet test $(buildConfiguration)'
-              inputs:
-                command: test
-                projects: '**/*[Tt]ests/*.csproj'
-                arguments: '--configuration $(buildConfiguration)'
+        pool:
+          vmImage: $(vmImageName)
+        
+        steps:
+          - task: NuGetToolInstaller@1
 
+          - task: UseDotNet@2
+            displayName: 'Use .NET 6 sdk'
+            inputs:
+              packageType: 'sdk'
+              version: '6.0.x'
+              includePreviewVersions: true
+
+          - task: NuGetCommand@2
+            inputs:
+              command: 'restore'
+              feedsToUse: 'config'
+              nugetConfigPath: 'nuget.config'
+
+          - script: dotnet build --configuration $(buildConfiguration)
+            displayName: 'dotnet build $(buildConfiguration)'
+
+          - task: DotNetCoreCLI@2
+            displayName: 'dotnet test $(buildConfiguration)'
+            inputs:
+              command: test
+              projects: '**/*[Tt]ests/*.csproj'
+              arguments: '--configuration $(buildConfiguration)'
+  
+  # common stage. Docker build, tag and push
   - stage: common
     displayName: 'Common'
     dependsOn: 'CI'
-    condition: |
+    condition:  |
       and
       (
         succeeded(),
@@ -66,7 +72,7 @@ stages:
       containerRegistry: '${{ variables.containerRegistryName }}'
       envGroupName: '$(globalPrefix)-$(fullAppName)-${{ variables.envName }}'
       dockerRegistryServiceConnection: '$(dockerRegistryServiceConnectionName)'
-      dockerfilePath: '$(Build.SourcesDirectory)/FamFeederFunction/Dockerfile'
+      dockerfilePath: '$(Build.SourcesDirectory)/FamFeederFunction/Dockerfile' 
     jobs:
       - template: /src/resources/fam/jobs/dockerbuild.yml@templates
         parameters:
@@ -79,9 +85,8 @@ stages:
           buildContext: '$(Build.SourcesDirectory)'
           repository: ${{ variables.repositoryName }}
           dockerRegistryServiceConnection: $(dockerRegistryServiceConnectionName)
-
   - stage: test
-    displayName: 'Test'
+    displayName: 'test'
     dependsOn: 'common'
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
     variables:
@@ -104,7 +109,7 @@ stages:
           keyVaultUrl: 'pcs-fam-non-prod-kv'
 
   - stage: prod
-    displayName: 'Prod'
+    displayName: 'prod'
     dependsOn: 'common'
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
     variables:
@@ -112,6 +117,7 @@ stages:
       serviceConnection: '${{ variables.prodServiceConnection }}'
       envGroupName: '$(globalPrefix)-$(fullAppName)-${{ variables.envName }}'
       envRg: 'pcs-fam-prod-rg'
+    
     jobs:
       - template: /src/resources/fam/jobs/deploy-function.yml@templates
         parameters:
