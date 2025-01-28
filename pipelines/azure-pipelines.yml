@@ -2,15 +2,14 @@ trigger:
   branches:
     include:
       - master
-      - dev
 
 resources:
-   repositories:
-   - repository: self
-   - repository: templates
-     type: github
-     name: equinor/procosys-infra
-     endpoint: 'equinor'
+  repositories:
+    - repository: self
+    - repository: templates
+      type: github
+      name: equinor/procosys-infra
+      endpoint: 'equinor'
 
 # Global variables for the pipeline
 variables:
@@ -19,123 +18,116 @@ variables:
   - name: 'repositoryName'
     value: 'fam/feeder-function'
   - name: 'buildConfiguration'
-    value: 'Release' 
+    value: 'Release'
   - name: 'vmImageName'
     value: 'ubuntu-latest'
 
 stages:
- - stage: "CI"
-   displayName: 'Build and Test'
-   jobs:
-   - job:
-     pool:
-       vmImage: $(vmImageName)
+  - stage: "CI"
+    displayName: 'Build and Test'
+    jobs:
+      - job:
+        pool:
+          vmImage: $(vmImageName)
+        
+        steps:
+          - task: NuGetToolInstaller@1
 
-     steps:
-     - task: NuGetToolInstaller@1
+          - task: UseDotNet@2
+            displayName: 'Use .NET 8 sdk'
+            inputs:
+              packageType: 'sdk'
+              version: '8.0.x'
+              includePreviewVersions: true
 
-     - task: UseDotNet@2
-       displayName: 'Use .NET 8 sdk'
-       inputs:
-         packageType: 'sdk'
-         version: '8.0.x'
-         includePreviewVersions: true
+          - task: NuGetCommand@2
+            inputs:
+              command: 'restore'
+              feedsToUse: 'config'
+              nugetConfigPath: 'nuget.config'
 
-     - task: NuGetCommand@2
-       inputs:
-         command: 'restore'
-         feedsToUse: 'config'
-         nugetConfigPath: 'nuget.config'
+          - script: dotnet build --configuration $(buildConfiguration)
+            displayName: 'dotnet build $(buildConfiguration)'
 
-     - script: dotnet build --configuration $(buildConfiguration)
-       displayName: 'dotnet build $(buildConfiguration)'
-    
-     - task: DotNetCoreCLI@2
-       displayName: 'dotnet test $(buildConfiguration)'
-       inputs:
-         command: test
-         projects: '**/*[Tt]ests/*.csproj'
-         arguments: '--configuration $(buildConfiguration)'
-
- # common stage. Docker build, tag and push
- - stage: common
-   displayName: 'Common'
-   dependsOn: 'CI'
-   condition:  |
-     and
-     (
-       succeeded(),
-       or
-       ( 
-         eq(variables['Build.SourceBranch'], 'refs/heads/master'),
-         eq(variables['Build.SourceBranch'], 'refs/heads/dev')
-       )
-     )
-   variables:
-     envName: 'common'
-     envRg: '${{ variables.envRgName }}'
-     containerRegistry: '${{ variables.containerRegistryName }}'
-     envGroupName: '$(globalPrefix)-$(fullAppName)-${{ variables.envName }}'
-     dockerRegistryServiceConnection: '$(dockerRegistryServiceConnectionName)'
-     dockerfilePath: '$(Build.SourcesDirectory)/FamFeederFunction/Dockerfile'
-
-   jobs:
-   - template: /src/resources/fam/jobs/dockerbuild.yml@templates
-     parameters:
-       deploymentName: 'docker_build_push'
-       env: 'pcs-${{ variables.envName }}'
-       nugetConfigPath: 'nuget.config'
-       envGroup: '${{ variables.envGroupName }}'
-       arguments: '--build-arg FEED_ACCESSTOKEN=$(VSS_NUGET_ACCESSTOKEN)'
-       dockerfilePath: ${{ variables.dockerfilePath }}
-       buildContext: '$(Build.SourcesDirectory)'
-       repository: ${{ variables.repositoryName }}
-       dockerRegistryServiceConnection: $(dockerRegistryServiceConnectionName)
-
- - stage: test
-   displayName: 'test'
-   dependsOn: 'common'
-   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/dev'))
-   variables:
-    envName: 'test'
-    serviceConnection: '${{ variables.nonProdServiceConnection }}'
-    envGroupName: '$(globalPrefix)-$(fullAppName)-${{ variables.envName }}'
-    envRg: 'pcs-fam-non-prod-rg'
-
-   jobs:
-   - template: /src/resources/fam/jobs/deploy-function.yml@templates
-     parameters:
-      dependsOn: ''
-      deploymentName: 'publish'
-      serviceConnection: ${{ variables.serviceConnection }}
-      functionApp: '$(globalPrefix)-$(fullAppName)-test-func'
-      envGroup: '${{ variables.envGroupName }}'
-      rgName: '${{ variables.envRg }}'
-      env: '${{ variables.envName }}'
-      repository: ${{ variables.repositoryName }}
-      containerRegistry: '${{ variables.containerRegistry }}'
-      keyVaultUrl: 'pcs-fam-non-prod-kv'
-
- - stage: prod
-   displayName: 'prod'
-   dependsOn: 'common'
-   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-   variables:
-    envName: 'prod'
-    serviceConnection: '${{ variables.prodServiceConnection }}'
-    envGroupName: '$(globalPrefix)-$(fullAppName)-${{ variables.envName }}'
-    envRg: 'pcs-fam-prod-rg'
+          - task: DotNetCoreCLI@2
+            displayName: 'dotnet test $(buildConfiguration)'
+            inputs:
+              command: test
+              projects: '**/*[Tt]ests/*.csproj'
+              arguments: '--configuration $(buildConfiguration)'
   
-   jobs:
-   - template: /src/resources/fam/jobs/deploy-function.yml@templates
-     parameters:
-      dependsOn: ''
-      deploymentName: 'publish'
-      serviceConnection: ${{ variables.serviceConnection }}
-      functionApp: '$(globalPrefix)-$(fullAppName)-prod-func'
-      envGroup: '${{ variables.envGroupName }}'
-      rgName: '${{ variables.envRg }}'
-      env: '${{ variables.envName }}'
-      repository: ${{ variables.repositoryName }}
-      containerRegistry: '${{ variables.containerRegistry }}'
-      keyVaultUrl: 'pcs-fam-prod-kv'
+  # common stage. Docker build, tag and push
+  - stage: common
+    displayName: 'Common'
+    dependsOn: 'CI'
+    condition:  |
+      and
+      (
+        succeeded(),
+        eq(variables['Build.SourceBranch'], 'refs/heads/master')
+      )
+    variables:
+      envName: 'common'
+      envRg: '${{ variables.envRgName }}'
+      containerRegistry: '${{ variables.containerRegistryName }}'
+      envGroupName: '$(globalPrefix)-$(fullAppName)-${{ variables.envName }}'
+      dockerRegistryServiceConnection: '$(dockerRegistryServiceConnectionName)'
+      dockerfilePath: '$(Build.SourcesDirectory)/FamFeederFunction/Dockerfile' 
+    jobs:
+      - template: /src/resources/fam/jobs/dockerbuild.yml@templates
+        parameters:
+          deploymentName: 'docker_build_push'
+          env: 'pcs-${{ variables.envName }}'
+          nugetConfigPath: 'nuget.config'
+          envGroup: '${{ variables.envGroupName }}'
+          arguments: '--build-arg FEED_ACCESSTOKEN=$(VSS_NUGET_ACCESSTOKEN)'
+          dockerfilePath: ${{ variables.dockerfilePath }}
+          buildContext: '$(Build.SourcesDirectory)'
+          repository: ${{ variables.repositoryName }}
+          dockerRegistryServiceConnection: $(dockerRegistryServiceConnectionName)
+  - stage: test
+    displayName: 'test'
+    dependsOn: 'common'
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    variables:
+      envName: 'test'
+      serviceConnection: '${{ variables.nonProdServiceConnection }}'
+      envGroupName: '$(globalPrefix)-$(fullAppName)-${{ variables.envName }}'
+      envRg: 'pcs-fam-non-prod-rg'
+    jobs:
+      - template: /src/resources/fam/jobs/deploy-function.yml@templates
+        parameters:
+          dependsOn: ''
+          deploymentName: 'publish'
+          serviceConnection: ${{ variables.serviceConnection }}
+          functionApp: '$(globalPrefix)-$(fullAppName)-test-func'
+          envGroup: '${{ variables.envGroupName }}'
+          rgName: '${{ variables.envRg }}'
+          env: '${{ variables.envName }}'
+          repository: ${{ variables.repositoryName }}
+          containerRegistry: '${{ variables.containerRegistry }}'
+          keyVaultUrl: 'pcs-fam-non-prod-kv'
+
+  - stage: prod
+    displayName: 'prod'
+    dependsOn: 'common'
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    variables:
+      envName: 'prod'
+      serviceConnection: '${{ variables.prodServiceConnection }}'
+      envGroupName: '$(globalPrefix)-$(fullAppName)-${{ variables.envName }}'
+      envRg: 'pcs-fam-prod-rg'
+    
+    jobs:
+      - template: /src/resources/fam/jobs/deploy-function.yml@templates
+        parameters:
+          dependsOn: ''
+          deploymentName: 'publish'
+          serviceConnection: ${{ variables.serviceConnection }}
+          functionApp: '$(globalPrefix)-$(fullAppName)-prod-func'
+          envGroup: '${{ variables.envGroupName }}'
+          rgName: '${{ variables.envRg }}'
+          env: '${{ variables.envName }}'
+          repository: ${{ variables.repositoryName }}
+          containerRegistry: '${{ variables.containerRegistry }}'
+          keyVaultUrl: 'pcs-fam-prod-kv'
