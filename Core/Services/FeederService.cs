@@ -238,7 +238,9 @@ public class FeederService : IFeederService
                 PcsTopicConstants.CommPkgOperation => await _repo.GetCommPkgOperations(plant),
                 PcsTopicConstants.CommPkgQuery => await _repo.GetCommPkgQueries(plant),
                 PcsTopicConstants.CommPkgTask => await _repo.GetCommPkgTasks(plant),
-                PcsTopicConstants.Document => await _repo.GetDocument(plant),
+                PcsTopicConstants.Document => shouldAddToQueue
+                    ? await _repo.GetDocumentsForCompletion( plant, checkAfterDate)
+                    : await _repo.GetDocument(plant),
                 PcsTopicConstants.HeatTrace => await _repo.GetHeatTraces(plant),
                 PcsTopicConstants.HeatTracePipeTest => await _repo.GetHeatTracePipeTests(plant),
                 PcsTopicConstants.Library => shouldAddToQueue
@@ -266,7 +268,9 @@ public class FeederService : IFeederService
                 PcsTopicConstants.Tag => await _repo.GetTags(plant),
                 PcsTopicConstants.TagEquipment => await _repo.GetTagEquipments(plant),
                 PcsTopicConstants.Task => await _repo.GetTasks(plant),
-                PcsTopicConstants.WorkOrder => await _repo.GetWorkOrders(plant),
+                PcsTopicConstants.WorkOrder => shouldAddToQueue
+                    ? await _repo.GetWorkOrdersForCompletion(plant, checkAfterDate)
+                    : await _repo.GetWorkOrders(plant),
                 PcsTopicConstants.WoChecklist => await _repo.GetWoChecklists(plant),
                 PcsTopicConstants.WoMaterial => await _repo.GetWoMaterials(plant),
                 PcsTopicConstants.WoMilestone => await _repo.GetWoMilestones(plant),
