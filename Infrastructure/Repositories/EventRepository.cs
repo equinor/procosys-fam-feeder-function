@@ -68,6 +68,19 @@ public class EventRepository : IEventRepository
     public async Task<IEnumerable<string>> GetLibrariesForPunch(string plant) => await Query<Library>(LibraryForPunchQuery.GetQuery(null, plant));
     public async Task<IEnumerable<string>> GetPunchItemsForCompletion(string plant, DateTime? checkAfterDate) => await Query<PunchListItem>(PunchListItemQuery.GetQuery(null, plant, CreateWhereClauseForCompletionPunch(checkAfterDate)));
 
+    public async Task<List<string>> GetWorkOrdersForCompletion(string plant, DateTime? checkAfterDate) => await Query<WorkOrder>(WorkOrderQuery.GetQuery(null, plant, CreateWhereClauseForCompletionWorkOrder(checkAfterDate)));
+
+    public async Task<List<string>> GetDocumentsForCompletion(string plant, DateTime? checkAfterDate) => await Query<Document>(DocumentQuery.GetQuery(null, plant, CreateWhereClauseForCompletionDocument(checkAfterDate)));
+
+    private static string? CreateWhereClauseForCompletionWorkOrder(DateTime? checkAfterDate)
+    {
+        return !checkAfterDate.HasValue ? null : $" and w.last_Updated > TO_DATE('{checkAfterDate.Value:MM-dd-yyyy}', 'MM-DD-YYYY')";
+    }
+    private static string? CreateWhereClauseForCompletionDocument(DateTime? checkAfterDate)
+    {
+        return !checkAfterDate.HasValue ? null : $" and d.last_Updated > TO_DATE('{checkAfterDate.Value:MM-dd-yyyy}', 'MM-DD-YYYY')";
+    }
+
     private static string CreateWhereClauseForCompletionPunch(DateTime? checkAfterDate)
     {
         const string notVoided = " and p.isVoided = 'N'";
@@ -147,4 +160,5 @@ public class EventRepository : IEventRepository
             }
         }
     }
+
 }
